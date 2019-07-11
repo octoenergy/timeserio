@@ -1,0 +1,7 @@
+include *.py
+include *.rst
+include *.txt
+include *.pickle
+recursive-include * *.pickle
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

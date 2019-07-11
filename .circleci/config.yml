@@ -1,0 +1,211 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.4
+
+jobs:
+  lint:
+    docker:
+      - image: circleci/python:3.6.4
+
+    working_directory: ~/timeserio
+
+    environment:
+        PIPENV_VENV_IN_PROJECT: true 
+
+    steps:
+
+      - checkout
+
+      - restore_cache:
+          keys:
+            # when lock file changes, use increasingly general patterns to restore cache
+            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            - pip-packages-v1-{{ .Branch }}-
+            - pip-packages-v1-
+
+      - run:
+          name: Install dependencies
+          command: |
+            make sync
+      
+      - save_cache:
+          paths:
+              - ./.venv/
+          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+
+      - run:
+          name: Run lint
+          command: |
+            make lint
+
+  test:
+    docker:
+      - image: circleci/python:3.6.4
+    parallelism: 4
+
+    working_directory: ~/timeserio
+
+    environment:
+        PIPENV_VENV_IN_PROJECT: true 
+
+    steps:
+
+      - checkout
+
+      - restore_cache:
+          keys:
+            # when lock file changes, use increasingly general patterns to restore cache
+            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            - pip-packages-v1-{{ .Branch }}-
+            - pip-packages-v1-
+
+      - run:
+          name: Install dependencies
+          command: |
+            make sync
+      
+      - save_cache:
+          paths:
+              - ./.venv/
+          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+
+      - run:
+          name: Run tests
+          command:  |
+            TESTFILES=$(circleci tests glob "tests/**/*.py" | circleci tests split --split-by=timings)
+            pipenv run pytest --cov=./timeserio/ --cov-report xml --junitxml=junit/pytest/results.xml --keep-duplicates $TESTFILES
+      
+      - store_test_results:
+          path: ./junit
+
+      - codecov/upload:
+          file: ./coverage.xml
+  
+  doctest:
+    docker:
+      - image: circleci/python:3.6.4
+
+    working_directory: ~/timeserio
+
+    environment:
+        PIPENV_VENV_IN_PROJECT: true 
+
+    steps:
+
+      - checkout
+
+      - restore_cache:
+          keys:
+            # when lock file changes, use increasingly general patterns to restore cache
+            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            - pip-packages-v1-{{ .Branch }}-
+            - pip-packages-v1-
+
+      - run:
+          name: Install dependencies
+          command: |
+            make sync
+      
+      - save_cache:
+          paths:
+              - ./.venv/
+          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+
+      - run:
+          name: Run doctests
+          command: make doctest
+
+      # - codecov/upload:
+      #     file: ./coverage.xml
+
+  docs-build:
+    docker:
+      - image: circleci/python:3.6.4
+
+    working_directory: ~/timeserio
+
+    environment:
+        PIPENV_VENV_IN_PROJECT: true 
+
+    steps:
+
+      - checkout
+
+      - run:
+          name: Install pandoc
+          command: |
+            sudo wget https://github.com/jgm/pandoc/releases/download/2.7.3/pandoc-2.7.3-1-amd64.deb
+            sudo dpkg -i pandoc-2.7.3-1-amd64.deb
+
+      - restore_cache:
+          keys:
+            # when lock file changes, use increasingly general patterns to restore cache
+            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            - pip-packages-v1-{{ .Branch }}-
+            - pip-packages-v1-
+
+      - run:
+          name: Install dependencies
+          command: |
+            make sync
+      
+      - save_cache:
+          paths:
+              - ./.venv/
+          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+
+      - run:
+          name: Build sphinx docs
+          command:  |
+            make docs-build
+      
+      - persist_to_workspace:
+          root: docs/_build
+          paths: html
+
+  docs-deploy:
+    docker:
+      - image: node:8.10.0
+    steps:
+      - add_ssh_keys:  # add deploy key to allow write access
+          fingerprints:
+            - "82:11:ce:1f:00:9b:90:10:54:9c:e4:d7:dc:6c:0a:c1"
+      - checkout      
+      - attach_workspace:
+          at: docs/_build
+      - run:
+          name: Install and configure dependencies
+          command: |
+            npm install -g --silent gh-pages@2.0.1
+            git config user.email "techmonitoring@octopus.energy"
+            git config user.name "octo-ci"
+      - run:
+          name: Deploy docs to gh-pages branch
+          command: |
+            touch docs/_build/html/.nojekyll
+            gh-pages --dist docs/_build/html --dotfiles --branch gh-pages --message "Update sphinx html docs [ci skip]"
+
+workflows:
+  version: 2
+  lint-test-docs:
+    jobs:
+      - lint
+      - test:
+          requires:
+            - lint
+      - doctest:
+          requires:
+            - lint
+      - docs-build:
+          requires:
+            - test
+            - doctest
+          filters:
+            branches:
+              only: master
+      - docs-deploy:
+          requires:
+            - docs-build
+          filters:
+            branches:
+              only: master

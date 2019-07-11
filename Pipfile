@@ -1,0 +1,39 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+mccabe           = "*"
+pep8-naming      = "*"
+flake8           = "*"
+pydocstyle       = "*"
+mypy             = "*"
+typeshed         = "*"
+yapf             = "*"
+pytest           = "==4.0.*"
+pytest-cov       = "*"
+pytest-benchmark = "*"
+pytest-parallel  = "*"
+pytest-mock      = "*"
+moto             = "*"
+glob2            = "*"
+codecov          = "*"
+#
+dask             = {extras = ["dataframe", "distributed"], version = "*"}
+tensorflow       = "==1.13.1"
+pyarrow          = "==0.12.1"  # Dask does not support 0.13.0 yet
+# sphinx docs
+sphinx-autodoc-typehints = ">=1.6.0"
+sphinx-rtd-theme         = ">=0.4.3"
+m2r                      = ">=0.2.1"
+sphinxcontrib-apidoc     = ">=0.3.0"
+nbsphinx                 = ">=0.4.2"
+nbsphinx-link            = ">=1.2.0"
+ipython                  = ">=7.5.0"
+
+[packages]
+timeserio        = {editable = true,path = "."}
+
+[requires]
+python_version    = "3.6"

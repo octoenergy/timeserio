@@ -1,0 +1,3 @@
+# Automatically collapse generated files
+Pipfile.lock linguist-generated=true
+*.ipynb linguist-generated=true
