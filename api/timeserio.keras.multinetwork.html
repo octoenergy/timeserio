@@ -1,0 +1,541 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>timeserio.keras.multinetwork module &mdash; Timeserio 0.10.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="timeserio.keras.timing module" href="timeserio.keras.timing.html" />
+    <link rel="prev" title="timeserio.keras.callbacks module" href="timeserio.keras.callbacks.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/constantine_100px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.10.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/getting_started.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/MovieLens100k.html">Building a Neural Movie Recommender System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/MNIST.html">Autoencoders and multi-stage training for MNIST classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/SolarGenerationTimeSeries_Part1.html">Modelling Solar generation across Multiple Sites - Part 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/SolarGenerationTimeSeries_Part2.html">Modelling Solar generation across Multiple Sites - Part 2</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="timeserio.html">timeserio package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="timeserio.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="timeserio.batches.html">timeserio.batches package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeserio.data.html">timeserio.data package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="timeserio.keras.html">timeserio.keras package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeserio.multimodel.html">timeserio.multimodel package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeserio.pipeline.html">timeserio.pipeline package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeserio.preprocessing.html">timeserio.preprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeserio.utils.html">timeserio.utils package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeserio.validation.html">timeserio.validation package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="timeserio.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Timeserio</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">timeserio</a> &raquo;</li>
+        
+          <li><a href="timeserio.html">timeserio package</a> &raquo;</li>
+        
+          <li><a href="timeserio.keras.html">timeserio.keras package</a> &raquo;</li>
+        
+      <li>timeserio.keras.multinetwork module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/timeserio.keras.multinetwork.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-timeserio.keras.multinetwork">
+<span id="timeserio-keras-multinetwork-module"></span><h1>timeserio.keras.multinetwork module<a class="headerlink" href="#module-timeserio.keras.multinetwork" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase">
+<em class="property">class </em><code class="sig-prename descclassname">timeserio.keras.multinetwork.</code><code class="sig-name descname">MultiNetworkBase</code><span class="sig-paren">(</span><em class="sig-param">**hyperparams</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<p>Abstract base class for models that contain multiple keras sub-models.</p>
+<p class="rubric">Examples</p>
+<p>Define a simple pair of regression models using <cite>MultiNetworkBase</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timeserio.keras.multinetwork</span> <span class="k">import</span> <span class="n">MultiNetworkBase</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Dense</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyNetwork</span><span class="p">(</span><span class="n">MultiNetworkBase</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden_units</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">((</span><span class="mi">1</span><span class="p">,))</span>
+<span class="gp">... </span>        <span class="n">intermediate</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">hidden_units</span><span class="p">)(</span><span class="nb">input</span><span class="p">)</span>  <span class="c1"># shared layer</span>
+<span class="gp">... </span>        <span class="n">output_1</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">)(</span><span class="n">intermediate</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">output_2</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">)(</span><span class="n">intermediate</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">model_1</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">output_1</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">model_2</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">output_2</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">model_1</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s2">&quot;MSE&quot;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s2">&quot;SGD&quot;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">model_2</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s2">&quot;MSE&quot;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s2">&quot;SGD&quot;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;model_1&quot;</span><span class="p">:</span> <span class="n">model_1</span><span class="p">,</span> <span class="s2">&quot;model_2&quot;</span><span class="p">:</span> <span class="n">model_2</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Instantiate a multi-network, using keyword arguments to provide
+hyperparameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mnet</span> <span class="o">=</span> <span class="n">MyNetwork</span><span class="p">(</span><span class="n">hidden_units</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Models are instantiated on demand:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mnet</span><span class="o">.</span><span class="n">model</span>
+<span class="go">{&#39;model_1&#39;: &lt;keras.engine.training.Model ...&gt;, &#39;model_2&#39;: &lt;...&gt;}</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.__getstate__">
+<code class="sig-name descname">__getstate__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.__getstate__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.__getstate__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a picklable state dictionary of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[~KT, ~VT]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.__setstate__">
+<code class="sig-name descname">__setstate__</code><span class="sig-paren">(</span><em class="sig-param">state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.__setstate__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.__setstate__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set model from unpickled state dictionary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.callbacks">
+<em class="property">property </em><code class="sig-name descname">callbacks</code><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.callbacks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.check_model_name">
+<code class="sig-name descname">check_model_name</code><span class="sig-paren">(</span><em class="sig-param">model</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.check_model_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.check_model_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.check_params">
+<code class="sig-name descname">check_params</code><span class="sig-paren">(</span><em class="sig-param">params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.check_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.check_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for user typos in <cite>params</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> – dictionary; the parameters to be checked</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.7)"><strong>ValueError</strong></a> – if any member of <cite>params</cite> is not a valid argument.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.evaluate">
+<code class="sig-name descname">evaluate</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">model=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate estimator on given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – array-like, shape <cite>(n_samples, n_features)</cite>
+Test samples where <cite>n_samples</cite> is the number of samples
+and <cite>n_features</cite> is the number of features.</p></li>
+<li><p><strong>y</strong> – array-like</p></li>
+<li><p><strong>model</strong> – string</p></li>
+<li><p><strong>kwargs</strong> – keyword arguments.
+Legal arguments are the arguments of <cite>Sequential.evaluate</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><em>metrics</em> –</p>
+<dl class="simple">
+<dt>List[float]</dt><dd><p>A list of loss and evaluation metric values</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.evaluate_generator">
+<code class="sig-name descname">evaluate_generator</code><span class="sig-paren">(</span><em class="sig-param">generator</em>, <em class="sig-param">model=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.evaluate_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.evaluate_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate estimator on given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>generator</strong> – generator or keras.utils.Sequence
+predict batches as in Sequential.evaluate_generator</p></li>
+<li><p><strong>model</strong> – string</p></li>
+<li><p><strong>**kwargs</strong> – keyword arguments.
+Legal arguments are the arguments of
+<cite>Sequential.evaluate_generator</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>evaluation metric value(s)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">model=None</em>, <em class="sig-param">reset_weights=False</em>, <em class="sig-param">reset_optimizers=True</em>, <em class="sig-param">reset_history=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run training on one model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.fit_generator">
+<code class="sig-name descname">fit_generator</code><span class="sig-paren">(</span><em class="sig-param">generator</em>, <em class="sig-param">model=None</em>, <em class="sig-param">reset_weights=False</em>, <em class="sig-param">reset_optimizers=True</em>, <em class="sig-param">reset_history=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.fit_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.fit_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train model from <cite>generator</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>generator</strong> – generator or keras.utils.Sequence
+Training batches as in Sequential.fit_generator</p></li>
+<li><p><strong>init</strong> – bool
+initialize new model; use False to continue training</p></li>
+<li><p><strong>**kwargs</strong> – dictionary arguments
+Legal arguments are the arguments of <cite>Sequential.fit_generator</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><em>history</em> –</p>
+<dl class="simple">
+<dt>List[Dict]</dt><dd><p>details about the training history at each epoch.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.get_params">
+<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><em class="sig-param">**params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get parameters for this estimator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>**params</strong> – ignored (exists for API compatibility).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary of parameter names mapped to their values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.hyperparams">
+<em class="property">property </em><code class="sig-name descname">hyperparams</code><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.hyperparams" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.model">
+<em class="property">property </em><code class="sig-name descname">model</code><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.model_names">
+<em class="property">property </em><code class="sig-name descname">model_names</code><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.model_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">model=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return predictions for the given test data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – array-like, shape <cite>(n_samples, n_features)</cite>
+Test samples where <cite>n_samples</cite> is the number of samples
+and <cite>n_features</cite> is the number of features.</p></li>
+<li><p><strong>**kwargs</strong> – dictionary arguments
+Legal arguments are the arguments of <cite>Sequential.predict</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><em>preds</em> –</p>
+<dl class="simple">
+<dt>array-like, shape <cite>(n_samples, …)</cite></dt><dd><p>Predictions.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.predict_generator">
+<code class="sig-name descname">predict_generator</code><span class="sig-paren">(</span><em class="sig-param">generator</em>, <em class="sig-param">model=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.predict_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.predict_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return predictions from a batch generator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>generator</strong> – generator or keras.utils.Sequence
+predict batches as in Sequential.predict_generator</p></li>
+<li><p><strong>**kwargs</strong> – dictionary arguments
+Legal arguments are the arguments of
+<cite>Sequential.predict_generator</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><em>preds</em> –</p>
+<dl class="simple">
+<dt>array-like, shape <cite>(n_samples, …)</cite></dt><dd><p>Predictions.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.score">
+<code class="sig-name descname">score</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for scikit compatibility.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.set_params">
+<code class="sig-name descname">set_params</code><span class="sig-paren">(</span><em class="sig-param">**params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/keras/multinetwork.html#MultiNetworkBase.set_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the parameters of this estimator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>**params</strong> – Dictionary of parameter names mapped to their values.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>self</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="timeserio.keras.multinetwork.MultiNetworkBase.trainable_models">
+<em class="property">property </em><code class="sig-name descname">trainable_models</code><a class="headerlink" href="#timeserio.keras.multinetwork.MultiNetworkBase.trainable_models" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="timeserio.keras.timing.html" class="btn btn-neutral float-right" title="timeserio.keras.timing module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="timeserio.keras.callbacks.html" class="btn btn-neutral float-left" title="timeserio.keras.callbacks module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Octopus Energy Ltd
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

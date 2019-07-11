@@ -1,0 +1,7 @@
+timeserio.batches.chunked.dask module
+=====================================
+
+.. automodule:: timeserio.batches.chunked.dask
+   :members:
+   :undoc-members:
+   :show-inheritance:

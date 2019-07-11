@@ -1,0 +1,18 @@
+timeserio.keras package
+=======================
+
+.. automodule:: timeserio.keras
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.keras.batches
+   timeserio.keras.callbacks
+   timeserio.keras.multinetwork
+   timeserio.keras.timing
+   timeserio.keras.utils

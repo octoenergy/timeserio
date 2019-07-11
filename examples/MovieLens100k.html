@@ -1,0 +1,1478 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Building a Neural Movie Recommender System &mdash; Timeserio 0.10.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Autoencoders and multi-stage training for MNIST classification" href="MNIST.html" />
+    <link rel="prev" title="Getting Started" href="../overview/getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/constantine_100px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.10.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/getting_started.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building a Neural Movie Recommender System</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Dataset">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Download-data">Download data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Define-the-model-architecture">Define the model architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#From-Multinetwork-to-Multimodel">From Multinetwork to Multimodel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Define-individual-pipelines">Define individual pipelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Group-the-pipelines-in-a-MultiPipeline">Group the pipelines in a <code class="docutils literal notranslate"><span class="pre">MultiPipeline</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Connect-pipelines-to-models">Connect pipelines to models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Put-it-all-together">Put it all together</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Fit-the-MultiModel">Fit the <code class="docutils literal notranslate"><span class="pre">MultiModel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Cross-Validate-our-approach">Cross-Validate our approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Using-multiple-models">Using multiple models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#User-embeddings">User embeddings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#And-the-movie-embeddings…">And the movie embeddings…</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Movie-and-Genre-embeddings">Movie and Genre embeddings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Freezing-and-partial-updating">Freezing and partial updating</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="MNIST.html">Autoencoders and multi-stage training for MNIST classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SolarGenerationTimeSeries_Part1.html">Modelling Solar generation across Multiple Sites - Part 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SolarGenerationTimeSeries_Part2.html">Modelling Solar generation across Multiple Sites - Part 2</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Timeserio</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Building a Neural Movie Recommender System</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/MovieLens100k.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 5ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="admonition note">
+<p>This page was generated from <a class="reference external" href="https://github.com/octoenergy/timeserio/blob/df6fa76dc72b202e467c70043437e75cfe8df2cf/docs/source/examples/MovieLens100k.ipynb">docs/source/examples/MovieLens100k.ipynb</a>.</p>
+</div>
+<div class="section" id="Building-a-Neural-Movie-Recommender-System">
+<h1>Building a Neural Movie Recommender System<a class="headerlink" href="#Building-a-Neural-Movie-Recommender-System" title="Permalink to this headline">¶</a></h1>
+<p>Despite its name (and the original purpose), <code class="docutils literal notranslate"><span class="pre">timeserio</span></code> is a general-purpose tool for rapid model development. In this example, we use it to train a state-of-the-art movie recommender system in a few lines of code.</p>
+<div class="section" id="Dataset">
+<h2>Dataset<a class="headerlink" href="#Dataset" title="Permalink to this headline">¶</a></h2>
+<p>The MovieLens dataset is commonly used to benchmark recommender systems - see <a class="reference external" href="https://grouplens.org/datasets/movielens/100k/">https://grouplens.org/datasets/movielens/100k/</a>.</p>
+<p>Our task is to learn to predict how user <span class="math notranslate nohighlight">\(u\)</span> would rate a movie <span class="math notranslate nohighlight">\(m\)</span> (<span class="math notranslate nohighlight">\(r_{um}\)</span>) based on an available dataset of ratings <span class="math notranslate nohighlight">\(r_{ij}\)</span>. Importantly, each user has only given ratings to some of the movies, and each movie has only been rated by some of the users. This is a classic example of transfer learning, commonly known as collaborative filtering in the context of recommender systems.</p>
+</div>
+<div class="section" id="Introduction">
+<h2>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this headline">¶</a></h2>
+<p>We make use of <code class="docutils literal notranslate"><span class="pre">keras</span></code> to define three models: - a <em>user embedder</em> that learns to represent each user’s preference as a vector - a <em>movie embedder</em> that learns to represent each movie as a vector - a <em>rating model</em> that concatenates user and movie embedding networks, and applies a dense neural network to predict a (non-negative) rating</p>
+<p>By wrapping the three models in a <code class="docutils literal notranslate"><span class="pre">multinetwork</span></code> (of the <code class="docutils literal notranslate"><span class="pre">MultiNetworkBase</span></code> class), we can for example - train the rating model end-to-end, then use one of the embedding models - freeze one or both of the embedding models and re-train the dense layers, or - freeze the dense layers, and re-train embeddings for new users only</p>
+<p>To make our job even simpler, we further wrap our <code class="docutils literal notranslate"><span class="pre">multinetwork</span></code> in a <code class="docutils literal notranslate"><span class="pre">MultiModel</span></code> class, which allows us to take data directly from <code class="docutils literal notranslate"><span class="pre">pandas</span></code> DataFrames, and apply pre-processing pipelines if needed.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xkcd</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Download-data">
+<h2>Download data<a class="headerlink" href="#Download-data" title="Permalink to this headline">¶</a></h2>
+<p>First, we download the freely available dataset and define a few helper functions for importing data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span>mkdir -p datasets<span class="p">;</span> <span class="nb">cd</span> datasets<span class="p">;</span> wget http://files.grouplens.org/datasets/movielens/ml-100k.zip<span class="p">;</span> unzip -o ml-100k.zip<span class="p">;</span> rm ml-100k.zip
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--2019-06-22 14:53:38--  http://files.grouplens.org/datasets/movielens/ml-100k.zip
+Resolving files.grouplens.org (files.grouplens.org)... 128.101.65.152
+Connecting to files.grouplens.org (files.grouplens.org)|128.101.65.152|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 4924029 (4.7M) [application/zip]
+Saving to: ‘ml-100k.zip’
+
+ml-100k.zip         100%[===================&gt;]   4.70M  2.00MB/s    in 2.3s
+
+2019-06-22 14:53:41 (2.00 MB/s) - ‘ml-100k.zip’ saved [4924029/4924029]
+
+Archive:  ml-100k.zip
+  inflating: ml-100k/allbut.pl
+  inflating: ml-100k/mku.sh
+  inflating: ml-100k/README
+  inflating: ml-100k/u.data
+  inflating: ml-100k/u.genre
+  inflating: ml-100k/u.info
+  inflating: ml-100k/u.item
+  inflating: ml-100k/u.occupation
+  inflating: ml-100k/u.user
+  inflating: ml-100k/u1.base
+  inflating: ml-100k/u1.test
+  inflating: ml-100k/u2.base
+  inflating: ml-100k/u2.test
+  inflating: ml-100k/u3.base
+  inflating: ml-100k/u3.test
+  inflating: ml-100k/u4.base
+  inflating: ml-100k/u4.test
+  inflating: ml-100k/u5.base
+  inflating: ml-100k/u5.test
+  inflating: ml-100k/ua.base
+  inflating: ml-100k/ua.test
+  inflating: ml-100k/ub.base
+  inflating: ml-100k/ub.test
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">get_ratings</span><span class="p">(</span><span class="n">part</span><span class="o">=</span><span class="s1">&#39;u.data&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a DataFrame of user-movie ratings.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;datasets/ml-100k&#39;</span><span class="p">,</span> <span class="n">part</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="s1">&#39;item_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">],</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;item_id&#39;</span><span class="p">:</span> <span class="s1">&#39;movie_id&#39;</span><span class="p">})</span>
+
+<span class="k">def</span> <span class="nf">get_users</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Return a DataFrame of all users.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;datasets/ml-100k&#39;</span><span class="p">,</span> <span class="s1">&#39;u.user&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;|&#39;</span><span class="p">,</span>
+        <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;gender&#39;</span><span class="p">,</span> <span class="s1">&#39;occupation&#39;</span><span class="p">,</span> <span class="s1">&#39;zip_code&#39;</span><span class="p">],</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;item_id&#39;</span><span class="p">:</span> <span class="s1">&#39;movie_id&#39;</span><span class="p">})</span>
+
+<span class="n">ITEM_PROPS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;movie_id&#39;</span><span class="p">,</span> <span class="s1">&#39;movie_title&#39;</span><span class="p">,</span> <span class="s1">&#39;video_release_date&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;IMDb_URL&#39;</span><span class="p">]</span>
+<span class="n">GENRES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Action&#39;</span><span class="p">,</span> <span class="s1">&#39;Adventure&#39;</span><span class="p">,</span> <span class="s1">&#39;Animation&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Childrens&#39;</span><span class="p">,</span> <span class="s1">&#39;Comedy&#39;</span><span class="p">,</span> <span class="s1">&#39;Crime&#39;</span><span class="p">,</span> <span class="s1">&#39;Documentary&#39;</span><span class="p">,</span> <span class="s1">&#39;Drama&#39;</span><span class="p">,</span> <span class="s1">&#39;Fantasy&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Film-Noir&#39;</span><span class="p">,</span> <span class="s1">&#39;Horror&#39;</span><span class="p">,</span> <span class="s1">&#39;Musical&#39;</span><span class="p">,</span> <span class="s1">&#39;Mystery&#39;</span><span class="p">,</span> <span class="s1">&#39;Romance&#39;</span><span class="p">,</span> <span class="s1">&#39;Sci-Fi&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Thriller&#39;</span><span class="p">,</span> <span class="s1">&#39;War&#39;</span><span class="p">,</span> <span class="s1">&#39;Western&#39;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">get_movies</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Return a DataFrame of all movies.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;datasets/ml-100k&#39;</span><span class="p">,</span> <span class="s1">&#39;u.item&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;iso-8859-1&quot;</span><span class="p">,</span>
+        <span class="n">names</span><span class="o">=</span><span class="n">ITEM_PROPS</span> <span class="o">+</span> <span class="n">GENRES</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">get_ratings</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+      <th>movie_id</th>
+      <th>rating</th>
+      <th>timestamp</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>196</td>
+      <td>242</td>
+      <td>3</td>
+      <td>881250949</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>186</td>
+      <td>302</td>
+      <td>3</td>
+      <td>891717742</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>22</td>
+      <td>377</td>
+      <td>1</td>
+      <td>878887116</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">get_users</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+      <th>age</th>
+      <th>gender</th>
+      <th>occupation</th>
+      <th>zip_code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>24</td>
+      <td>M</td>
+      <td>technician</td>
+      <td>85711</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>53</td>
+      <td>F</td>
+      <td>other</td>
+      <td>94043</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>23</td>
+      <td>M</td>
+      <td>writer</td>
+      <td>32067</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">get_movies</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>movie_id</th>
+      <th>movie_title</th>
+      <th>video_release_date</th>
+      <th>unknown</th>
+      <th>IMDb_URL</th>
+      <th>Action</th>
+      <th>Adventure</th>
+      <th>Animation</th>
+      <th>Childrens</th>
+      <th>Comedy</th>
+      <th>...</th>
+      <th>Fantasy</th>
+      <th>Film-Noir</th>
+      <th>Horror</th>
+      <th>Musical</th>
+      <th>Mystery</th>
+      <th>Romance</th>
+      <th>Sci-Fi</th>
+      <th>Thriller</th>
+      <th>War</th>
+      <th>Western</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>Toy Story (1995)</td>
+      <td>01-Jan-1995</td>
+      <td>NaN</td>
+      <td>http://us.imdb.com/M/title-exact?Toy%20Story%2...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>GoldenEye (1995)</td>
+      <td>01-Jan-1995</td>
+      <td>NaN</td>
+      <td>http://us.imdb.com/M/title-exact?GoldenEye%20(...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>Four Rooms (1995)</td>
+      <td>01-Jan-1995</td>
+      <td>NaN</td>
+      <td>http://us.imdb.com/M/title-exact?Four%20Rooms%...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>3 rows × 23 columns</p>
+</div></div>
+</div>
+</div>
+<div class="section" id="Define-the-model-architecture">
+<h2>Define the model architecture<a class="headerlink" href="#Define-the-model-architecture" title="Permalink to this headline">¶</a></h2>
+<p>We start by defining the network architecture. All we need to do is sub-class <code class="docutils literal notranslate"><span class="pre">MultiNetworkBase</span></code>, and define the <code class="docutils literal notranslate"><span class="pre">_model</span></code> method.</p>
+<ul class="simple">
+<li><p>keyword arguments to <code class="docutils literal notranslate"><span class="pre">_model</span></code> are used to parametrise our network architecture, e.g. by specifying a settable number of neurons or layers</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">_model</span></code> method is expected to return a dictionary of <code class="docutils literal notranslate"><span class="pre">keras.models.Model</span></code> objects.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Embedding</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">Flatten</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Using TensorFlow backend.
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.keras.multinetwork</span> <span class="k">import</span> <span class="n">MultiNetworkBase</span>
+
+<span class="k">class</span> <span class="nc">MovieLensNetwork</span><span class="p">(</span><span class="n">MultiNetworkBase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">user_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">item_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_user</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">max_item</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+               <span class="n">hidden</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+        <span class="n">user_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
+        <span class="n">item_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;movie&#39;</span><span class="p">)</span>
+        <span class="n">user_emb</span> <span class="o">=</span> <span class="n">Flatten</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;flatten_user&#39;</span><span class="p">)(</span><span class="n">Embedding</span><span class="p">(</span><span class="n">max_user</span><span class="p">,</span> <span class="n">user_dim</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;embed_user&#39;</span><span class="p">)(</span><span class="n">user_input</span><span class="p">))</span>
+        <span class="n">item_emb</span> <span class="o">=</span> <span class="n">Flatten</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;flatten_movie&#39;</span><span class="p">)(</span><span class="n">Embedding</span><span class="p">(</span><span class="n">max_item</span><span class="p">,</span> <span class="n">item_dim</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;embed_movie&#39;</span><span class="p">)(</span><span class="n">item_input</span><span class="p">))</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;concatenate&#39;</span><span class="p">)([</span><span class="n">user_emb</span><span class="p">,</span> <span class="n">item_emb</span><span class="p">])</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">hidden</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dense&#39;</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;rating&#39;</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+        <span class="n">user_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">user_input</span><span class="p">,</span> <span class="n">user_emb</span><span class="p">)</span>
+        <span class="n">item_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">item_input</span><span class="p">,</span> <span class="n">item_emb</span><span class="p">)</span>
+        <span class="n">rating_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">([</span><span class="n">user_input</span><span class="p">,</span> <span class="n">item_input</span><span class="p">],</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">rating_model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;Adam&#39;</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;mse&#39;</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mae&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">user_model</span><span class="p">,</span> <span class="s1">&#39;movie&#39;</span><span class="p">:</span> <span class="n">item_model</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">:</span> <span class="n">rating_model</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>The three models are initialized on-demand, e.g. when we access <code class="docutils literal notranslate"><span class="pre">multinetwork.model</span></code>. Note that the inputs and embedding layers are shared, and therefore changes made to e.g. the <code class="docutils literal notranslate"><span class="pre">user</span></code> model are instantly available in the <code class="docutils literal notranslate"><span class="pre">rating</span></code> model.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">multinetwork</span> <span class="o">=</span> <span class="n">MovieLensNetwork</span><span class="p">()</span>
+<span class="n">multinetwork</span><span class="o">.</span><span class="n">model</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>{&#39;user&#39;: &lt;keras.engine.training.Model at 0x139c6c438&gt;,
+ &#39;movie&#39;: &lt;keras.engine.training.Model at 0x139c8eac8&gt;,
+ &#39;rating&#39;: &lt;keras.engine.training.Model at 0x139c8e5c0&gt;}
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">SVG</span>
+<span class="kn">from</span> <span class="nn">keras.utils.vis_utils</span> <span class="k">import</span> <span class="n">model_to_dot</span>
+<span class="kn">from</span> <span class="nn">keras.utils.layer_utils</span> <span class="k">import</span> <span class="n">print_summary</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">SVG</span><span class="p">(</span><span class="n">model_to_dot</span><span class="p">(</span><span class="n">multinetwork</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">],</span> <span class="n">rankdir</span><span class="o">=</span><span class="s1">&#39;LR&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_MovieLens100k_14_0.svg" src="../_images/examples_MovieLens100k_14_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">SVG</span><span class="p">(</span><span class="n">model_to_dot</span><span class="p">(</span><span class="n">multinetwork</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="s1">&#39;movie&#39;</span><span class="p">],</span> <span class="n">rankdir</span><span class="o">=</span><span class="s1">&#39;LR&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_MovieLens100k_15_0.svg" src="../_images/examples_MovieLens100k_15_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">SVG</span><span class="p">(</span><span class="n">model_to_dot</span><span class="p">(</span><span class="n">multinetwork</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_MovieLens100k_16_0.svg" src="../_images/examples_MovieLens100k_16_0.svg" /></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">print_summary</span><span class="p">(</span><span class="n">multinetwork</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+__________________________________________________________________________________________________
+Layer (type)                    Output Shape         Param #     Connected to
+==================================================================================================
+user (InputLayer)               (None, 1)            0
+__________________________________________________________________________________________________
+movie (InputLayer)              (None, 1)            0
+__________________________________________________________________________________________________
+embed_user (Embedding)          (None, 1, 2)         20000       user[0][0]
+__________________________________________________________________________________________________
+embed_movie (Embedding)         (None, 1, 2)         20000       movie[0][0]
+__________________________________________________________________________________________________
+flatten_user (Flatten)          (None, 2)            0           embed_user[0][0]
+__________________________________________________________________________________________________
+flatten_movie (Flatten)         (None, 2)            0           embed_movie[0][0]
+__________________________________________________________________________________________________
+concatenate (Concatenate)       (None, 4)            0           flatten_user[0][0]
+                                                                 flatten_movie[0][0]
+__________________________________________________________________________________________________
+dense (Dense)                   (None, 8)            40          concatenate[0][0]
+__________________________________________________________________________________________________
+rating (Dense)                  (None, 1)            9           dense[0][0]
+==================================================================================================
+Total params: 40,049
+Trainable params: 40,049
+Non-trainable params: 0
+__________________________________________________________________________________________________
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="From-Multinetwork-to-Multimodel">
+<h2>From Multinetwork to Multimodel<a class="headerlink" href="#From-Multinetwork-to-Multimodel" title="Permalink to this headline">¶</a></h2>
+<p>We can train a specific model by using its name. Note that we must provide <code class="docutils literal notranslate"><span class="pre">numpy</span></code> feature arrays to each input, and also an array of training labels:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">multinetwork</span><span class="o">.</span><span class="n">fit</span><span class="p">([</span><span class="n">X_user</span><span class="p">,</span> <span class="n">X_movie</span><span class="p">],</span> <span class="n">y_rating</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;rating&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In our case, we could simply write <code class="docutils literal notranslate"><span class="pre">X_user</span> <span class="pre">=</span> <span class="pre">df[&quot;user_id&quot;].values</span></code> etc.</p>
+<p>However, we prefer different models to be fed from one data source, typically a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>, with any details of feature pre-processing, or input ordering, taken care of by encapsulated pipelines, providing an interface of the form</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">multimodel</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;rating&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s work through the necessary steps - these may seem trivial for a simple problem, but save a lot of headaches when developing and deploying complex models.</p>
+<div class="section" id="Define-individual-pipelines">
+<h3>Define individual pipelines<a class="headerlink" href="#Define-individual-pipelines" title="Permalink to this headline">¶</a></h3>
+<p>We start by defining a pipeline (a <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code> transformer) for each of the model inputs and labels:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.preprocessing</span> <span class="k">import</span> <span class="n">PandasValueSelector</span>
+
+<span class="n">user_pipe</span> <span class="o">=</span> <span class="n">PandasValueSelector</span><span class="p">(</span><span class="s1">&#39;user_id&#39;</span><span class="p">)</span>
+<span class="n">item_pipe</span> <span class="o">=</span> <span class="n">PandasValueSelector</span><span class="p">(</span><span class="s1">&#39;movie_id&#39;</span><span class="p">)</span>
+<span class="n">rating_pipe</span> <span class="o">=</span> <span class="n">PandasValueSelector</span><span class="p">(</span><span class="s1">&#39;rating&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Group-the-pipelines-in-a-MultiPipeline">
+<h3>Group the pipelines in a <code class="docutils literal notranslate"><span class="pre">MultiPipeline</span></code><a class="headerlink" href="#Group-the-pipelines-in-a-MultiPipeline" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">MultiPipeline</span></code> object provides a container for all the pipelines, with convenience features such as easy parameter accesss. All we need is to provide a name for each pipeline:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.pipeline</span> <span class="k">import</span> <span class="n">MultiPipeline</span>
+
+<span class="n">multipipeline</span> <span class="o">=</span> <span class="n">MultiPipeline</span><span class="p">({</span>
+    <span class="s1">&#39;user_pipe&#39;</span><span class="p">:</span> <span class="n">user_pipe</span><span class="p">,</span>
+    <span class="s1">&#39;movie_pipe&#39;</span><span class="p">:</span> <span class="n">item_pipe</span><span class="p">,</span>
+    <span class="s1">&#39;rating_pipe&#39;</span><span class="p">:</span> <span class="n">rating_pipe</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Connect-pipelines-to-models">
+<h3>Connect pipelines to models<a class="headerlink" href="#Connect-pipelines-to-models" title="Permalink to this headline">¶</a></h3>
+<p>To finish the plumbing exercise, we specify which pipeline connects to each input or output of each model using a <em>manifold</em>.</p>
+<p>Each key-value in the manifold has the form <code class="docutils literal notranslate"><span class="pre">model_name:</span> <span class="pre">(input_pipes,</span> <span class="pre">output_pipes)</span></code>, where <code class="docutils literal notranslate"><span class="pre">input_pipes</span></code> is either a single pipe name, or a list of pipe names (one per input). Similarly, the <code class="docutils literal notranslate"><span class="pre">output_pipe</span></code> will have one ore more pipe names, one per output of the model - we use <code class="docutils literal notranslate"><span class="pre">None</span></code> for models that we do not intend to train using supervised labels.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">manifold</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;user_pipe&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="s1">&#39;movie&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;movie_pipe&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="s1">&#39;rating&#39;</span><span class="p">:</span> <span class="p">([</span><span class="s1">&#39;user_pipe&#39;</span><span class="p">,</span> <span class="s1">&#39;movie_pipe&#39;</span><span class="p">],</span> <span class="s1">&#39;rating_pipe&#39;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Put-it-all-together">
+<h3>Put it all together<a class="headerlink" href="#Put-it-all-together" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">MultiModel</span></code> holds all three parts: - the <code class="docutils literal notranslate"><span class="pre">multinetwork</span></code> specifies the model architectures, and also training parameters and callbacks - the <code class="docutils literal notranslate"><span class="pre">multipipeline</span></code> specifies the feature processing pipelines - the <code class="docutils literal notranslate"><span class="pre">manifold</span></code> specifies which pipelines is plumbed to which input (or output) of which neural network model</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.multimodel</span> <span class="k">import</span> <span class="n">MultiModel</span>
+
+<span class="n">multimodel</span> <span class="o">=</span> <span class="n">MultiModel</span><span class="p">(</span>
+    <span class="n">multinetwork</span><span class="o">=</span><span class="n">multinetwork</span><span class="p">,</span>
+    <span class="n">multipipeline</span><span class="o">=</span><span class="n">multipipeline</span><span class="p">,</span>
+    <span class="n">manifold</span><span class="o">=</span><span class="n">manifold</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Fit-the-MultiModel">
+<h2>Fit the <code class="docutils literal notranslate"><span class="pre">MultiModel</span></code><a class="headerlink" href="#Fit-the-MultiModel" title="Permalink to this headline">¶</a></h2>
+<p>We load one train-test split, and fitting our neural recommender system</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">df_train</span> <span class="o">=</span> <span class="n">get_ratings</span><span class="p">(</span><span class="s1">&#39;u1.base&#39;</span><span class="p">)</span>
+<span class="n">df_val</span> <span class="o">=</span> <span class="n">get_ratings</span><span class="p">(</span><span class="s1">&#39;u1.test&#39;</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">df_train</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_val</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>(80000, 20000)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">kerashistoryplot.callbacks</span> <span class="k">import</span> <span class="n">PlotHistory</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Note: `PlotHistory` callback is rather slow</span>
+<span class="n">multimodel</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">reset_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">df</span><span class="o">=</span><span class="n">df_train</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="n">validation_data</span><span class="o">=</span><span class="n">df_val</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">PlotHistory</span><span class="p">(</span><span class="n">batches</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_cols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_MovieLens100k_30_0.png" src="../_images/examples_MovieLens100k_30_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;timeserio.keras.callbacks.HistoryLogger at 0x13d5189e8&gt;
+</pre></div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">multimodel</span></code> provides all the familiar methods such as <code class="docutils literal notranslate"><span class="pre">fit</span></code>, <code class="docutils literal notranslate"><span class="pre">predict</span></code>, or <code class="docutils literal notranslate"><span class="pre">evaluate</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[70]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mse</span><span class="p">,</span> <span class="n">mae</span> <span class="o">=</span> <span class="n">multimodel</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">df_val</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;rating&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;MSE: </span><span class="si">{mse}</span><span class="s2">, RMSE: {np.sqrt(mse)}, MAE: </span><span class="si">{mae}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+MSE: 0.9139011481761933, RMSE: 0.9559817718849002, MAE: 0.7554579020500183
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Cross-Validate-our-approach">
+<h2>Cross-Validate our approach<a class="headerlink" href="#Cross-Validate-our-approach" title="Permalink to this headline">¶</a></h2>
+<p>To evaluate how well recommender system performs, we perform 5-fold cross-validation and compare scores established benchmarks.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[71]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">mean_absolute_error</span><span class="p">,</span> <span class="n">mean_squared_error</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[74]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%%time</span>
+<span class="n">folds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="n">folds_mse</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">folds_rmse</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">folds_mae</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">folds</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">folds</span><span class="p">)):</span>
+    <span class="n">multimodel</span><span class="o">.</span><span class="n">multinetwork</span><span class="o">.</span><span class="n">_init_model</span><span class="p">()</span>
+    <span class="n">df_train</span> <span class="o">=</span> <span class="n">get_ratings</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;u</span><span class="si">{fold}</span><span class="s1">.base&#39;</span><span class="p">)</span>
+    <span class="n">df_val</span> <span class="o">=</span> <span class="n">get_ratings</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;u</span><span class="si">{fold}</span><span class="s1">.test&#39;</span><span class="p">)</span>
+    <span class="n">multimodel</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">df_train</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="n">validation_data</span><span class="o">=</span><span class="n">df_val</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">reset_weights</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">multimodel</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df_val</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;rating&#39;</span><span class="p">)</span>
+    <span class="n">mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">df_val</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">],</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">df_val</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">],</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">folds_mse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span>
+    <span class="n">folds_rmse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">))</span>
+    <span class="n">folds_mae</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mae</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|██████████| 5/5 [01:00&lt;00:00, 12.28s/it]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 1min 6s, sys: 4.14 s, total: 1min 10s
+Wall time: 1min
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[75]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span>
+    <span class="n">f</span><span class="s2">&quot;5-fold Cross-Validation results: </span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">f</span><span class="s2">&quot;RMSE: {np.mean(folds_rmse):.2f} ± {np.std(folds_rmse):.2f} </span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">f</span><span class="s2">&quot;MAE: {np.mean(folds_mae):.2f} ± {np.std(folds_mae):.2f} </span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+5-fold Cross-Validation results:
+RMSE: 0.94 ± 0.01
+MAE: 0.74 ± 0.00
+
+</pre></div></div>
+</div>
+<p>Benchmarks for some modern algorithms can be seen e.g. at <a class="reference external" href="http://surpriselib.com/">http://surpriselib.com/</a> or <a class="reference external" href="https://www.librec.net/release/v1.3/example.html">https://www.librec.net/release/v1.3/example.html</a> - our approach is in fact competitive with the state of the art before any tuning! By using dense embeddings, we did not use any user features such as gender or age - all we need is to learn their preference embedding as part of our end-to-end model.</p>
+<p>We are now free to experiment with embedding dimensions for users and movies, or tweak the dense layers.</p>
+</div>
+<div class="section" id="Using-multiple-models">
+<h2>Using multiple models<a class="headerlink" href="#Using-multiple-models" title="Permalink to this headline">¶</a></h2>
+<p>We now use a trained <code class="docutils literal notranslate"><span class="pre">MultiModel</span></code> to inspect the embeddings. Because we defined user and movie embedders as independent models, we can simple call <code class="docutils literal notranslate"><span class="pre">.predict(...,</span> <span class="pre">model=...)</span></code> with different model names.</p>
+<div class="section" id="User-embeddings">
+<h3>User embeddings<a class="headerlink" href="#User-embeddings" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[76]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">user_df</span> <span class="o">=</span> <span class="n">get_users</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[77]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">multimodel</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">user_df</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
+<span class="n">user_df</span><span class="p">[</span><span class="s1">&#39;emb_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">user_df</span><span class="p">[</span><span class="s1">&#39;emb_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[78]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;emb_0&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;emb_1&#39;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s1">&#39;gender&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">user_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[78]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x143dac320&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_MovieLens100k_42_1.png" src="../_images/examples_MovieLens100k_42_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="And-the-movie-embeddings…">
+<h3>And the movie embeddings…<a class="headerlink" href="#And-the-movie-embeddings…" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[79]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">movie_df</span> <span class="o">=</span> <span class="n">get_movies</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[81]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">multimodel</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">movie_df</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;movie&#39;</span><span class="p">)</span>
+<span class="n">movie_df</span><span class="p">[</span><span class="s1">&#39;emb_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">movie_df</span><span class="p">[</span><span class="s1">&#39;emb_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Out of curiosity, we can compute mean embeddings for movies tagged with each genre.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[85]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">genre_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">genre</span> <span class="ow">in</span> <span class="n">GENRES</span><span class="p">:</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">movie_df</span><span class="p">[</span><span class="n">movie_df</span><span class="p">[</span><span class="n">genre</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">][[</span><span class="s1">&#39;emb_0&#39;</span><span class="p">,</span> <span class="s1">&#39;emb_1&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">mean</span><span class="p">[</span><span class="s1">&#39;genre&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genre</span>
+    <span class="n">genre_df</span> <span class="o">=</span> <span class="n">genre_df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Movie-and-Genre-embeddings">
+<h3>Movie and Genre embeddings<a class="headerlink" href="#Movie-and-Genre-embeddings" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[88]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;emb_0&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;emb_1&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">movie_df</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;bright&#39;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;emb_0&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;emb_1&#39;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s1">&#39;genre&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">genre_df</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;bright&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[88]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x1443e4f98&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_MovieLens100k_49_1.png" src="../_images/examples_MovieLens100k_49_1.png" />
+</div>
+</div>
+<p>We can even consider similarity between genres by: - computing centroid for each genre - performing hierarchical clustering on genre centroids - plotting the distance matrix with a fancy colour scheme</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[89]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">pairwise_distances</span>
+<span class="kn">from</span> <span class="nn">scipy.cluster</span> <span class="k">import</span> <span class="n">hierarchy</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[90]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">X</span> <span class="o">=</span> <span class="n">genre_df</span><span class="p">[[</span><span class="s1">&#39;emb_0&#39;</span><span class="p">,</span> <span class="s1">&#39;emb_1&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">linkage</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">order</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">leaves_list</span><span class="p">(</span><span class="n">hierarchy</span><span class="o">.</span><span class="n">optimal_leaf_ordering</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">X</span><span class="p">))</span>
+<span class="n">genre_df_ordered</span> <span class="o">=</span> <span class="n">genre_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[91]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">embs_ord</span> <span class="o">=</span> <span class="n">genre_df_ordered</span><span class="p">[[</span><span class="s1">&#39;emb_0&#39;</span><span class="p">,</span> <span class="s1">&#39;emb_1&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">dist_ord</span> <span class="o">=</span> <span class="n">pairwise_distances</span><span class="p">(</span><span class="n">embs_ord</span><span class="p">)</span>
+<span class="n">genres_ord</span> <span class="o">=</span> <span class="n">genre_df_ordered</span><span class="p">[</span><span class="s1">&#39;genre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[92]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">dist_ord</span><span class="p">,</span> <span class="n">xticklabels</span><span class="o">=</span><span class="n">genres_ord</span><span class="p">,</span> <span class="n">yticklabels</span><span class="o">=</span><span class="n">genres_ord</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;plasma_r&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_MovieLens100k_54_0.png" src="../_images/examples_MovieLens100k_54_0.png" />
+</div>
+</div>
+<p>We see that the two genres furthest apart are <em>Horror</em> and <em>Musical</em>, while <em>Romance</em> and <em>Mystery</em> or <em>Crime</em> and <em>Adventure</em> evoke similar rating patterns!</p>
+</div>
+</div>
+<div class="section" id="Freezing-and-partial-updating">
+<h2>Freezing and partial updating<a class="headerlink" href="#Freezing-and-partial-updating" title="Permalink to this headline">¶</a></h2>
+<p>Finally, we mention another key advantage of the <code class="docutils literal notranslate"><span class="pre">MultiModel</span></code> approach: partial re-training.</p>
+<p>Imagine we have a powerful production system, but new users register with our service every day.</p>
+<p>We don’t want to re-train the full model, only the embeddings for new users. This is trivial:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">multimodel</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">trainable_models</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">],</span>
+    <span class="n">df</span><span class="o">=</span><span class="n">df_new</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This will ensure that only the user embeddings are updated (and only for users present in <code class="docutils literal notranslate"><span class="pre">df_new</span></code>, while dense layer weights and movie embeddings remain frozen.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="MNIST.html" class="btn btn-neutral float-right" title="Autoencoders and multi-stage training for MNIST classification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../overview/getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Octopus Energy Ltd
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

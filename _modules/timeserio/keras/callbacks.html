@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>timeserio.keras.callbacks &mdash; Timeserio 0.10.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/constantine_100px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.10.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/getting_started.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/MovieLens100k.html">Building a Neural Movie Recommender System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/MNIST.html">Autoencoders and multi-stage training for MNIST classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/SolarGenerationTimeSeries_Part1.html">Modelling Solar generation across Multiple Sites - Part 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/SolarGenerationTimeSeries_Part2.html">Modelling Solar generation across Multiple Sites - Part 2</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Timeserio</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>timeserio.keras.callbacks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for timeserio.keras.callbacks</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">keras.callbacks</span> <span class="k">import</span> <span class="n">Callback</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_now</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Return the current time, helper for mocking.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_get_log_metrics</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;epoch&#39;</span><span class="p">,</span> <span class="s1">&#39;batches&#39;</span><span class="p">)):</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">metrics</span>
+
+
+<span class="k">def</span> <span class="nf">_format_epoch_metric</span><span class="p">(</span>
+    <span class="n">history</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;loss&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.2e&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">idx</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">with_name</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Metric &#39;</span><span class="si">{metric}</span><span class="s2">&#39; not found in history.&quot;</span><span class="p">)</span>
+    <span class="n">mean_value</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
+    <span class="n">formatted_value</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;{mean_value:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span>
+    <span class="k">if</span> <span class="n">errors</span> <span class="ow">and</span> <span class="s1">&#39;batches&#39;</span> <span class="ow">in</span> <span class="n">history</span> <span class="ow">and</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="s1">&#39;batches&#39;</span><span class="p">][</span><span class="n">idx</span><span class="p">]:</span>
+        <span class="n">batch_values</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="s1">&#39;batches&#39;</span><span class="p">][</span><span class="n">idx</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span>
+        <span class="n">batch_min</span><span class="p">,</span> <span class="n">batch_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">batch_values</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">batch_values</span><span class="p">)</span>
+        <span class="n">batch_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">batch_values</span><span class="p">)</span>
+        <span class="n">formatted_errors</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">f</span><span class="s2">&quot; +- {batch_std:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span>
+            <span class="n">f</span><span class="s2">&quot; [{batch_min:</span><span class="si">{fmt}</span><span class="s2">} .. {batch_max:</span><span class="si">{fmt}</span><span class="s2">}]&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">formatted_errors</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">with_name</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{metric}</span><span class="s2">: </span><span class="si">{formatted_value}{formatted_errors}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{formatted_value}{formatted_errors}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_format_epoch_summary</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.2e&#39;</span><span class="p">,</span> <span class="n">idx</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="n">_get_log_metrics</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+    <span class="n">formatted_values</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_format_epoch_metric</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">fmt</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span>
+    <span class="p">]</span>
+    <span class="n">formatted_epoch</span> <span class="o">=</span> <span class="n">_format_epoch_metric</span><span class="p">(</span>
+        <span class="n">history</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;epoch&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">idx</span>
+    <span class="p">)</span>
+    <span class="n">formatted_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">formatted_epoch</span><span class="p">]</span> <span class="o">+</span> <span class="n">formatted_values</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39; - &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">formatted_values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">message</span>
+
+
+<div class="viewcode-block" id="HistoryLogger"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.HistoryLogger">[docs]</a><span class="k">class</span> <span class="nc">HistoryLogger</span><span class="p">(</span><span class="n">Callback</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Log all history, including per-batch losses and metrics.</span>
+
+<span class="sd">    Based on keras.callbacks.History</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batches</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batches</span> <span class="o">=</span> <span class="n">batches</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="HistoryLogger.on_train_begin"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.HistoryLogger.on_train_begin">[docs]</a>    <span class="k">def</span> <span class="nf">on_train_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Training started.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="HistoryLogger.on_epoch_begin"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.HistoryLogger.on_epoch_begin">[docs]</a>    <span class="k">def</span> <span class="nf">on_epoch_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">batch_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;batches&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">batch_history</span><span class="o">.</span><span class="n">append</span><span class="p">({})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch_time_start</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="HistoryLogger.on_batch_end"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.HistoryLogger.on_batch_end">[docs]</a>    <span class="k">def</span> <span class="nf">on_batch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">batches</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">batch_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;batches&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">logs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">batch_history</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HistoryLogger.on_epoch_end"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.HistoryLogger.on_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">on_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">logs</span> <span class="o">=</span> <span class="n">logs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">elapsed</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch_time_start</span>
+        <span class="n">logs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">)</span>
+        <span class="n">logs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">epoch_duration</span><span class="o">=</span><span class="n">elapsed</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">logs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">_format_epoch_summary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_log_training_metric_improvement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.2e&#39;</span><span class="p">):</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">_get_log_metrics</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;batches&#39;</span><span class="p">,</span> <span class="s1">&#39;epoch&#39;</span><span class="p">,</span> <span class="s1">&#39;epoch_duration&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="n">before</span> <span class="o">=</span> <span class="n">_format_epoch_metric</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">after</span> <span class="o">=</span> <span class="n">_format_epoch_metric</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+                <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+                <span class="n">idx</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">with_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">errors</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{metric}</span><span class="s2">: </span><span class="si">{before}</span><span class="s2"> --&gt; </span><span class="si">{after}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_log_training_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.2e&#39;</span><span class="p">):</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;epoch_duration&#39;</span><span class="p">]</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+        <span class="n">min_duration</span><span class="p">,</span> <span class="n">max_duration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Total duration: {total:</span><span class="si">{fmt}</span><span class="s2">} seconds&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="n">f</span><span class="s2">&quot;Epoch duration: {mean:</span><span class="si">{fmt}</span><span class="s2">} +- {std:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span>
+            <span class="n">f</span><span class="s2">&quot; [{min_duration:</span><span class="si">{fmt}</span><span class="s2">} .. {max_duration:</span><span class="si">{fmt}</span><span class="s2">}] seconds&quot;</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="HistoryLogger.on_train_end"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.HistoryLogger.on_train_end">[docs]</a>    <span class="k">def</span> <span class="nf">on_train_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">num_epochs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Training finished in </span><span class="si">{num_epochs}</span><span class="s2"> epochs.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_training_time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_training_metric_improvement</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="TimeLogger"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.TimeLogger">[docs]</a><span class="k">class</span> <span class="nc">TimeLogger</span><span class="p">(</span><span class="n">Callback</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Logs the times of training the network and per epoch.</span>
+
+<span class="sd">    A summary of the total statistics is given when the network finishes</span>
+<span class="sd">    the training process.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Callback</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_training_time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch_times</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_time</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="TimeLogger.on_train_begin"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.TimeLogger.on_train_begin">[docs]</a>    <span class="k">def</span> <span class="nf">on_train_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_training_time</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;TimeLogger on_train_begin&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeLogger.on_train_end"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.TimeLogger.on_train_end">[docs]</a>    <span class="k">def</span> <span class="nf">on_train_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_time</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_training_time</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Timing: Training took </span><span class="si">%0.2f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_time</span><span class="p">)</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">max_elapsed</span><span class="p">,</span> <span class="n">min_elapsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stats</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Timing: Epochs summary mean/std/max/min: </span><span class="si">%0.5f</span><span class="s2">/</span><span class="si">%0.5f</span><span class="s2">/</span><span class="si">%0.5f</span><span class="s2">/</span><span class="si">%0.5f</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">max_elapsed</span><span class="p">,</span> <span class="n">min_elapsed</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_times</span><span class="p">)</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_times</span><span class="p">)</span>
+        <span class="n">max_elapsed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_times</span><span class="p">)</span>
+        <span class="n">min_elapsed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_times</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">max_elapsed</span><span class="p">,</span> <span class="n">min_elapsed</span>
+
+<div class="viewcode-block" id="TimeLogger.on_epoch_begin"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.TimeLogger.on_epoch_begin">[docs]</a>    <span class="k">def</span> <span class="nf">on_epoch_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch_time_start</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TimeLogger.on_epoch_end"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.TimeLogger.on_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">on_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">elapsed</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch_time_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elapsed</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Timing: Epoch </span><span class="si">%d</span><span class="s2"> took </span><span class="si">%0.5f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">elapsed</span><span class="p">))</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Octopus Energy Ltd
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

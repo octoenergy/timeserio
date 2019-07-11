@@ -1,0 +1,361 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>timeserio.data.mock &mdash; Timeserio 0.10.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/constantine_100px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.10.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/getting_started.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/MovieLens100k.html">Building a Neural Movie Recommender System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/MNIST.html">Autoencoders and multi-stage training for MNIST classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/SolarGenerationTimeSeries_Part1.html">Modelling Solar generation across Multiple Sites - Part 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/SolarGenerationTimeSeries_Part2.html">Modelling Solar generation across Multiple Sites - Part 2</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Timeserio</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>timeserio.data.mock</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for timeserio.data.mock</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">dask.dataframe</span> <span class="k">as</span> <span class="nn">dd</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">ini</span>
+
+<span class="n">DEF_N</span> <span class="o">=</span> <span class="mi">48</span>
+<span class="n">DEF_EMB_DIM</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">DEF_SEQ_LENGTH</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">DEF_FREQ</span> <span class="o">=</span> <span class="s1">&#39;0.5H&#39;</span>
+
+
+<div class="viewcode-block" id="mock_datetime_range"><a class="viewcode-back" href="../../../api/timeserio.data.mock.html#timeserio.data.mock.mock_datetime_range">[docs]</a><span class="k">def</span> <span class="nf">mock_datetime_range</span><span class="p">(</span><span class="n">periods</span><span class="o">=</span><span class="n">DEF_N</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sample datetime range with a half-hour period.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">start</span><span class="p">:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">DEF_FREQ</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">periods</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_single_user_fit_df</span><span class="p">(</span>
+    <span class="n">periods</span><span class="o">=</span><span class="n">DEF_N</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="nb">id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">embedding_dim</span><span class="o">=</span><span class="n">DEF_EMB_DIM</span><span class="p">,</span>
+    <span class="n">seq_length</span><span class="o">=</span><span class="n">DEF_SEQ_LENGTH</span>
+<span class="p">):</span>
+    <span class="n">embeddings</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">i</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">embedding_dim</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">dt_range</span> <span class="o">=</span> <span class="n">mock_datetime_range</span><span class="p">(</span><span class="n">periods</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">seq_dt</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">i</span><span class="p">:</span> <span class="n">dt_range</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">seq_length</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">seq_usage</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">i</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">seq_length</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span>
+        <span class="s1">&#39;embedding&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">embeddings</span><span class="p">),</span>
+        <span class="n">f</span><span class="s1">&#39;seq_</span><span class="si">{ini.Columns.datetime}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">seq_dt</span><span class="p">),</span>
+        <span class="n">f</span><span class="s1">&#39;seq_</span><span class="si">{ini.Columns.target}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">seq_usage</span><span class="p">),</span>
+    <span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">ini</span><span class="o">.</span><span class="n">Columns</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="n">mock_datetime_range</span><span class="p">(</span><span class="n">periods</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start_date</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;weather_temperature&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">ini</span><span class="o">.</span><span class="n">Columns</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">ini</span><span class="o">.</span><span class="n">Columns</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">id</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<div class="viewcode-block" id="mock_fit_data"><a class="viewcode-back" href="../../../api/timeserio.data.mock.html#timeserio.data.mock.mock_fit_data">[docs]</a><span class="k">def</span> <span class="nf">mock_fit_data</span><span class="p">(</span><span class="n">periods</span><span class="o">=</span><span class="n">DEF_N</span><span class="p">,</span>
+                  <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                  <span class="n">embedding_dim</span><span class="o">=</span><span class="n">DEF_EMB_DIM</span><span class="p">,</span>
+                  <span class="n">seq_length</span><span class="o">=</span><span class="n">DEF_SEQ_LENGTH</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create example fit data in the tall DataFrame format.&quot;&quot;&quot;</span>
+    <span class="n">user_dfs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_single_user_fit_df</span><span class="p">(</span>
+            <span class="n">periods</span><span class="o">=</span><span class="n">periods</span><span class="p">,</span>
+            <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+            <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
+            <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+            <span class="n">seq_length</span><span class="o">=</span><span class="n">seq_length</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ids</span>
+    <span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">user_dfs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="mock_dask_fit_data"><a class="viewcode-back" href="../../../api/timeserio.data.mock.html#timeserio.data.mock.mock_dask_fit_data">[docs]</a><span class="k">def</span> <span class="nf">mock_dask_fit_data</span><span class="p">(</span>
+    <span class="n">periods</span><span class="o">=</span><span class="n">DEF_N</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">embedding_dim</span><span class="o">=</span><span class="n">DEF_EMB_DIM</span><span class="p">,</span>
+    <span class="n">seq_length</span><span class="o">=</span><span class="n">DEF_SEQ_LENGTH</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create example fit data as a dask DataFrame.</span>
+
+<span class="sd">    DataFrame is partitioned by ID.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">mock_fit_data</span><span class="p">(</span>
+        <span class="n">periods</span><span class="o">=</span><span class="n">periods</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span>
+        <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+        <span class="n">seq_length</span><span class="o">=</span><span class="n">seq_length</span>
+    <span class="p">)</span>
+    <span class="n">ddf</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">periods</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ddf</span></div>
+
+
+<span class="k">def</span> <span class="nf">_single_user_raw_df</span><span class="p">(</span>
+    <span class="n">periods</span><span class="o">=</span><span class="n">DEF_N</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="nb">id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="n">ini</span><span class="o">.</span><span class="n">Columns</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="nb">id</span><span class="p">,</span>
+        <span class="n">ini</span><span class="o">.</span><span class="n">Columns</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span> <span class="n">mock_datetime_range</span><span class="p">(</span><span class="n">periods</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start_date</span><span class="p">),</span>
+        <span class="n">ini</span><span class="o">.</span><span class="n">Columns</span><span class="o">.</span><span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<div class="viewcode-block" id="mock_raw_data"><a class="viewcode-back" href="../../../api/timeserio.data.mock.html#timeserio.data.mock.mock_raw_data">[docs]</a><span class="k">def</span> <span class="nf">mock_raw_data</span><span class="p">(</span><span class="n">periods</span><span class="o">=</span><span class="n">DEF_N</span><span class="p">,</span>
+                  <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Create example raw data in the tall DataFrame format.&quot;&quot;&quot;</span>
+    <span class="n">user_dfs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_single_user_raw_df</span><span class="p">(</span>
+            <span class="n">periods</span><span class="o">=</span><span class="n">periods</span><span class="p">,</span>
+            <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+            <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ids</span>
+    <span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">user_dfs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="mock_dask_raw_data"><a class="viewcode-back" href="../../../api/timeserio.data.mock.html#timeserio.data.mock.mock_dask_raw_data">[docs]</a><span class="k">def</span> <span class="nf">mock_dask_raw_data</span><span class="p">(</span>
+    <span class="n">periods</span><span class="o">=</span><span class="n">DEF_N</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create example fit data as a dask DataFrame.</span>
+
+<span class="sd">    DataFrame is partitioned by ID.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">mock_raw_data</span><span class="p">(</span>
+        <span class="n">periods</span><span class="o">=</span><span class="n">periods</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ddf</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">periods</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ddf</span></div>
+
+
+<div class="viewcode-block" id="mock_predict_data"><a class="viewcode-back" href="../../../api/timeserio.data.mock.html#timeserio.data.mock.mock_predict_data">[docs]</a><span class="k">def</span> <span class="nf">mock_predict_data</span><span class="p">(</span><span class="n">periods</span><span class="o">=</span><span class="n">DEF_N</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create example predict data in the tall DataFrame format.&quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">mock_fit_data</span><span class="p">(</span><span class="n">periods</span><span class="o">=</span><span class="n">periods</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;usage&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Octopus Energy Ltd
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

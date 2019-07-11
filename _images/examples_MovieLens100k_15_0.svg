@@ -1,0 +1,36 @@
+<svg height="45pt" viewBox="0.00 0.00 507.08 45.00" width="507pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g class="graph" id="graph0" transform="scale(1 1) rotate(0) translate(4 41)">
+<title>G</title>
+<polygon fill="#ffffff" points="-4,4 -4,-41 503.0801,-41 503.0801,4 -4,4" stroke="transparent"/>
+<!-- 5264408760 -->
+<g class="node" id="node1">
+<title>5264408760</title>
+<polygon fill="none" points="0,-.5 0,-36.5 120.5762,-36.5 120.5762,-.5 0,-.5" stroke="#000000"/>
+<text fill="#000000" font-family="Times,serif" font-size="14.00" text-anchor="middle" x="60.2881" y="-14.3">movie: InputLayer</text>
+</g>
+<!-- 5266445144 -->
+<g class="node" id="node2">
+<title>5266445144</title>
+<polygon fill="none" points="156.5762,-.5 156.5762,-36.5 323.8213,-36.5 323.8213,-.5 156.5762,-.5" stroke="#000000"/>
+<text fill="#000000" font-family="Times,serif" font-size="14.00" text-anchor="middle" x="240.1987" y="-14.3">embed_movie: Embedding</text>
+</g>
+<!-- 5264408760&#45;&gt;5266445144 -->
+<g class="edge" id="edge1">
+<title>5264408760-&gt;5266445144</title>
+<path d="M120.6962,-18.5C128.9138,-18.5 137.5015,-18.5 146.1397,-18.5" fill="none" stroke="#000000"/>
+<polygon fill="#000000" points="146.2844,-22.0001 156.2843,-18.5 146.2843,-15.0001 146.2844,-22.0001" stroke="#000000"/>
+</g>
+<!-- 5264201992 -->
+<g class="node" id="node3">
+<title>5264201992</title>
+<polygon fill="none" points="359.8213,-.5 359.8213,-36.5 499.0801,-36.5 499.0801,-.5 359.8213,-.5" stroke="#000000"/>
+<text fill="#000000" font-family="Times,serif" font-size="14.00" text-anchor="middle" x="429.4507" y="-14.3">flatten_movie: Flatten</text>
+</g>
+<!-- 5266445144&#45;&gt;5264201992 -->
+<g class="edge" id="edge2">
+<title>5266445144-&gt;5264201992</title>
+<path d="M324.0339,-18.5C332.4687,-18.5 341.0195,-18.5 349.4133,-18.5" fill="none" stroke="#000000"/>
+<polygon fill="#000000" points="349.5557,-22.0001 359.5557,-18.5 349.5557,-15.0001 349.5557,-22.0001" stroke="#000000"/>
+</g>
+</g>
+</svg>

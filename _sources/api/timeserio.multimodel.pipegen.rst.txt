@@ -1,0 +1,7 @@
+timeserio.multimodel.pipegen module
+===================================
+
+.. automodule:: timeserio.multimodel.pipegen
+   :members:
+   :undoc-members:
+   :show-inheritance:

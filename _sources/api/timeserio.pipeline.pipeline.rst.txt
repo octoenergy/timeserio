@@ -1,0 +1,7 @@
+timeserio.pipeline.pipeline module
+==================================
+
+.. automodule:: timeserio.pipeline.pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:

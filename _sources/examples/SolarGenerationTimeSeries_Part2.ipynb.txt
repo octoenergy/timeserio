@@ -1,0 +1,1011 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Modelling Solar generation across Multiple Sites - Part 2\n",
+    "\n",
+    "In [Part 1](SolarGenerationTimeSeries_Part1.ipynb), we have explored the SETIS PV generation dataset and built a powerful and performant model using \n",
+    "`timeserio`'s `MultiModel` and datetime feature generation pipelines. In this part, we instead train an auto-regressive model using more advanced batch generator features.\n",
+    "\n",
+    "Remember the metrics our previous model achieved on the train/test split (without any parameter tuning):\n",
+    "\n",
+    "|&nbsp;| train | test |\n",
+    "|---|---|---|\n",
+    "| MSE | 0.0063 | 0.0068 |\n",
+    "| MAE | 0.0401 | 0.0424 |\n",
+    "\n",
+    "In this notebook, we will build a simple model to create short-range predictions (between 1 and 2 hours ahead) based on recent history (say 6h)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Load the data from parquet"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CPU times: user 1.09 s, sys: 608 ms, total: 1.7 s\n",
+      "Wall time: 449 ms\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "df = pd.read_parquet(\"~/tmp/datasets/EMHIRESPV_TSh_CF_Country_19862015_tall.parquet\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plot_countries = ['ES', 'UK', 'FI', ]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Split into train-test sets"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(2761080, 6442800)"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df_dev = df.iloc[:100]\n",
+    "df_train, df_test = df[df['Year'] < 1995], df[df['Year'] >= 1995]\n",
+    "len(df_train), len(df_test)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Auto-regressive model\n",
+    "\n",
+    "In an auto-regressive model, we treat past values of the timeseries as input features to the forecasting model.\n",
+    "While the functional form of the model is important, deep learning frameworks give us an easy way to try different approaches including CNNs, RNNs, etc.\n",
+    "\n",
+    "A key part remains however - we must be able to supply abundant training examples, each consisting of a window of consecutive values, the target, and (optinally) the time between the end of the window and the target (the \"forecast horizon\"). A long timeseries can be used to generate many examples simply by sampling the windows randomly from the original timeseries - in fact, for a realistic timeseries, pre-generating training examples in memory is prohibitively expensive. `timeserio` provides a way to generate sequence training examples on-demand from data held in memory, or even from datasets partitioned into multiple files."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Using TensorFlow backend.\n"
+     ]
+    }
+   ],
+   "source": [
+    "from timeserio.batches.chunked.pandas import SequenceForecastBatchGenerator\n",
+    "\n",
+    "batchgen_train = SequenceForecastBatchGenerator(\n",
+    "    df=df_train, batch_size=2**15,\n",
+    "    sequence_length=6,\n",
+    "    sequence_columns=[\"generation\", \"Time_step\"],\n",
+    "    last_step_columns=[\"Time_step\"],\n",
+    "    forecast_steps_min=1,\n",
+    "    forecast_steps_max=2,\n",
+    "    batch_offset=True,\n",
+    "    id_column=\"country\",\n",
+    "    batch_aggregator=1\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "35"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(batchgen_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CPU times: user 116 ms, sys: 4.71 ms, total: 121 ms\n",
+      "Wall time: 119 ms\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "batch = batchgen_train[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead tr th {\n",
+       "        text-align: left;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr>\n",
+       "      <th></th>\n",
+       "      <th>country</th>\n",
+       "      <th>generation</th>\n",
+       "      <th>Time_step</th>\n",
+       "      <th colspan=\"6\" halign=\"left\">seq_generation</th>\n",
+       "      <th colspan=\"6\" halign=\"left\">seq_Time_step</th>\n",
+       "      <th>end_of_Time_step</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "      <th>2</th>\n",
+       "      <th>3</th>\n",
+       "      <th>4</th>\n",
+       "      <th>5</th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "      <th>2</th>\n",
+       "      <th>3</th>\n",
+       "      <th>4</th>\n",
+       "      <th>5</th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>HU</td>\n",
+       "      <td>0.070537</td>\n",
+       "      <td>9</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.030528</td>\n",
+       "      <td>3</td>\n",
+       "      <td>4</td>\n",
+       "      <td>5</td>\n",
+       "      <td>6</td>\n",
+       "      <td>7</td>\n",
+       "      <td>8</td>\n",
+       "      <td>8</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>HU</td>\n",
+       "      <td>0.084160</td>\n",
+       "      <td>16</td>\n",
+       "      <td>0.070537</td>\n",
+       "      <td>0.078465</td>\n",
+       "      <td>0.072669</td>\n",
+       "      <td>0.082293</td>\n",
+       "      <td>0.069379</td>\n",
+       "      <td>0.062412</td>\n",
+       "      <td>9</td>\n",
+       "      <td>10</td>\n",
+       "      <td>11</td>\n",
+       "      <td>12</td>\n",
+       "      <td>13</td>\n",
+       "      <td>14</td>\n",
+       "      <td>14</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  country generation Time_step seq_generation                                \\\n",
+       "                                            0         1         2         3   \n",
+       "0      HU   0.070537         9       0.000000  0.000000  0.000000  0.000000   \n",
+       "1      HU   0.084160        16       0.070537  0.078465  0.072669  0.082293   \n",
+       "\n",
+       "                      seq_Time_step                     end_of_Time_step  \n",
+       "          4         5             0   1   2   3   4   5                   \n",
+       "0  0.000000  0.030528             3   4   5   6   7   8                8  \n",
+       "1  0.069379  0.062412             9  10  11  12  13  14               14  "
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "batch.head(2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CPU times: user 158 ms, sys: 3.54 ms, total: 162 ms\n",
+      "Wall time: 161 ms\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "batch = batchgen_train[-1]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead tr th {\n",
+       "        text-align: left;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr>\n",
+       "      <th></th>\n",
+       "      <th>country</th>\n",
+       "      <th>generation</th>\n",
+       "      <th>Time_step</th>\n",
+       "      <th colspan=\"6\" halign=\"left\">seq_generation</th>\n",
+       "      <th colspan=\"6\" halign=\"left\">seq_Time_step</th>\n",
+       "      <th>end_of_Time_step</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "      <th>2</th>\n",
+       "      <th>3</th>\n",
+       "      <th>4</th>\n",
+       "      <th>5</th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "      <th>2</th>\n",
+       "      <th>3</th>\n",
+       "      <th>4</th>\n",
+       "      <th>5</th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>RS</td>\n",
+       "      <td>0.066365</td>\n",
+       "      <td>9</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.00000</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>0.035935</td>\n",
+       "      <td>3</td>\n",
+       "      <td>4</td>\n",
+       "      <td>5</td>\n",
+       "      <td>6</td>\n",
+       "      <td>7</td>\n",
+       "      <td>8</td>\n",
+       "      <td>8</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>RS</td>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>16</td>\n",
+       "      <td>0.066365</td>\n",
+       "      <td>0.088595</td>\n",
+       "      <td>0.083035</td>\n",
+       "      <td>0.09524</td>\n",
+       "      <td>0.090335</td>\n",
+       "      <td>0.071625</td>\n",
+       "      <td>9</td>\n",
+       "      <td>10</td>\n",
+       "      <td>11</td>\n",
+       "      <td>12</td>\n",
+       "      <td>13</td>\n",
+       "      <td>14</td>\n",
+       "      <td>14</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  country generation Time_step seq_generation                               \\\n",
+       "                                            0         1         2        3   \n",
+       "0      RS   0.066365         9       0.000000  0.000000  0.000000  0.00000   \n",
+       "1      RS   0.000000        16       0.066365  0.088595  0.083035  0.09524   \n",
+       "\n",
+       "                      seq_Time_step                     end_of_Time_step  \n",
+       "          4         5             0   1   2   3   4   5                   \n",
+       "0  0.000000  0.035935             3   4   5   6   7   8                8  \n",
+       "1  0.090335  0.071625             9  10  11  12  13  14               14  "
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "batch.head(2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Sequence and Forecast horizon features"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from timeserio.pipeline import Pipeline\n",
+    "from timeserio.preprocessing import PandasColumnSelector, PandasValueSelector\n",
+    "\n",
+    "class ColumnDifferenceValues:\n",
+    "    \"\"\"Compute difference feature of two columns\"\"\"\n",
+    "    def __init__(self, *, col_plus, col_minus):\n",
+    "        self.col_plus = col_plus\n",
+    "        self.col_minus = col_minus\n",
+    "    \n",
+    "    def fit(self, *args, **kwargs):\n",
+    "        return self\n",
+    "    \n",
+    "    def fit_transform(self, df, *args, **kwargs):\n",
+    "        return self.transform(df, *args, **kwargs)\n",
+    "\n",
+    "    def transform(self, df, *args, **kwargs):\n",
+    "        return (df[self.col_plus] - df[self.col_minus]).values.reshape(-1, 1)\n",
+    "\n",
+    "    \n",
+    "seq_pipeline = PandasValueSelector(\"seq_generation\")\n",
+    "fc_horizon_pipeline = ColumnDifferenceValues(col_plus=\"Time_step\", col_minus=\"end_of_Time_step\")\n",
+    "target_pipeline = PandasValueSelector(\"generation\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Define the Neural Network Architecture\n",
+    "\n",
+    "We define a regression network with two inputs: sequence of previous readings, and the forecast horizon"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from timeserio.keras.multinetwork import MultiNetworkBase\n",
+    "\n",
+    "from keras.layers import Input, Dense, Flatten, Concatenate, Reshape, Permute, Conv1D, BatchNormalization, MaxPool1D, Activation\n",
+    "from keras.models import Model\n",
+    "from keras.optimizers import Adam\n",
+    "from keras.callbacks import EarlyStopping, ReduceLROnPlateau\n",
+    "\n",
+    "class ARForecastingNetwork(MultiNetworkBase):\n",
+    "    def _model(\n",
+    "        self,\n",
+    "        *,\n",
+    "        seq_length=6,  # number of real-valued features\n",
+    "        filters=(1, ),\n",
+    "        kernel_sizes=(1, ),\n",
+    "        strides=(1, ),\n",
+    "        pools=(1, ),\n",
+    "        hidden_units=(8, 8),\n",
+    "        lr=0.01\n",
+    "    ):\n",
+    "        horizon_input = Input(shape=(1,), name='horizon')\n",
+    "        seq_input = Input(shape=(seq_length,), name='sequence')\n",
+    "        encoding = Reshape(\n",
+    "            target_shape=(-1, 1)\n",
+    "        )(seq_input)\n",
+    "                \n",
+    "        for idx, (_filters, _kernel_size, _strides, _pool) in enumerate(zip(filters, kernel_sizes, strides, pools)):\n",
+    "            encoding = Conv1D(filters=_filters, kernel_size=_kernel_size, strides=_strides, padding=\"same\", name=f\"conv_{idx}\")(encoding)\n",
+    "            encoding = BatchNormalization()(encoding)\n",
+    "            encoding = Activation(activation='relu')(encoding)\n",
+    "            encoding = MaxPool1D(pool_size=_pool)(encoding)\n",
+    "        encoding = Flatten()(encoding)\n",
+    "\n",
+    "        output = Concatenate(name='concatenate')([encoding, horizon_input])\n",
+    "        for idx, _hidden_units in enumerate(hidden_units):\n",
+    "            output = Dense(_hidden_units, activation='relu', name=f'dense_{idx}')(output)\n",
+    "        output = Dense(1, name='generation', activation='relu')(output)\n",
+    "        \n",
+    "        encoding_model = Model(seq_input, encoding)\n",
+    "        forecasting_model = Model([seq_input, horizon_input], output)\n",
+    "        \n",
+    "        optimizer = Adam(lr=lr)\n",
+    "        forecasting_model.compile(optimizer=optimizer, loss='mse', metrics=['mae'])\n",
+    "        \n",
+    "        return {'encoder': encoding_model, 'forecast': forecasting_model}\n",
+    "\n",
+    "    \n",
+    "multinetwork = ARForecastingNetwork(seq_length=6, lr=0.001)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from keras.utils.vis_utils import model_to_dot\n",
+    "from IPython.display import SVG\n",
+    "\n",
+    "def vis_model(model, show_shapes=False, show_layer_names=True, rankdir='TB'):\n",
+    "    \"\"\"Visualize model in a notebook.\"\"\"\n",
+    "    return SVG(\n",
+    "        model_to_dot(\n",
+    "            model, show_shapes=show_shapes, show_layer_names=show_layer_names, rankdir=rankdir\n",
+    "        ).create(prog='dot', format='svg')\n",
+    "    )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/svg+xml": [
+       "<svg height=\"166pt\" viewBox=\"0.00 0.00 2230.00 166.00\" width=\"2230pt\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n",
+       "<g class=\"graph\" id=\"graph0\" transform=\"scale(1 1) rotate(0) translate(4 162)\">\n",
+       "<title>G</title>\n",
+       "<polygon fill=\"#ffffff\" points=\"-4,4 -4,-162 2226,-162 2226,4 -4,4\" stroke=\"transparent\"/>\n",
+       "<!-- 139771994230344 -->\n",
+       "<g class=\"node\" id=\"node1\">\n",
+       "<title>139771994230344</title>\n",
+       "<polygon fill=\"none\" points=\"0,-88.5 0,-157.5 138,-157.5 138,-88.5 0,-88.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"69\" y=\"-142.3\">sequence: InputLayer</text>\n",
+       "<polyline fill=\"none\" points=\"0,-134.5 138,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"32.5\" y=\"-119.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"65,-111.5 65,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"101.5\" y=\"-119.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"0,-111.5 138,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"34.5\" y=\"-96.3\">(None, 6)</text>\n",
+       "<polyline fill=\"none\" points=\"69,-88.5 69,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"103.5\" y=\"-96.3\">(None, 6)</text>\n",
+       "</g>\n",
+       "<!-- 139770585812888 -->\n",
+       "<g class=\"node\" id=\"node2\">\n",
+       "<title>139770585812888</title>\n",
+       "<polygon fill=\"none\" points=\"174,-88.5 174,-157.5 326,-157.5 326,-88.5 174,-88.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"250\" y=\"-142.3\">reshape_3: Reshape</text>\n",
+       "<polyline fill=\"none\" points=\"174,-134.5 326,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"210\" y=\"-119.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"246,-111.5 246,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"286\" y=\"-119.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"174,-111.5 326,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"208.5\" y=\"-96.3\">(None, 6)</text>\n",
+       "<polyline fill=\"none\" points=\"243,-88.5 243,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"284.5\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "</g>\n",
+       "<!-- 139771994230344&#45;&gt;139770585812888 -->\n",
+       "<g class=\"edge\" id=\"edge1\">\n",
+       "<title>139771994230344-&gt;139770585812888</title>\n",
+       "<path d=\"M138.2031,-123C146.5956,-123 155.2471,-123 163.8461,-123\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"163.898,-126.5001 173.8979,-123 163.8979,-119.5001 163.898,-126.5001\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139770585811824 -->\n",
+       "<g class=\"node\" id=\"node3\">\n",
+       "<title>139770585811824</title>\n",
+       "<polygon fill=\"none\" points=\"362,-88.5 362,-157.5 528,-157.5 528,-88.5 362,-88.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"445\" y=\"-142.3\">conv_0: Conv1D</text>\n",
+       "<polyline fill=\"none\" points=\"362,-134.5 528,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"401.5\" y=\"-119.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"441,-111.5 441,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"484.5\" y=\"-119.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"362,-111.5 528,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"403.5\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "<polyline fill=\"none\" points=\"445,-88.5 445,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"486.5\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "</g>\n",
+       "<!-- 139770585812888&#45;&gt;139770585811824 -->\n",
+       "<g class=\"edge\" id=\"edge2\">\n",
+       "<title>139770585812888-&gt;139770585811824</title>\n",
+       "<path d=\"M326.2299,-123C334.5076,-123 343.0003,-123 351.4534,-123\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"351.7275,-126.5001 361.7274,-123 351.7274,-119.5001 351.7275,-126.5001\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139770585812720 -->\n",
+       "<g class=\"node\" id=\"node4\">\n",
+       "<title>139770585812720</title>\n",
+       "<polygon fill=\"none\" points=\"564,-88.5 564,-157.5 824,-157.5 824,-88.5 564,-88.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"694\" y=\"-142.3\">batch_normalization_3: BatchNormalization</text>\n",
+       "<polyline fill=\"none\" points=\"564,-134.5 824,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"627\" y=\"-119.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"690,-111.5 690,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"757\" y=\"-119.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"564,-111.5 824,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"629\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "<polyline fill=\"none\" points=\"694,-88.5 694,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"759\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "</g>\n",
+       "<!-- 139770585811824&#45;&gt;139770585812720 -->\n",
+       "<g class=\"edge\" id=\"edge3\">\n",
+       "<title>139770585811824-&gt;139770585812720</title>\n",
+       "<path d=\"M528.2596,-123C536.4905,-123 544.9925,-123 553.5976,-123\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"553.7365,-126.5001 563.7364,-123 553.7364,-119.5001 553.7365,-126.5001\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139770585810872 -->\n",
+       "<g class=\"node\" id=\"node5\">\n",
+       "<title>139770585810872</title>\n",
+       "<polygon fill=\"none\" points=\"860,-88.5 860,-157.5 1026,-157.5 1026,-88.5 860,-88.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"943\" y=\"-142.3\">activation_3: Activation</text>\n",
+       "<polyline fill=\"none\" points=\"860,-134.5 1026,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"899.5\" y=\"-119.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"939,-111.5 939,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"982.5\" y=\"-119.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"860,-111.5 1026,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"901.5\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "<polyline fill=\"none\" points=\"943,-88.5 943,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"984.5\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "</g>\n",
+       "<!-- 139770585812720&#45;&gt;139770585810872 -->\n",
+       "<g class=\"edge\" id=\"edge4\">\n",
+       "<title>139770585812720-&gt;139770585810872</title>\n",
+       "<path d=\"M824.334,-123C832.8668,-123 841.3629,-123 849.6616,-123\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"849.6755,-126.5001 859.6755,-123 849.6754,-119.5001 849.6755,-126.5001\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139770584937024 -->\n",
+       "<g class=\"node\" id=\"node6\">\n",
+       "<title>139770584937024</title>\n",
+       "<polygon fill=\"none\" points=\"1062,-88.5 1062,-157.5 1269,-157.5 1269,-88.5 1062,-88.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1165.5\" y=\"-142.3\">max_pooling1d_3: MaxPooling1D</text>\n",
+       "<polyline fill=\"none\" points=\"1062,-134.5 1269,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1112\" y=\"-119.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"1162,-111.5 1162,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1215.5\" y=\"-119.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"1062,-111.5 1269,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1113.5\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "<polyline fill=\"none\" points=\"1165,-88.5 1165,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1217\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "</g>\n",
+       "<!-- 139770585810872&#45;&gt;139770584937024 -->\n",
+       "<g class=\"edge\" id=\"edge5\">\n",
+       "<title>139770585810872-&gt;139770584937024</title>\n",
+       "<path d=\"M1026.1672,-123C1034.5067,-123 1043.0714,-123 1051.6568,-123\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"1051.7324,-126.5001 1061.7324,-123 1051.7324,-119.5001 1051.7324,-126.5001\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139770585809528 -->\n",
+       "<g class=\"node\" id=\"node7\">\n",
+       "<title>139770585809528</title>\n",
+       "<polygon fill=\"none\" points=\"1305,-88.5 1305,-157.5 1457,-157.5 1457,-88.5 1305,-88.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1381\" y=\"-142.3\">flatten_3: Flatten</text>\n",
+       "<polyline fill=\"none\" points=\"1305,-134.5 1457,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1341\" y=\"-119.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"1377,-111.5 1377,-134.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1417\" y=\"-119.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"1305,-111.5 1457,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1346.5\" y=\"-96.3\">(None, 6, 1)</text>\n",
+       "<polyline fill=\"none\" points=\"1388,-88.5 1388,-111.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1422.5\" y=\"-96.3\">(None, 6)</text>\n",
+       "</g>\n",
+       "<!-- 139770584937024&#45;&gt;139770585809528 -->\n",
+       "<g class=\"edge\" id=\"edge6\">\n",
+       "<title>139770584937024-&gt;139770585809528</title>\n",
+       "<path d=\"M1269.1471,-123C1277.7328,-123 1286.3533,-123 1294.7901,-123\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"1294.9754,-126.5001 1304.9754,-123 1294.9754,-119.5001 1294.9754,-126.5001\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139770585375800 -->\n",
+       "<g class=\"node\" id=\"node9\">\n",
+       "<title>139770585375800</title>\n",
+       "<polygon fill=\"none\" points=\"1493,-44.5 1493,-113.5 1700,-113.5 1700,-44.5 1493,-44.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1596.5\" y=\"-98.3\">concatenate: Concatenate</text>\n",
+       "<polyline fill=\"none\" points=\"1493,-90.5 1700,-90.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1543\" y=\"-75.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"1593,-67.5 1593,-90.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1646.5\" y=\"-75.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"1493,-67.5 1700,-67.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1562\" y=\"-52.3\">[(None, 6), (None, 1)]</text>\n",
+       "<polyline fill=\"none\" points=\"1631,-44.5 1631,-67.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1665.5\" y=\"-52.3\">(None, 7)</text>\n",
+       "</g>\n",
+       "<!-- 139770585809528&#45;&gt;139770585375800 -->\n",
+       "<g class=\"edge\" id=\"edge7\">\n",
+       "<title>139770585809528-&gt;139770585375800</title>\n",
+       "<path d=\"M1457.2805,-107.4253C1465.6378,-105.719 1474.272,-103.9561 1482.9565,-102.1829\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"1483.6733,-105.6088 1492.7709,-100.179 1482.2729,-98.7503 1483.6733,-105.6088\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139771994164472 -->\n",
+       "<g class=\"node\" id=\"node8\">\n",
+       "<title>139771994164472</title>\n",
+       "<polygon fill=\"none\" points=\"1312,-.5 1312,-69.5 1450,-69.5 1450,-.5 1312,-.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1381\" y=\"-54.3\">horizon: InputLayer</text>\n",
+       "<polyline fill=\"none\" points=\"1312,-46.5 1450,-46.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1344.5\" y=\"-31.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"1377,-23.5 1377,-46.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1413.5\" y=\"-31.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"1312,-23.5 1450,-23.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1346.5\" y=\"-8.3\">(None, 1)</text>\n",
+       "<polyline fill=\"none\" points=\"1381,-.5 1381,-23.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1415.5\" y=\"-8.3\">(None, 1)</text>\n",
+       "</g>\n",
+       "<!-- 139771994164472&#45;&gt;139770585375800 -->\n",
+       "<g class=\"edge\" id=\"edge8\">\n",
+       "<title>139771994164472-&gt;139770585375800</title>\n",
+       "<path d=\"M1450.0748,-49.1034C1460.644,-51.2614 1471.7857,-53.5363 1483.0108,-55.8282\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"1482.3862,-59.2728 1492.8843,-57.8441 1483.7866,-52.4143 1482.3862,-59.2728\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139770585810200 -->\n",
+       "<g class=\"node\" id=\"node10\">\n",
+       "<title>139770585810200</title>\n",
+       "<polygon fill=\"none\" points=\"1736,-44.5 1736,-113.5 1874,-113.5 1874,-44.5 1736,-44.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1805\" y=\"-98.3\">dense_0: Dense</text>\n",
+       "<polyline fill=\"none\" points=\"1736,-90.5 1874,-90.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1768.5\" y=\"-75.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"1801,-67.5 1801,-90.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1837.5\" y=\"-75.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"1736,-67.5 1874,-67.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1770.5\" y=\"-52.3\">(None, 7)</text>\n",
+       "<polyline fill=\"none\" points=\"1805,-44.5 1805,-67.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1839.5\" y=\"-52.3\">(None, 8)</text>\n",
+       "</g>\n",
+       "<!-- 139770585375800&#45;&gt;139770585810200 -->\n",
+       "<g class=\"edge\" id=\"edge9\">\n",
+       "<title>139770585375800-&gt;139770585810200</title>\n",
+       "<path d=\"M1700.1392,-79C1708.7857,-79 1717.4378,-79 1725.8576,-79\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"1725.9967,-82.5001 1735.9967,-79 1725.9966,-75.5001 1725.9967,-82.5001\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139770586149104 -->\n",
+       "<g class=\"node\" id=\"node11\">\n",
+       "<title>139770586149104</title>\n",
+       "<polygon fill=\"none\" points=\"1910,-44.5 1910,-113.5 2048,-113.5 2048,-44.5 1910,-44.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1979\" y=\"-98.3\">dense_1: Dense</text>\n",
+       "<polyline fill=\"none\" points=\"1910,-90.5 2048,-90.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1942.5\" y=\"-75.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"1975,-67.5 1975,-90.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"2011.5\" y=\"-75.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"1910,-67.5 2048,-67.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"1944.5\" y=\"-52.3\">(None, 8)</text>\n",
+       "<polyline fill=\"none\" points=\"1979,-44.5 1979,-67.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"2013.5\" y=\"-52.3\">(None, 8)</text>\n",
+       "</g>\n",
+       "<!-- 139770585810200&#45;&gt;139770586149104 -->\n",
+       "<g class=\"edge\" id=\"edge10\">\n",
+       "<title>139770585810200-&gt;139770586149104</title>\n",
+       "<path d=\"M1874.0193,-79C1882.4757,-79 1891.1691,-79 1899.7607,-79\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"1899.7795,-82.5001 1909.7795,-79 1899.7794,-75.5001 1899.7795,-82.5001\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "<!-- 139770591142744 -->\n",
+       "<g class=\"node\" id=\"node12\">\n",
+       "<title>139770591142744</title>\n",
+       "<polygon fill=\"none\" points=\"2084,-44.5 2084,-113.5 2222,-113.5 2222,-44.5 2084,-44.5\" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"2153\" y=\"-98.3\">generation: Dense</text>\n",
+       "<polyline fill=\"none\" points=\"2084,-90.5 2222,-90.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"2116.5\" y=\"-75.3\">input:</text>\n",
+       "<polyline fill=\"none\" points=\"2149,-67.5 2149,-90.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"2185.5\" y=\"-75.3\">output:</text>\n",
+       "<polyline fill=\"none\" points=\"2084,-67.5 2222,-67.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"2118.5\" y=\"-52.3\">(None, 8)</text>\n",
+       "<polyline fill=\"none\" points=\"2153,-44.5 2153,-67.5 \" stroke=\"#000000\"/>\n",
+       "<text fill=\"#000000\" font-family=\"Times,serif\" font-size=\"14.00\" text-anchor=\"middle\" x=\"2187.5\" y=\"-52.3\">(None, 1)</text>\n",
+       "</g>\n",
+       "<!-- 139770586149104&#45;&gt;139770591142744 -->\n",
+       "<g class=\"edge\" id=\"edge11\">\n",
+       "<title>139770586149104-&gt;139770591142744</title>\n",
+       "<path d=\"M2048.0193,-79C2056.4757,-79 2065.1691,-79 2073.7607,-79\" fill=\"none\" stroke=\"#000000\"/>\n",
+       "<polygon fill=\"#000000\" points=\"2073.7795,-82.5001 2083.7795,-79 2073.7794,-75.5001 2073.7795,-82.5001\" stroke=\"#000000\"/>\n",
+       "</g>\n",
+       "</g>\n",
+       "</svg>"
+      ],
+      "text/plain": [
+       "<IPython.core.display.SVG object>"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "vis_model(multinetwork.model[\"forecast\"], show_shapes=True, rankdir=\"LR\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Connect feature pipelines to the neural network"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from timeserio.pipeline import MultiPipeline"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "multipipeline = MultiPipeline({\n",
+    "    \"sequence\": seq_pipeline,\n",
+    "    \"horizon\": fc_horizon_pipeline,\n",
+    "    \"target\": target_pipeline\n",
+    "})"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from timeserio.multimodel import MultiModel\n",
+    "\n",
+    "manifold = {\n",
+    "    # keras_model_name: (input_pipes, output_pipes)\n",
+    "    \"encoder\": (\"sequence\", None),\n",
+    "    \"forecast\": ([\"sequence\", \"horizon\"], \"target\")\n",
+    "}\n",
+    "\n",
+    "multimodel = MultiModel(\n",
+    "    multinetwork=multinetwork,\n",
+    "    multipipeline=multipipeline,\n",
+    "    manifold=manifold\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Fit model from the batch generator\n",
+    "\n",
+    "`multimodel.fit_generator()` will apply pipelines correctly to the training batch generator, and, if `validation_data` is provided in the form of another (pandas) batch generator,\n",
+    "evaluate the relevant metrics. In addition, feature extraction for each batch will benefit from the `workers` parallelism."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "iVBORw0KGgoAAAANSUhEUgAABDAAAADQCAYAAADxn5GHAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjAsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+17YcXAAAgAElEQVR4nOzdeZxcZZn3/89V1VXV3VXVnV6zrwSQJECAJCCbKCqgAir6AAqCG+PDoM4PxeWnMzIMOir8XEbxBT4zyCOC4KCOEVEEBdkEEiAsCVsSErKR7vSS3mu9f3+c053qppNUeqnqdH3fr1e9qs5aV590uk5d93XftznnEBERERERERGZyALFDkBEREREREREZH+UwBARERERERGRCU8JDBERERERERGZ8JTAEBEREREREZEJTwkMEREREREREZnwlMAQERERERERkQlPCQwRGRNmtsnM3lnsOEREREREZHJSAkNERERERArGzOaZmTOzsjE+rxpTRCY5JTBERERERKSkKNkhcnBSAkNExpSZRczsB2a23X/8wMwi/rZ6M7vbzNrNrNXMHjazgL/ty2a2zcw6zexlMzu9uD+JiIiIyNgZruLkQKtQxrpqReRgowSGiIy1rwEnAEuBo4EVwNf9bV8AtgINwFTg/wWcmR0OXAEsd87FgTOATYUNW0RE5ODiVxFcZWbPmVm3mf2XmU01sz/6DQL3m1mNv+8JZvaY34jwrJmdlnOej5vZi/4xG83sH3K2nWZmW83sC2bWZGY7zOzjecT2XjN7xsw6zGyLmV09zG6f8Bs7dpjZF3OOXWFmq/1jd5rZ93K2nWNma/2f40EzO2Iv73+LmV079OfwX98KzAF+b2ZdZval/V2jffyc1f513+E3xFxrZkF/26Vm9qiZfd/MWoCr97IuYGZfN7PN/jX+uZlV++fo727zSTN7Hfjr/mISmcyUwBCRsfZR4BrnXJNzrhn4V+Bif1sKmA7Mdc6lnHMPO+cckAEiwCIzCznnNjnnNhQlehERkYPLecC7gMOAs4E/4jUQNODd63/OzGYCfwCuBWqBLwK/NrMG/xxNwPuAKuDjwPfN7Nic95gGVAMzgU8CN/QnRvahG/gYMAV4L/C/zez9Q/Z5O3Ao8G7gyzldOn4I/NA5VwUcAvwKwMwOA34J/JP/892Dl4QI7yeWQZxzFwOvA2c752LOue/mcY325hYgDSwEjvF/lk/lbD8e2IjXcPPNvay71H+8HVgAxIAfD3mftwFH4DXyiJQsJTBEZKzNADbnLG/21wFcB6wH/uy38HwFwDm3Hu9m5GqgyczuMLMZiIiIyP78yDm30zm3DXgYeMI594xzrg/4Ld6X6ouAe5xz9zjnss65+4DVwHsAnHN/cM5tcJ6/AX8GTsl5jxRe40TKOXcP0AUcvq+gnHMPOuee99/vObzEw9uG7Pavzrlu59zzwM+AC3Peb6GZ1Tvnupxzj/vrzwf+4Jy7zzmXAq4HKoATD/SiDWOf12g4ZjbV3/5P/s/RBHwfuCBnt+3OuR8559LOud69rPso8D3n3EbnXBfwVeCCId1FrvbfoxeREqYEhoiMte3A3JzlOf46nHOdzrkvOOcWAOcAV/aPdeGcu905d7J/rAO+U9iwRUREDko7c173DrMcw/ts/bDfNaLdzNqBk/GqIjGzs8zscX98qna8L+X1Oedpcc6lc5Z7/PPulZkdb2YPmFmzme0GPjPknABbcl7nNnh8Eq+i5CUzW2Vm7/PXD2okcc5l/XPM3FcsedrnNdrHMSFgR84xNwGNOftsGea4oeuGa/wpw6vQ2Nd5REqOBoERkbH2S+DrZrYKLxHxL8AvAPwbkJeADcBuvK4jWX8MjJnAo0Af3g1XsPChi4iITEpbgFudc58eusG8gbZ/jdfd43fOuZSZ/Q9go3zP2/G6QZzlnOszsx/w5gTGbLz7Ahjc4PEqcKF5A31/ELjLzOr87UfmxG7+ObYN8/7dQGXO8rQh292Q5b1eo33YAiSA+iEJnn29z3Drhmv8SeMlo2bt4zwiJUcVGCIy1q7FK7l8DngeeNpfB14/1/vxSk//DvzEOfcA3vgX3wZ2AW/gtVx8tbBhi4iITFq/AM42szPMLGhm5f6glrOAMN7ncDOQNrOz8MZxGK040OonL1YAHxlmn382s0ozW4w39sadAGZ2kZk1+BUW7f6+WbyxMN5rZqebWQhvcPAE8Ngw514DvMfMas1sGl5X1Vw78cab6LevazQs59wOvO42/5+ZVfmDcR5iZkO7yuzPL4H/x8zmm1kM+BZw5z6SIiIlSwkMERkTzrl5zrn7nXN9zrnPOeem+4/P+f1wcc59398v6pyb5Zz7N3/9c865Fc65uHOu1jn3Pufc9uL+RCIiIpODc24LcC7e4J7NeJUDVwEB51wn8Dm85EAbXqJh5Ri87eXANWbWiVeN+ath9vkb3thYfwGud8792V9/JrDWzLrwBvS8wDnX65x7GW+sih/hNXqcjTcQZ3KYc98KPIs3q9mf8ZMjOf4dr2K03cy+uK9rtJ+f82N4SaB1eNfvLvbd7WQ4N/vxPgS8hleN+tkDPIdISTBvAgARERERERERkYlLFRgiIiIiIiIiMuEpgSEiIiIiIgfMzNaaWdcwj48WO7axtJefscvMTtn/0SIyltSFREREREREREQmvAk3jWp9fb2bN29escMQERGREXjqqad2Oecaih2H7idEREQOXnu7n5hwCYx58+axevXqYochIiIiI2Bmm4sdA+h+QkRE5GC2t/sJjYEhIiIiIiIiIhOeEhgiIiIiIiIiMuEpgSEiIiIiIiIiE96EGwNDRERkMkmlUmzdupW+vr5ihzKmysvLmTVrFqFQqNihiIjIBDFZP/Nk/Bzo/UTJJDD+8+GNNHcm+Op7jih2KCIiUkK2bt1KPB5n3rx5mFmxwxkTzjlaWlrYunUr8+fPL3Y4BbNuewc3PLieq959OPPqo8UOR0RkwpmMn3kyfkZyP1EyXUie27qbP619o9hhiIhIienr66Ourm5S3ciZGXV1dSXXwtaTTPOH53awubWn2KGIiExIk/EzT8bPSO4nSiaBURsN09qVLHYYIiJSgibjjdxk/Jn2pzFeDkBTR2klbkREDkQpfj7IyB3o70vJJDDqomE6E2kS6UyxQxEREZGDUEM8AkBTZ6LIkYiIiJSmkklg1ETDALR1p4ociYiISGHFYrFihzApVISDxCNlNCuBISIiUhQlk8Co8xMYLd266RAREZlIzOxMM3vZzNab2Vf2sd95ZubMbFkh48vVUBVRAkNEREbktNNOY/Xq1aM6x6ZNm1iyZMl+9/vWt741qveZqEomgVHrJzBauzUOhoiIlCbnHFdddRVLlizhyCOP5M477wRgx44dnHrqqSxdupQlS5bw8MMPk8lkuPTSSwf2/f73vz8uMZlZELgBOAtYBFxoZouG2S8OfB54YlwCyVNjPEJTp8bAEBGRiW28ExiZzOChGdLpdF7H5bvf3pTMNKp1MSUwRESkuP7192tZt71jTM+5aEYV3zh7cV77/uY3v2HNmjU8++yz7Nq1i+XLl3Pqqady++23c8YZZ/C1r32NTCZDT08Pa9asYdu2bbzwwgsAtLe3j2ncOVYA651zGwHM7A7gXGDdkP3+DfgOcNV4BZKPxng5z24dt2shIjJpFOszb9OmTZx55pmccMIJPPbYYyxfvpyPf/zjfOMb36CpqYnbbruNxYsX89nPfpYXXniBVCrF1VdfzbnnnsumTZu4+OKL6e7uBuDHP/4xJ554Ig8++CBXX3019fX1vPDCCxx33HH84he/2OsAlNdccw2///3v6e3t5cQTT+Smm24a2PfWW2/lU5/6FOl0mptvvpkVK1bwt7/9jc9//vOAN6jlQw89RCwW40tf+hJ//OMfMTO+/vWvc/755w96n1tuuYXVq1fz4x//GID3ve99fPGLX+RPf/oTvb29LF26lMWLF3Pbbbfxi1/8gv/4j/8gmUxy/PHH85Of/IRgMDhs/H/+85/5xje+QSKR4JBDDuFnP/sZsViMefPmcf7553PffffxpS99iRtvvJGlS5fyyCOPcOGFF3LeeefxiU98gl27dtHQ0MDPfvYz5syZw6WXXkp5eTnPPPMMJ510Et/73vfy/0cfooQqMLyBt5TAEBGRUtV/gxEMBpk6dSpve9vbWLVqFcuXL+dnP/sZV199Nc8//zzxeJwFCxawceNGPvvZz/KnP/2Jqqqq8QprJrAlZ3mrv26AmR0LzHbO/WFfJzKzy8xstZmtbm5uHvtI8SswOhI458bl/CIiMnrr16/nC1/4Ai+99BIvvfQSt99+O4888gjXX3893/rWt/jmN7/JO97xDp588kkeeOABrrrqKrq7u2lsbOS+++7j6aef5s477+Rzn/vcwDmfeeYZfvCDH7Bu3To2btzIo48+utf3v+KKK1i1ahUvvPACvb293H333QPb+hsJfvKTn/CJT3wCgOuvv54bbriBNWvW8PDDD1NRUTGo0eH+++/nqquuYseOHXn9/N/+9repqKhgzZo13Hbbbbz44ovceeedPProo6xZs4ZgMMhtt9027LG7du3i2muv5f777+fpp59m2bJlgxIOdXV1PP3001xwwQUAJJNJVq9ezRe+8AU++9nPcskll/Dcc8/x0Y9+dND127p1K4899tiokheQZwWGmZ0J/BAIAv/pnPv2kO1XAp8C0kAz8Ann3GZ/WwZ43t/1defcOaOKeISmVIQImBIYIiJSPPlWShTaqaee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\n",
+      "text/plain": [
+       "<Figure size 1080x216 with 2 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/plain": [
+       "<timeserio.keras.callbacks.HistoryLogger at 0x7f1ee0cccf28>"
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "from kerashistoryplot.callbacks import PlotHistory\n",
+    "plot_callback = PlotHistory(figsize=(15, 3), n_cols=3, batches=False)\n",
+    "\n",
+    "multimodel.fit_generator(\n",
+    "    batchgen_train, model=\"forecast\", verbose=1, epochs=50,\n",
+    "    reset_weights=True,\n",
+    "    workers=4,\n",
+    "    callbacks=[plot_callback]\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "persist the model:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from timeserio.utils.pickle import loadf, dumpf\n",
+    "dumpf(multimodel, \"/tmp/PV_model_2.pickle\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Evaluate performance on test data\n",
+    "We can evaluate the model on the validation data generator, which can also be out-of-memory:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "batchgen_test = SequenceForecastBatchGenerator(\n",
+    "    df=df_test, batch_size=2**15,\n",
+    "    sequence_length=6,\n",
+    "    sequence_columns=[\"generation\", \"Time_step\"],\n",
+    "    last_step_columns=[\"Time_step\"],\n",
+    "    forecast_steps_min=1,\n",
+    "    forecast_steps_max=2,\n",
+    "    batch_offset=False,\n",
+    "    id_column=\"country\",\n",
+    "    batch_aggregator=1\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "35/35 [==============================] - 9s 254ms/step\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "[0.008467954644999866, 0.051904945554477826]"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "multimodel.evaluate_generator(batchgen_test, model=\"forecast\", verbose=1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "While the model takes longer to train (and longer still with practical encoder architectures), it can be tuned to achieve higher performanec, especially if encodings are combined with datetime features."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.4"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

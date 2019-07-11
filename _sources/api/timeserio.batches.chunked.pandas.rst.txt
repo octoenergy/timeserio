@@ -1,0 +1,7 @@
+timeserio.batches.chunked.pandas module
+=======================================
+
+.. automodule:: timeserio.batches.chunked.pandas
+   :members:
+   :undoc-members:
+   :show-inheritance:

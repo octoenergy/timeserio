@@ -1,0 +1,7 @@
+timeserio.utils.functools module
+================================
+
+.. automodule:: timeserio.utils.functools
+   :members:
+   :undoc-members:
+   :show-inheritance:

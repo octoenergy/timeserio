@@ -1,0 +1,36 @@
+<svg height="45pt" viewBox="0.00 0.00 472.07 45.00" width="472pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g class="graph" id="graph0" transform="scale(1 1) rotate(0) translate(4 41)">
+<title>G</title>
+<polygon fill="#ffffff" points="-4,4 -4,-41 468.0732,-41 468.0732,4 -4,4" stroke="transparent"/>
+<!-- 5263988776 -->
+<g class="node" id="node1">
+<title>5263988776</title>
+<polygon fill="none" points="0,-.5 0,-36.5 108.9072,-36.5 108.9072,-.5 0,-.5" stroke="#000000"/>
+<text fill="#000000" font-family="Times,serif" font-size="14.00" text-anchor="middle" x="54.4536" y="-14.3">user: InputLayer</text>
+</g>
+<!-- 5264000896 -->
+<g class="node" id="node2">
+<title>5264000896</title>
+<polygon fill="none" points="144.9072,-.5 144.9072,-36.5 300.4834,-36.5 300.4834,-.5 144.9072,-.5" stroke="#000000"/>
+<text fill="#000000" font-family="Times,serif" font-size="14.00" text-anchor="middle" x="222.6953" y="-14.3">embed_user: Embedding</text>
+</g>
+<!-- 5263988776&#45;&gt;5264000896 -->
+<g class="edge" id="edge1">
+<title>5263988776-&gt;5264000896</title>
+<path d="M109.0769,-18.5C117.2834,-18.5 125.9189,-18.5 134.6109,-18.5" fill="none" stroke="#000000"/>
+<polygon fill="#000000" points="134.8182,-22.0001 144.8182,-18.5 134.8181,-15.0001 134.8182,-22.0001" stroke="#000000"/>
+</g>
+<!-- 5263999832 -->
+<g class="node" id="node3">
+<title>5263999832</title>
+<polygon fill="none" points="336.4834,-.5 336.4834,-36.5 464.0732,-36.5 464.0732,-.5 336.4834,-.5" stroke="#000000"/>
+<text fill="#000000" font-family="Times,serif" font-size="14.00" text-anchor="middle" x="400.2783" y="-14.3">flatten_user: Flatten</text>
+</g>
+<!-- 5264000896&#45;&gt;5263999832 -->
+<g class="edge" id="edge2">
+<title>5264000896-&gt;5263999832</title>
+<path d="M300.5858,-18.5C309.0663,-18.5 317.6815,-18.5 326.1155,-18.5" fill="none" stroke="#000000"/>
+<polygon fill="#000000" points="326.2923,-22.0001 336.2922,-18.5 326.2922,-15.0001 326.2923,-22.0001" stroke="#000000"/>
+</g>
+</g>
+</svg>

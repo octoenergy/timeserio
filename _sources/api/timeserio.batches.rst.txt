@@ -1,0 +1,22 @@
+timeserio.batches package
+=========================
+
+.. automodule:: timeserio.batches
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+   timeserio.batches.chunked
+   timeserio.batches.single
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.batches.utils

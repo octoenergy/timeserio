@@ -1,0 +1,17 @@
+timeserio.batches.chunked package
+=================================
+
+.. automodule:: timeserio.batches.chunked
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.batches.chunked.base
+   timeserio.batches.chunked.dask
+   timeserio.batches.chunked.pandas
+   timeserio.batches.chunked.parquet

@@ -1,0 +1,7 @@
+timeserio.version module
+========================
+
+.. automodule:: timeserio.version
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,21 @@
+timeserio.preprocessing package
+===============================
+
+.. automodule:: timeserio.preprocessing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.preprocessing.aggregate
+   timeserio.preprocessing.base
+   timeserio.preprocessing.batches
+   timeserio.preprocessing.datetime
+   timeserio.preprocessing.encoding
+   timeserio.preprocessing.multipipeline
+   timeserio.preprocessing.pandas
+   timeserio.preprocessing.utils

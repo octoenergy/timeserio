@@ -1,0 +1,29 @@
+timeserio package
+=================
+
+.. automodule:: timeserio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+   timeserio.batches
+   timeserio.data
+   timeserio.keras
+   timeserio.multimodel
+   timeserio.pipeline
+   timeserio.preprocessing
+   timeserio.utils
+   timeserio.validation
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.ini
+   timeserio.version

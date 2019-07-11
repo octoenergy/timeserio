@@ -1,0 +1,14 @@
+timeserio.data package
+======================
+
+.. automodule:: timeserio.data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.data.mock

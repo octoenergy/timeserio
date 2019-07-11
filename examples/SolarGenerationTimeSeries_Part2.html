@@ -1,0 +1,1122 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Modelling Solar generation across Multiple Sites - Part 2 &mdash; Timeserio 0.10.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="timeserio" href="../api/modules.html" />
+    <link rel="prev" title="Modelling Solar generation across Multiple Sites - Part 1" href="SolarGenerationTimeSeries_Part1.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/constantine_100px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.10.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/getting_started.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="MovieLens100k.html">Building a Neural Movie Recommender System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MNIST.html">Autoencoders and multi-stage training for MNIST classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SolarGenerationTimeSeries_Part1.html">Modelling Solar generation across Multiple Sites - Part 1</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Modelling Solar generation across Multiple Sites - Part 2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Load-the-data-from-parquet">Load the data from parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Split-into-train-test-sets">Split into train-test sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Auto-regressive-model">Auto-regressive model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Sequence-and-Forecast-horizon-features">Sequence and Forecast horizon features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Define-the-Neural-Network-Architecture">Define the Neural Network Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Connect-feature-pipelines-to-the-neural-network">Connect feature pipelines to the neural network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Fit-model-from-the-batch-generator">Fit model from the batch generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Evaluate-performance-on-test-data">Evaluate performance on test data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Timeserio</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Modelling Solar generation across Multiple Sites - Part 2</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/SolarGenerationTimeSeries_Part2.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 5ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="admonition note">
+<p>This page was generated from <a class="reference external" href="https://github.com/octoenergy/timeserio/blob/df6fa76dc72b202e467c70043437e75cfe8df2cf/docs/source/examples/SolarGenerationTimeSeries_Part2.ipynb">docs/source/examples/SolarGenerationTimeSeries_Part2.ipynb</a>.</p>
+</div>
+<div class="section" id="Modelling-Solar-generation-across-Multiple-Sites---Part-2">
+<h1>Modelling Solar generation across Multiple Sites - Part 2<a class="headerlink" href="#Modelling-Solar-generation-across-Multiple-Sites---Part-2" title="Permalink to this headline">¶</a></h1>
+<p>In <a class="reference internal" href="SolarGenerationTimeSeries_Part1.html"><span class="doc">Part 1</span></a>, we have explored the SETIS PV generation dataset and built a powerful and performant model using <code class="docutils literal notranslate"><span class="pre">timeserio</span></code>’s <code class="docutils literal notranslate"><span class="pre">MultiModel</span></code> and datetime feature generation pipelines. In this part, we instead train an auto-regressive model using more advanced batch generator features.</p>
+<p>Remember the metrics our previous model achieved on the train/test split (without any parameter tuning):</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 40%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"></th>
+<th class="head"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>MSE</p></td>
+<td><p>0.0063</p></td>
+<td><p>0.0068</p></td>
+</tr>
+<tr class="row-odd"><td><p>MAE</p></td>
+<td><p>0.0401</p></td>
+<td><p>0.0424</p></td>
+</tr>
+</tbody>
+</table>
+<p>In this notebook, we will build a simple model to create short-range predictions (between 1 and 2 hours ahead) based on recent history (say 6h)</p>
+<div class="section" id="Load-the-data-from-parquet">
+<h2>Load the data from parquet<a class="headerlink" href="#Load-the-data-from-parquet" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%%time</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">&quot;~/tmp/datasets/EMHIRESPV_TSh_CF_Country_19862015_tall.parquet&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 1.09 s, sys: 608 ms, total: 1.7 s
+Wall time: 449 ms
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plot_countries</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ES&#39;</span><span class="p">,</span> <span class="s1">&#39;UK&#39;</span><span class="p">,</span> <span class="s1">&#39;FI&#39;</span><span class="p">,</span> <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Split-into-train-test-sets">
+<h2>Split into train-test sets<a class="headerlink" href="#Split-into-train-test-sets" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">df_dev</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">100</span><span class="p">]</span>
+<span class="n">df_train</span><span class="p">,</span> <span class="n">df_test</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1995</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">1995</span><span class="p">]</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">df_train</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_test</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>(2761080, 6442800)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Auto-regressive-model">
+<h2>Auto-regressive model<a class="headerlink" href="#Auto-regressive-model" title="Permalink to this headline">¶</a></h2>
+<p>In an auto-regressive model, we treat past values of the timeseries as input features to the forecasting model. While the functional form of the model is important, deep learning frameworks give us an easy way to try different approaches including CNNs, RNNs, etc.</p>
+<p>A key part remains however - we must be able to supply abundant training examples, each consisting of a window of consecutive values, the target, and (optinally) the time between the end of the window and the target (the “forecast horizon”). A long timeseries can be used to generate many examples simply by sampling the windows randomly from the original timeseries - in fact, for a realistic timeseries, pre-generating training examples in memory is prohibitively expensive. <code class="docutils literal notranslate"><span class="pre">timeserio</span></code> provides
+a way to generate sequence training examples on-demand from data held in memory, or even from datasets partitioned into multiple files.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.batches.chunked.pandas</span> <span class="k">import</span> <span class="n">SequenceForecastBatchGenerator</span>
+
+<span class="n">batchgen_train</span> <span class="o">=</span> <span class="n">SequenceForecastBatchGenerator</span><span class="p">(</span>
+    <span class="n">df</span><span class="o">=</span><span class="n">df_train</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">sequence_length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">sequence_columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;generation&quot;</span><span class="p">,</span> <span class="s2">&quot;Time_step&quot;</span><span class="p">],</span>
+    <span class="n">last_step_columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Time_step&quot;</span><span class="p">],</span>
+    <span class="n">forecast_steps_min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">forecast_steps_max</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">batch_offset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">id_column</span><span class="o">=</span><span class="s2">&quot;country&quot;</span><span class="p">,</span>
+    <span class="n">batch_aggregator</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Using TensorFlow backend.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">len</span><span class="p">(</span><span class="n">batchgen_train</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>35
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%%time</span>
+<span class="n">batch</span> <span class="o">=</span> <span class="n">batchgen_train</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 116 ms, sys: 4.71 ms, total: 121 ms
+Wall time: 119 ms
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">batch</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead tr th {
+        text-align: left;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th>country</th>
+      <th>generation</th>
+      <th>Time_step</th>
+      <th colspan="6" halign="left">seq_generation</th>
+      <th colspan="6" halign="left">seq_Time_step</th>
+      <th>end_of_Time_step</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>HU</td>
+      <td>0.070537</td>
+      <td>9</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.030528</td>
+      <td>3</td>
+      <td>4</td>
+      <td>5</td>
+      <td>6</td>
+      <td>7</td>
+      <td>8</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>HU</td>
+      <td>0.084160</td>
+      <td>16</td>
+      <td>0.070537</td>
+      <td>0.078465</td>
+      <td>0.072669</td>
+      <td>0.082293</td>
+      <td>0.069379</td>
+      <td>0.062412</td>
+      <td>9</td>
+      <td>10</td>
+      <td>11</td>
+      <td>12</td>
+      <td>13</td>
+      <td>14</td>
+      <td>14</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%%time</span>
+<span class="n">batch</span> <span class="o">=</span> <span class="n">batchgen_train</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+CPU times: user 158 ms, sys: 3.54 ms, total: 162 ms
+Wall time: 161 ms
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">batch</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead tr th {
+        text-align: left;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th>country</th>
+      <th>generation</th>
+      <th>Time_step</th>
+      <th colspan="6" halign="left">seq_generation</th>
+      <th colspan="6" halign="left">seq_Time_step</th>
+      <th>end_of_Time_step</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>RS</td>
+      <td>0.066365</td>
+      <td>9</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+      <td>0.035935</td>
+      <td>3</td>
+      <td>4</td>
+      <td>5</td>
+      <td>6</td>
+      <td>7</td>
+      <td>8</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>RS</td>
+      <td>0.000000</td>
+      <td>16</td>
+      <td>0.066365</td>
+      <td>0.088595</td>
+      <td>0.083035</td>
+      <td>0.09524</td>
+      <td>0.090335</td>
+      <td>0.071625</td>
+      <td>9</td>
+      <td>10</td>
+      <td>11</td>
+      <td>12</td>
+      <td>13</td>
+      <td>14</td>
+      <td>14</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="section" id="Sequence-and-Forecast-horizon-features">
+<h3>Sequence and Forecast horizon features<a class="headerlink" href="#Sequence-and-Forecast-horizon-features" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.pipeline</span> <span class="k">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">timeserio.preprocessing</span> <span class="k">import</span> <span class="n">PandasColumnSelector</span><span class="p">,</span> <span class="n">PandasValueSelector</span>
+
+<span class="k">class</span> <span class="nc">ColumnDifferenceValues</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Compute difference feature of two columns&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">col_plus</span><span class="p">,</span> <span class="n">col_minus</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col_plus</span> <span class="o">=</span> <span class="n">col_plus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col_minus</span> <span class="o">=</span> <span class="n">col_minus</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">col_plus</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">col_minus</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="n">seq_pipeline</span> <span class="o">=</span> <span class="n">PandasValueSelector</span><span class="p">(</span><span class="s2">&quot;seq_generation&quot;</span><span class="p">)</span>
+<span class="n">fc_horizon_pipeline</span> <span class="o">=</span> <span class="n">ColumnDifferenceValues</span><span class="p">(</span><span class="n">col_plus</span><span class="o">=</span><span class="s2">&quot;Time_step&quot;</span><span class="p">,</span> <span class="n">col_minus</span><span class="o">=</span><span class="s2">&quot;end_of_Time_step&quot;</span><span class="p">)</span>
+<span class="n">target_pipeline</span> <span class="o">=</span> <span class="n">PandasValueSelector</span><span class="p">(</span><span class="s2">&quot;generation&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Define-the-Neural-Network-Architecture">
+<h3>Define the Neural Network Architecture<a class="headerlink" href="#Define-the-Neural-Network-Architecture" title="Permalink to this headline">¶</a></h3>
+<p>We define a regression network with two inputs: sequence of previous readings, and the forecast horizon</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.keras.multinetwork</span> <span class="k">import</span> <span class="n">MultiNetworkBase</span>
+
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Flatten</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">Reshape</span><span class="p">,</span> <span class="n">Permute</span><span class="p">,</span> <span class="n">Conv1D</span><span class="p">,</span> <span class="n">BatchNormalization</span><span class="p">,</span> <span class="n">MaxPool1D</span><span class="p">,</span> <span class="n">Activation</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">keras.optimizers</span> <span class="k">import</span> <span class="n">Adam</span>
+<span class="kn">from</span> <span class="nn">keras.callbacks</span> <span class="k">import</span> <span class="n">EarlyStopping</span><span class="p">,</span> <span class="n">ReduceLROnPlateau</span>
+
+<span class="k">class</span> <span class="nc">ARForecastingNetwork</span><span class="p">(</span><span class="n">MultiNetworkBase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">seq_length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>  <span class="c1"># number of real-valued features</span>
+        <span class="n">filters</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">),</span>
+        <span class="n">kernel_sizes</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">),</span>
+        <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">),</span>
+        <span class="n">pools</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">),</span>
+        <span class="n">hidden_units</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+        <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span>
+    <span class="p">):</span>
+        <span class="n">horizon_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;horizon&#39;</span><span class="p">)</span>
+        <span class="n">seq_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">seq_length</span><span class="p">,),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;sequence&#39;</span><span class="p">)</span>
+        <span class="n">encoding</span> <span class="o">=</span> <span class="n">Reshape</span><span class="p">(</span>
+            <span class="n">target_shape</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)(</span><span class="n">seq_input</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">_filters</span><span class="p">,</span> <span class="n">_kernel_size</span><span class="p">,</span> <span class="n">_strides</span><span class="p">,</span> <span class="n">_pool</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">strides</span><span class="p">,</span> <span class="n">pools</span><span class="p">)):</span>
+            <span class="n">encoding</span> <span class="o">=</span> <span class="n">Conv1D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">_filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="n">_kernel_size</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="n">_strides</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;conv_</span><span class="si">{idx}</span><span class="s2">&quot;</span><span class="p">)(</span><span class="n">encoding</span><span class="p">)</span>
+            <span class="n">encoding</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">encoding</span><span class="p">)</span>
+            <span class="n">encoding</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">encoding</span><span class="p">)</span>
+            <span class="n">encoding</span> <span class="o">=</span> <span class="n">MaxPool1D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="n">_pool</span><span class="p">)(</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="n">encoding</span> <span class="o">=</span> <span class="n">Flatten</span><span class="p">()(</span><span class="n">encoding</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;concatenate&#39;</span><span class="p">)([</span><span class="n">encoding</span><span class="p">,</span> <span class="n">horizon_input</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_hidden_units</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hidden_units</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">_hidden_units</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="s1">&#39;dense_</span><span class="si">{idx}</span><span class="s1">&#39;</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;generation&#39;</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+        <span class="n">encoding_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">seq_input</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
+        <span class="n">forecasting_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">([</span><span class="n">seq_input</span><span class="p">,</span> <span class="n">horizon_input</span><span class="p">],</span> <span class="n">output</span><span class="p">)</span>
+
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+        <span class="n">forecasting_model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;mse&#39;</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mae&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;encoder&#39;</span><span class="p">:</span> <span class="n">encoding_model</span><span class="p">,</span> <span class="s1">&#39;forecast&#39;</span><span class="p">:</span> <span class="n">forecasting_model</span><span class="p">}</span>
+
+
+<span class="n">multinetwork</span> <span class="o">=</span> <span class="n">ARForecastingNetwork</span><span class="p">(</span><span class="n">seq_length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">keras.utils.vis_utils</span> <span class="k">import</span> <span class="n">model_to_dot</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">SVG</span>
+
+<span class="k">def</span> <span class="nf">vis_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">show_shapes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_layer_names</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rankdir</span><span class="o">=</span><span class="s1">&#39;TB&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Visualize model in a notebook.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">SVG</span><span class="p">(</span>
+        <span class="n">model_to_dot</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">show_shapes</span><span class="o">=</span><span class="n">show_shapes</span><span class="p">,</span> <span class="n">show_layer_names</span><span class="o">=</span><span class="n">show_layer_names</span><span class="p">,</span> <span class="n">rankdir</span><span class="o">=</span><span class="n">rankdir</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">vis_model</span><span class="p">(</span><span class="n">multinetwork</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="s2">&quot;forecast&quot;</span><span class="p">],</span> <span class="n">show_shapes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rankdir</span><span class="o">=</span><span class="s2">&quot;LR&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_SolarGenerationTimeSeries_Part2_19_0.svg" src="../_images/examples_SolarGenerationTimeSeries_Part2_19_0.svg" /></div>
+</div>
+</div>
+<div class="section" id="Connect-feature-pipelines-to-the-neural-network">
+<h3>Connect feature pipelines to the neural network<a class="headerlink" href="#Connect-feature-pipelines-to-the-neural-network" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.pipeline</span> <span class="k">import</span> <span class="n">MultiPipeline</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">multipipeline</span> <span class="o">=</span> <span class="n">MultiPipeline</span><span class="p">({</span>
+    <span class="s2">&quot;sequence&quot;</span><span class="p">:</span> <span class="n">seq_pipeline</span><span class="p">,</span>
+    <span class="s2">&quot;horizon&quot;</span><span class="p">:</span> <span class="n">fc_horizon_pipeline</span><span class="p">,</span>
+    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">target_pipeline</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.multimodel</span> <span class="k">import</span> <span class="n">MultiModel</span>
+
+<span class="n">manifold</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># keras_model_name: (input_pipes, output_pipes)</span>
+    <span class="s2">&quot;encoder&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;sequence&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="s2">&quot;forecast&quot;</span><span class="p">:</span> <span class="p">([</span><span class="s2">&quot;sequence&quot;</span><span class="p">,</span> <span class="s2">&quot;horizon&quot;</span><span class="p">],</span> <span class="s2">&quot;target&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">multimodel</span> <span class="o">=</span> <span class="n">MultiModel</span><span class="p">(</span>
+    <span class="n">multinetwork</span><span class="o">=</span><span class="n">multinetwork</span><span class="p">,</span>
+    <span class="n">multipipeline</span><span class="o">=</span><span class="n">multipipeline</span><span class="p">,</span>
+    <span class="n">manifold</span><span class="o">=</span><span class="n">manifold</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Fit-model-from-the-batch-generator">
+<h3>Fit model from the batch generator<a class="headerlink" href="#Fit-model-from-the-batch-generator" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">multimodel.fit_generator()</span></code> will apply pipelines correctly to the training batch generator, and, if <code class="docutils literal notranslate"><span class="pre">validation_data</span></code> is provided in the form of another (pandas) batch generator, evaluate the relevant metrics. In addition, feature extraction for each batch will benefit from the <code class="docutils literal notranslate"><span class="pre">workers</span></code> parallelism.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">kerashistoryplot.callbacks</span> <span class="k">import</span> <span class="n">PlotHistory</span>
+<span class="n">plot_callback</span> <span class="o">=</span> <span class="n">PlotHistory</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">n_cols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">batches</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">multimodel</span><span class="o">.</span><span class="n">fit_generator</span><span class="p">(</span>
+    <span class="n">batchgen_train</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;forecast&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">reset_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">plot_callback</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_SolarGenerationTimeSeries_Part2_25_0.png" src="../_images/examples_SolarGenerationTimeSeries_Part2_25_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&lt;timeserio.keras.callbacks.HistoryLogger at 0x7f1ee0cccf28&gt;
+</pre></div>
+</div>
+</div>
+<p>persist the model:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">timeserio.utils.pickle</span> <span class="k">import</span> <span class="n">loadf</span><span class="p">,</span> <span class="n">dumpf</span>
+<span class="n">dumpf</span><span class="p">(</span><span class="n">multimodel</span><span class="p">,</span> <span class="s2">&quot;/tmp/PV_model_2.pickle&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Evaluate-performance-on-test-data">
+<h3>Evaluate performance on test data<a class="headerlink" href="#Evaluate-performance-on-test-data" title="Permalink to this headline">¶</a></h3>
+<p>We can evaluate the model on the validation data generator, which can also be out-of-memory:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">batchgen_test</span> <span class="o">=</span> <span class="n">SequenceForecastBatchGenerator</span><span class="p">(</span>
+    <span class="n">df</span><span class="o">=</span><span class="n">df_test</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">sequence_length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">sequence_columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;generation&quot;</span><span class="p">,</span> <span class="s2">&quot;Time_step&quot;</span><span class="p">],</span>
+    <span class="n">last_step_columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Time_step&quot;</span><span class="p">],</span>
+    <span class="n">forecast_steps_min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">forecast_steps_max</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">batch_offset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">id_column</span><span class="o">=</span><span class="s2">&quot;country&quot;</span><span class="p">,</span>
+    <span class="n">batch_aggregator</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">multimodel</span><span class="o">.</span><span class="n">evaluate_generator</span><span class="p">(</span><span class="n">batchgen_test</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;forecast&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+35/35 [==============================] - 9s 254ms/step
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>[0.008467954644999866, 0.051904945554477826]
+</pre></div>
+</div>
+</div>
+<p>While the model takes longer to train (and longer still with practical encoder architectures), it can be tuned to achieve higher performanec, especially if encodings are combined with datetime features.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api/modules.html" class="btn btn-neutral float-right" title="timeserio" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="SolarGenerationTimeSeries_Part1.html" class="btn btn-neutral float-left" title="Modelling Solar generation across Multiple Sites - Part 1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Octopus Energy Ltd
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

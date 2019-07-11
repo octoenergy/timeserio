@@ -1,0 +1,7 @@
+timeserio.preprocessing.multipipeline module
+============================================
+
+.. automodule:: timeserio.preprocessing.multipipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:

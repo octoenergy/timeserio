@@ -1,0 +1,7 @@
+timeserio.keras.timing module
+=============================
+
+.. automodule:: timeserio.keras.timing
+   :members:
+   :undoc-members:
+   :show-inheritance:

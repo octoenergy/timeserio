@@ -1,0 +1,7 @@
+timeserio.multimodel.base module
+================================
+
+.. automodule:: timeserio.multimodel.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+timeserio.batches.single.base module
+====================================
+
+.. automodule:: timeserio.batches.single.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

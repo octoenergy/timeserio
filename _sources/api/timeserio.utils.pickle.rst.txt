@@ -1,0 +1,7 @@
+timeserio.utils.pickle module
+=============================
+
+.. automodule:: timeserio.utils.pickle
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+timeserio.batches.chunked.parquet module
+========================================
+
+.. automodule:: timeserio.batches.chunked.parquet
+   :members:
+   :undoc-members:
+   :show-inheritance:

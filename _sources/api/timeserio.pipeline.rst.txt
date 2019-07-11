@@ -1,0 +1,15 @@
+timeserio.pipeline package
+==========================
+
+.. automodule:: timeserio.pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.pipeline.multipipeline
+   timeserio.pipeline.pipeline

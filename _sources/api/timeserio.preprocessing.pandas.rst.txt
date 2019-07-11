@@ -1,0 +1,7 @@
+timeserio.preprocessing.pandas module
+=====================================
+
+.. automodule:: timeserio.preprocessing.pandas
+   :members:
+   :undoc-members:
+   :show-inheritance:

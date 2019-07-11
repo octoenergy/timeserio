@@ -1,0 +1,7 @@
+timeserio.keras.batches module
+==============================
+
+.. automodule:: timeserio.keras.batches
+   :members:
+   :undoc-members:
+   :show-inheritance:

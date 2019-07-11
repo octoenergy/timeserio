@@ -1,0 +1,7 @@
+timeserio.preprocessing.base module
+===================================
+
+.. automodule:: timeserio.preprocessing.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

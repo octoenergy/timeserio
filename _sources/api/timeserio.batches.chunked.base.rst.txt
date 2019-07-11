@@ -1,0 +1,7 @@
+timeserio.batches.chunked.base module
+=====================================
+
+.. automodule:: timeserio.batches.chunked.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

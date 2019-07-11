@@ -1,0 +1,7 @@
+timeserio.preprocessing.batches module
+======================================
+
+.. automodule:: timeserio.preprocessing.batches
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+timeserio.preprocessing.datetime module
+=======================================
+
+.. automodule:: timeserio.preprocessing.datetime
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,16 @@
+timeserio.batches.single package
+================================
+
+.. automodule:: timeserio.batches.single
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.batches.single.base
+   timeserio.batches.single.row
+   timeserio.batches.single.sequence

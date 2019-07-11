@@ -1,0 +1,7 @@
+timeserio.data.mock module
+==========================
+
+.. automodule:: timeserio.data.mock
+   :members:
+   :undoc-members:
+   :show-inheritance:

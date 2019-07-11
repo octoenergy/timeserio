@@ -1,0 +1,7 @@
+timeserio.preprocessing.aggregate module
+========================================
+
+.. automodule:: timeserio.preprocessing.aggregate
+   :members:
+   :undoc-members:
+   :show-inheritance:

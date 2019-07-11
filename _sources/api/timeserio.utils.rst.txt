@@ -1,0 +1,15 @@
+timeserio.utils package
+=======================
+
+.. automodule:: timeserio.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.utils.functools
+   timeserio.utils.pickle

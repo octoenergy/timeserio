@@ -1,0 +1,809 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>timeserio.keras.multinetwork &mdash; Timeserio 0.10.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/constantine_100px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.10.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/getting_started.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/MovieLens100k.html">Building a Neural Movie Recommender System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/MNIST.html">Autoencoders and multi-stage training for MNIST classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/SolarGenerationTimeSeries_Part1.html">Modelling Solar generation across Multiple Sites - Part 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/SolarGenerationTimeSeries_Part2.html">Modelling Solar generation across Multiple Sites - Part 2</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Timeserio</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>timeserio.keras.multinetwork</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for timeserio.keras.multinetwork</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Collection</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Sequential</span><span class="p">,</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">keras.callbacks</span> <span class="k">import</span> <span class="n">Callback</span>
+<span class="kn">from</span> <span class="nn">keras.utils.generic_utils</span> <span class="k">import</span> <span class="n">has_arg</span>
+
+<span class="kn">from</span> <span class="nn">..utils.functools</span> <span class="k">import</span> <span class="n">get_default_args</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">iterlayers</span>
+<span class="kn">from</span> <span class="nn">.callbacks</span> <span class="k">import</span> <span class="n">HistoryLogger</span>
+
+
+<div class="viewcode-block" id="MultiNetworkBase"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase">[docs]</a><span class="k">class</span> <span class="nc">MultiNetworkBase</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for models that contain multiple keras sub-models.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        Define a simple pair of regression models using `MultiNetworkBase`:</span>
+
+<span class="sd">        &gt;&gt;&gt; from timeserio.keras.multinetwork import MultiNetworkBase</span>
+<span class="sd">        &gt;&gt;&gt; from keras.models import Model</span>
+<span class="sd">        &gt;&gt;&gt; from keras.layers import Input, Dense</span>
+
+<span class="sd">        &gt;&gt;&gt; class MyNetwork(MultiNetworkBase):</span>
+<span class="sd">        ...     def _model(self, hidden_units=8):</span>
+<span class="sd">        ...         input = Input((1,))</span>
+<span class="sd">        ...         intermediate = Dense(hidden_units)(input)  # shared layer</span>
+<span class="sd">        ...         output_1 = Dense(1)(intermediate)</span>
+<span class="sd">        ...         output_2 = Dense(1)(intermediate)</span>
+<span class="sd">        ...         model_1 = Model(input, output_1)</span>
+<span class="sd">        ...         model_2 = Model(input, output_2)</span>
+<span class="sd">        ...         model_1.compile(loss=&quot;MSE&quot;, optimizer=&quot;SGD&quot;)</span>
+<span class="sd">        ...         model_2.compile(loss=&quot;MSE&quot;, optimizer=&quot;SGD&quot;)</span>
+<span class="sd">        ...         return {&quot;model_1&quot;: model_1, &quot;model_2&quot;: model_2}</span>
+
+<span class="sd">        Instantiate a multi-network, using keyword arguments to provide</span>
+<span class="sd">        hyperparameters:</span>
+
+<span class="sd">        &gt;&gt;&gt; mnet = MyNetwork(hidden_units=32)</span>
+
+<span class="sd">        Models are instantiated on demand:</span>
+
+<span class="sd">        &gt;&gt;&gt; mnet.model</span>
+<span class="sd">        {&#39;model_1&#39;: &lt;keras.engine.training.Model ...&gt;, &#39;model_2&#39;: &lt;...&gt;}</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">hyperparams</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_instance</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparams</span> <span class="o">=</span> <span class="n">hyperparams</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizers_config</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Abstract methods that need sub-classing #</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Model</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Build and return a list of keras models.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callback</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Build and return a list of keras callbacks.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="c1"># Hyperparameters #</span>
+    <span class="c1"># Helper functions ##</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_funcs_with_legal_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">Sequential</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span> <span class="n">Sequential</span><span class="o">.</span><span class="n">fit_generator</span><span class="p">,</span> <span class="n">Sequential</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span>
+            <span class="n">Sequential</span><span class="o">.</span><span class="n">predict_classes</span><span class="p">,</span> <span class="n">Sequential</span><span class="o">.</span><span class="n">evaluate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span>
+        <span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_funcs_with_default_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_default_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get default network parameters.&quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_funcs_with_default_params</span><span class="p">:</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">get_default_args</span><span class="p">(</span><span class="n">fn</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">params</span>
+
+    <span class="k">def</span> <span class="nf">_filter_hyperparams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">override</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Filter `hyperparams` and return those in `fn`&#39;s arguments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fn : arbitrary function</span>
+<span class="sd">            override: dictionary, values to override `hyperparams`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            res : dictionary containing variables</span>
+<span class="sd">                in both `hyperparams` and `fn`&#39;s arguments.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">override</span> <span class="o">=</span> <span class="n">override</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparams</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">has_arg</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">override</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+<div class="viewcode-block" id="MultiNetworkBase.check_params"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.check_params">[docs]</a>    <span class="k">def</span> <span class="nf">check_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Check for user typos in `params`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params: dictionary; the parameters to be checked</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: if any member of `params` is not a valid argument.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">params_name</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_funcs_with_legal_params</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">has_arg</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">params_name</span><span class="p">):</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{params_name}</span><span class="s1"> is not a legal parameter&#39;</span><span class="p">)</span></div>
+
+    <span class="c1"># Public hyperparams setters/getters ##</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hyperparams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_params</span>
+        <span class="n">hyperparams</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hyperparams</span><span class="p">)</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hyperparams</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params</span>
+
+    <span class="nd">@hyperparams</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">hyperparams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_hyperparams&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_hyperparams</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hyperparams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MultiNetworkBase.get_params"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.get_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get parameters for this estimator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **params: ignored (exists for API compatibility).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary of parameter names mapped to their values.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparams</span></div>
+
+<div class="viewcode-block" id="MultiNetworkBase.set_params"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the parameters of this estimator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **params: Dictionary of parameter names mapped to their values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            self</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparams</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="c1"># Model #</span>
+    <span class="k">def</span> <span class="nf">_init_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reset_optimizers</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">(</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_filter_hyperparams</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reset_weights</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weights</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reset_optimizers</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizers_config</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_optimizers_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizers_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizers_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_optimizers_config</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_instance</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_model_instance&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_instance</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_model</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_instance</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<div class="viewcode-block" id="MultiNetworkBase.check_model_name"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.check_model_name">[docs]</a>    <span class="k">def</span> <span class="nf">check_model_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;Unknown sub-model name </span><span class="si">{model}</span><span class="s1">: &#39;</span>
+                <span class="n">f</span><span class="s1">&#39;must be one of </span><span class="si">{self.model_names}</span><span class="s1">&#39;</span>
+            <span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">callbacks</span> <span class="o">=</span> <span class="p">{</span><span class="n">model</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">}</span>
+        <span class="n">callbacks</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_filter_hyperparams</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_callbacks</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">callbacks</span>
+
+    <span class="c1"># Weights ##</span>
+    <span class="k">def</span> <span class="nf">_get_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get a dictionary of weights per keras model.&quot;&quot;&quot;</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">weights</span>
+
+    <span class="k">def</span> <span class="nf">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set model weights from dictionary of weights per model.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+
+    <span class="c1"># Optimizers ##</span>
+    <span class="k">def</span> <span class="nf">_get_optimizers_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get optimizer parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">optimizers_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;optimizer&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">optimizer</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">optimizers_config</span>
+
+    <span class="k">def</span> <span class="nf">_set_optimizers_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizers_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set optimizer parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">optimizers_config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+    <span class="c1"># Model freezing and training #</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trainable_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trainable_models</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trainable_models</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trainable_models</span>
+
+    <span class="nd">@trainable_models</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">trainable_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">MESSAGE</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;`MultiNetworkBase.trainable_models` attribute is deprecated, &quot;</span>
+            <span class="s2">&quot;use `trainable_models` keyword argument in &quot;</span>
+            <span class="s2">&quot;.fit() or .fit_generator() instead.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">MESSAGE</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">model_names</span> <span class="o">=</span> <span class="n">value</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">model_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_names</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">model_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trainable_models</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_set_model_trainable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set trainable state for each layer in submodel.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">submodel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">iterlayers</span><span class="p">(</span><span class="n">submodel</span><span class="p">):</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">trainable</span> <span class="o">=</span> <span class="n">trainable</span>
+
+    <span class="k">def</span> <span class="nf">_compile_all_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compile all submodels.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="p">:</span>
+            <span class="n">submodel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">submodel</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                    <span class="n">loss</span><span class="o">=</span><span class="n">submodel</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span>
+                    <span class="n">optimizer</span><span class="o">=</span><span class="n">submodel</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span>
+                    <span class="n">metrics</span><span class="o">=</span><span class="n">submodel</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_freeze_models_except</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Freeze all layers of a given model except the layers given by &#39;model&#39;.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model: string or list of strings</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_model_trainable</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">model</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_model_trainable</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compile_all_models</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_freeze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainable_models</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Freeze specified models.</span>
+
+<span class="sd">        Use argument if a list is provided, else use self.trainable_models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_freeze_models_except</span><span class="p">(</span>
+            <span class="n">trainable_models</span> <span class="k">if</span> <span class="n">trainable_models</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainable_models</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_unfreeze</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set all keras models as trainable.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_freeze_models_except</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_names</span><span class="p">)</span>
+
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">_model_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">reset_weights</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">reset_optimizers</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">reset_history</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">freeze</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">training</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">persist_model</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">trainable_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Collection</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">persist_model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_init_model</span><span class="p">(</span>
+                    <span class="n">reset_weights</span><span class="o">=</span><span class="n">reset_weights</span><span class="p">,</span>
+                    <span class="n">reset_optimizers</span><span class="o">=</span><span class="n">reset_optimizers</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">reset_history</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">freeze</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_freeze</span><span class="p">(</span><span class="n">trainable_models</span><span class="o">=</span><span class="n">trainable_models</span><span class="p">)</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">freeze</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_unfreeze</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">training</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weights</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">optimizers_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_optimizers_config</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">persist_model</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_model_instance</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_training_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">reset_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">reset_optimizers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">reset_history</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">trainable_models</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_context</span><span class="p">(</span>
+            <span class="n">reset_weights</span><span class="o">=</span><span class="n">reset_weights</span><span class="p">,</span>
+            <span class="n">reset_optimizers</span><span class="o">=</span><span class="n">reset_optimizers</span><span class="p">,</span>
+            <span class="n">reset_history</span><span class="o">=</span><span class="n">reset_history</span><span class="p">,</span>
+            <span class="n">freeze</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">persist_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">trainable_models</span><span class="o">=</span><span class="n">trainable_models</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prediction_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">persist_model</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_context</span><span class="p">(</span>
+            <span class="n">reset_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">reset_optimizers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">reset_history</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">freeze</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">training</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">persist_model</span><span class="o">=</span><span class="n">persist_model</span>
+        <span class="p">)</span>
+
+    <span class="c1"># History #</span>
+    <span class="k">def</span> <span class="nf">_add_history_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">history</span><span class="p">,</span> <span class="n">trainable_models</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add record of current training run to history.&quot;&quot;&quot;</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+            <span class="s1">&#39;trainable_models&#39;</span><span class="p">:</span> <span class="n">trainable_models</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainable_models</span><span class="p">,</span>
+            <span class="s1">&#39;history&#39;</span><span class="p">:</span> <span class="n">history</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+    <span class="c1"># Fit/predict methods #</span>
+<div class="viewcode-block" id="MultiNetworkBase.fit"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">reset_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">reset_optimizers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">reset_history</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run training on one model.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;trainable_models&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">trainable_models</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;trainable_models&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trainable_models</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">fit_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_hyperparams</span><span class="p">(</span><span class="n">Sequential</span><span class="o">.</span><span class="n">fit</span><span class="p">)</span>
+        <span class="n">fit_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">callbacks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+        <span class="n">fit_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">history_cbk</span> <span class="o">=</span> <span class="n">HistoryLogger</span><span class="p">(</span><span class="n">batches</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fit_args</span><span class="p">[</span><span class="s1">&#39;callbacks&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">history_cbk</span><span class="p">]</span>
+
+        <span class="n">training_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_context</span><span class="p">(</span>
+            <span class="n">reset_weights</span><span class="o">=</span><span class="n">reset_weights</span><span class="p">,</span>
+            <span class="n">reset_optimizers</span><span class="o">=</span><span class="n">reset_optimizers</span><span class="p">,</span>
+            <span class="n">reset_history</span><span class="o">=</span><span class="n">reset_history</span><span class="p">,</span>
+            <span class="n">trainable_models</span><span class="o">=</span><span class="n">trainable_models</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">with</span> <span class="n">training_context</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_history_record</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="n">history_cbk</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">trainable_models</span><span class="o">=</span><span class="n">trainable_models</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">history_cbk</span></div>
+
+<div class="viewcode-block" id="MultiNetworkBase.fit_generator"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.fit_generator">[docs]</a>    <span class="k">def</span> <span class="nf">fit_generator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">generator</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">reset_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">reset_optimizers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">reset_history</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Train model from `generator`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            generator : generator or keras.utils.Sequence</span>
+<span class="sd">                Training batches as in Sequential.fit_generator</span>
+<span class="sd">            init: bool</span>
+<span class="sd">                initialize new model; use False to continue training</span>
+<span class="sd">            **kwargs: dictionary arguments</span>
+<span class="sd">                Legal arguments are the arguments of `Sequential.fit_generator`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            history : List[Dict]</span>
+<span class="sd">                details about the training history at each epoch.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;trainable_models&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">trainable_models</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;trainable_models&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trainable_models</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">fit_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_hyperparams</span><span class="p">(</span><span class="n">Sequential</span><span class="o">.</span><span class="n">fit_generator</span><span class="p">)</span>
+        <span class="n">fit_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">callbacks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+        <span class="n">fit_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">history_cbk</span> <span class="o">=</span> <span class="n">HistoryLogger</span><span class="p">(</span><span class="n">batches</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fit_args</span><span class="p">[</span><span class="s1">&#39;callbacks&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">history_cbk</span><span class="p">]</span>
+
+        <span class="n">training_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_context</span><span class="p">(</span>
+            <span class="n">reset_weights</span><span class="o">=</span><span class="n">reset_weights</span><span class="p">,</span>
+            <span class="n">reset_optimizers</span><span class="o">=</span><span class="n">reset_optimizers</span><span class="p">,</span>
+            <span class="n">reset_history</span><span class="o">=</span><span class="n">reset_history</span><span class="p">,</span>
+            <span class="n">trainable_models</span><span class="o">=</span><span class="n">trainable_models</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">with</span> <span class="n">training_context</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">fit_generator</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_history_record</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="n">history_cbk</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">trainable_models</span><span class="o">=</span><span class="n">trainable_models</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">history_cbk</span></div>
+
+<div class="viewcode-block" id="MultiNetworkBase.predict"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return predictions for the given test data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: array-like, shape `(n_samples, n_features)`</span>
+<span class="sd">                Test samples where `n_samples` is the number of samples</span>
+<span class="sd">                and `n_features` is the number of features.</span>
+<span class="sd">            **kwargs: dictionary arguments</span>
+<span class="sd">                Legal arguments are the arguments of `Sequential.predict`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            preds: array-like, shape `(n_samples, ...)`</span>
+<span class="sd">                Predictions.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">pred_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_hyperparams</span><span class="p">(</span><span class="n">Sequential</span><span class="o">.</span><span class="n">predict</span><span class="p">)</span>
+        <span class="n">pred_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_context</span><span class="p">():</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">predictions</span></div>
+
+<div class="viewcode-block" id="MultiNetworkBase.predict_generator"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.predict_generator">[docs]</a>    <span class="k">def</span> <span class="nf">predict_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return predictions from a batch generator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            generator : generator or keras.utils.Sequence</span>
+<span class="sd">                predict batches as in Sequential.predict_generator</span>
+<span class="sd">            **kwargs: dictionary arguments</span>
+<span class="sd">                Legal arguments are the arguments of</span>
+<span class="sd">                `Sequential.predict_generator`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            preds: array-like, shape `(n_samples, ...)`</span>
+<span class="sd">                Predictions.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">pred_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_hyperparams</span><span class="p">(</span>
+            <span class="n">Sequential</span><span class="o">.</span><span class="n">predict_generator</span><span class="p">,</span> <span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_context</span><span class="p">():</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">predict_generator</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">predictions</span></div>
+
+<div class="viewcode-block" id="MultiNetworkBase.evaluate"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate estimator on given data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x:  array-like, shape `(n_samples, n_features)`</span>
+<span class="sd">                Test samples where `n_samples` is the number of samples</span>
+<span class="sd">                and `n_features` is the number of features.</span>
+<span class="sd">            y: array-like</span>
+<span class="sd">            model: string</span>
+<span class="sd">            kwargs: keyword arguments.</span>
+<span class="sd">                    Legal arguments are the arguments of `Sequential.evaluate`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            metrics: List[float]</span>
+<span class="sd">                A list of loss and evaluation metric values</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">ev_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_hyperparams</span><span class="p">(</span><span class="n">Sequential</span><span class="o">.</span><span class="n">evaluate</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_context</span><span class="p">():</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">ev_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metrics</span></div>
+
+<div class="viewcode-block" id="MultiNetworkBase.score"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.score">[docs]</a>    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Alias for scikit compatibility.&quot;&quot;&quot;</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># in case we have loss + multiple metrics</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="k">return</span> <span class="n">score</span></div>
+
+<div class="viewcode-block" id="MultiNetworkBase.evaluate_generator"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.evaluate_generator">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate estimator on given data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            generator : generator or keras.utils.Sequence</span>
+<span class="sd">                predict batches as in Sequential.evaluate_generator</span>
+<span class="sd">            model: string</span>
+<span class="sd">            **kwargs: keyword arguments.</span>
+<span class="sd">                Legal arguments are the arguments of</span>
+<span class="sd">                `Sequential.evaluate_generator`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            evaluation metric value(s)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">ev_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_hyperparams</span><span class="p">(</span><span class="n">Sequential</span><span class="o">.</span><span class="n">evaluate</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_context</span><span class="p">():</span>
+            <span class="n">evaluation</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate_generator</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="o">**</span><span class="n">ev_kwargs</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">evaluation</span></div>
+
+    <span class="c1"># Pickling #</span>
+<div class="viewcode-block" id="MultiNetworkBase.__getstate__"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.__getstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get a picklable state dictionary of the model.&quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">state</span><span class="p">[</span><span class="s1">&#39;hyperparams&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparams</span>
+        <span class="n">state</span><span class="p">[</span><span class="s1">&#39;weights&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span>
+        <span class="n">state</span><span class="p">[</span><span class="s1">&#39;optimizers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizers_config</span>
+        <span class="n">state</span><span class="p">[</span><span class="s1">&#39;history&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span>
+        <span class="k">return</span> <span class="n">state</span></div>
+
+<div class="viewcode-block" id="MultiNetworkBase.__setstate__"><a class="viewcode-back" href="../../../api/timeserio.keras.multinetwork.html#timeserio.keras.multinetwork.MultiNetworkBase.__setstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set model from unpickled state dictionary.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparams</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hyperparams&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;weights&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizers_config</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;optimizers&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;history&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Octopus Energy Ltd
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

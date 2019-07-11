@@ -1,0 +1,7 @@
+timeserio.keras.multinetwork module
+===================================
+
+.. automodule:: timeserio.keras.multinetwork
+   :members:
+   :undoc-members:
+   :show-inheritance:

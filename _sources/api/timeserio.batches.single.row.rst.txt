@@ -1,0 +1,7 @@
+timeserio.batches.single.row module
+===================================
+
+.. automodule:: timeserio.batches.single.row
+   :members:
+   :undoc-members:
+   :show-inheritance:

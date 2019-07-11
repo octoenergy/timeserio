@@ -1,0 +1,7 @@
+timeserio.preprocessing.encoding module
+=======================================
+
+.. automodule:: timeserio.preprocessing.encoding
+   :members:
+   :undoc-members:
+   :show-inheritance:
