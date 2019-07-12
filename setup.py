@@ -8,20 +8,29 @@ from setuptools import find_packages, setup
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 # read __version__ attribute from version.py
-exec(open('timeserio/version.py').read())
-VERSION = __version__   # type: ignore  # noqa
+with open("timeserio/version.py") as f:
+    exec(f.read())
+VERSION = __version__  # type: ignore  # noqa
+# User README.md as long description
+with open("README.md", encoding="utf-8") as f:
+    README = f.read()
 
 setup(
-    name='timeserio',
+    name="timeserio",
     version=VERSION,
-    packages=find_packages(exclude=('tests', )),
-    entry_points={'console_scripts': []},
+    description="Machine Learning and Forecasting tools",
+    long_description=README,
+    long_description_content_type="text/markdown",
+    # Credentials
+    author="Octopus Energy",
+    author_email="nerds@octopus.energy",
+    url="https://github.com/octoenergy/timeserio",
+    license="MIT",
+    # Package
+    packages=find_packages(exclude=("tests",)),
+    entry_points={"console_scripts": []},
     include_package_data=True,
     zip_safe=False,
-    description='Machine Learning and Forecasting tools',
-    author='Octopus Energy',
-    author_email='igor@octopus.energy',
-    license='MIT',
     install_requires=[
         "joblib",
         "numpy",
@@ -32,10 +41,12 @@ setup(
         "holidays",
     ],
     classifiers=[
-        'Intended Audience :: Developers',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
     ],
 )

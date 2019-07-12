@@ -1,7 +1,7 @@
 GPU_IMAGE?="timeserio:latest-gpu"
 CPU_IMAGE?="timeserio:latest"
 
-.PHONY: yapf lint clean sync lock test test-parallel docs-build docs-clean circle build-cpu build-gpu
+.PHONY: yapf lint clean sync lock test test-parallel docs-build docs-clean circle build-cpu build-gpu release
 
 yapf:
 	pipenv run yapf -vv -ir .
@@ -50,6 +50,9 @@ build-cpu:
 build-gpu:
 	docker build -t ${GPU_IMAGE} . --build-arg gpu_tag="-gpu"
 
-release:
-	python setup.py sdist bdist_wheel
-	twine upload dist/*
+package:
+	pipenv run python setup.py sdist
+	pipenv run python setup.py bdist_wheel
+
+release: package
+	pipenv run twine upload dist/*
