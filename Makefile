@@ -54,5 +54,8 @@ package:
 	pipenv run python setup.py sdist
 	pipenv run python setup.py bdist_wheel
 
+test-release: package
+	pipenv run twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
 release: package
 	pipenv run twine upload dist/*

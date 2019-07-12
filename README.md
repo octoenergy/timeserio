@@ -7,7 +7,7 @@
 Loosing track of big networks with multiple inputs and outputs? Forgetting to freeze the right layers?
 Struggling to re-generate the input features? `timeserio` can help!
 
-![complex_network](https://raw.githubusercontent.com/octoenergy/timeserio/master/docs/source/_static/multinetwork_complex.svg)
+![complex_network](https://raw.githubusercontent.com/octoenergy/timeserio/master/docs/source/_static/multinetwork_complex.svg?sanitize=true)
 
 ## Features
 
@@ -30,5 +30,5 @@ Please see the [official documentation](http://tech.octopus.energy/timeserio/) o
 
 We welcome contributions and enhancements to any part of the code base, documentation, or tool chain.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on setting up the development environment, running tests,
+See [CONTRIBUTING.md](https://github.com/octoenergy/timeserio/blob/master/CONTRIBUTING.md) for details on setting up the development environment, running tests,
 etc.
