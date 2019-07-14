@@ -9,6 +9,10 @@ Struggling to re-generate the input features? `timeserio` can help!
 
 ![complex_network](https://raw.githubusercontent.com/octoenergy/timeserio/master/docs/source/_static/multinetwork_complex.svg?sanitize=true)
 
+## Documentation and Tutorials
+
+Please see the [official documentation](http://tech.octopus.energy/timeserio/) on how to get started.
+
 ## Features
 
 * Enable encapsulated, maintainable and reusable deep learning models
@@ -20,11 +24,7 @@ Struggling to re-generate the input features? `timeserio` can help!
 
 `pip install timeserio`, or install from source - `pip install -e .`
 
-See [Getting Started](http://docs.octopus.engineering/timeserio/overview/getting_started.html#installation)
-
-## Documentation and Tutorials
-
-Please see the [official documentation](http://tech.octopus.energy/timeserio/) on how to get started.
+See [Getting Started](http://http://tech.octopus.energy/timeserio/overview/getting_started.html#installation)
 
 ## Development
 
