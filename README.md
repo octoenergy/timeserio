@@ -24,7 +24,7 @@ Please see the [official documentation](http://tech.octopus.energy/timeserio/) o
 
 `pip install timeserio`, or install from source - `pip install -e .`
 
-See [Getting Started](http://http://tech.octopus.energy/timeserio/overview/getting_started.html#installation)
+See [Getting Started](http://tech.octopus.energy/timeserio/overview/getting_started.html#installation)
 
 ## Development
 
