@@ -1,10 +1,23 @@
+import functools
+
 import numpy as np
 import pandas as pd
+
 import sklearn.pipeline
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.utils.validation import check_is_fitted
 
 from .. import ini
+
+
+def _y_as_string(func):
+    """Allow func(X, y) to be called as func(df, col_name)."""
+    @functools.wraps(func)
+    def decorated(X, y, **kwargs):
+        if isinstance(X, pd.DataFrame) and isinstance(y, str):
+            X, y = X, X[y]
+        return func(X, y, **kwargs)
+    return decorated
 
 
 class FeatureUnion(sklearn.pipeline.FeatureUnion):
