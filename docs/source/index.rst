@@ -25,6 +25,7 @@
    examples/MNIST
    examples/SolarGenerationTimeSeries_Part1
    examples/SolarGenerationTimeSeries_Part2
+   examples/GroupedPipeline
 
 .. toctree::
    :maxdepth: 1

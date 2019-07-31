@@ -28,6 +28,7 @@ lagger = ('lag', FunctionTransformer(lambda x: x.shift(1), validate=False))
 @pytest.mark.parametrize(
     'pipeline, groupby, is_estimator',
     [
+        (Pipeline([val_selector]), 'id', False),
         (Pipeline([val_selector]), ['id'], False),
         (Pipeline([val_selector]), ['id', 'group'], False),
         (Pipeline_sk([val_selector]), ['id'], False),
@@ -48,25 +49,42 @@ def test_grouped_returns_numpy(pipeline, groupby, is_estimator, input_df):
 
 
 @pytest.mark.parametrize(
-    'pipeline, groupby, is_estimator',
+    'pipeline, groupby',
     [
-        (Pipeline([col_selector]), ['id'], False),
-        (Pipeline([col_selector]), ['id', 'group'], False),
-        (Pipeline_sk([col_selector]), ['id'], False),
-        (Pipeline_sk([col_selector]), ['id', 'group'], False),
-        (Pipeline([col_selector, identity]), ['id'], True),
-        (Pipeline([col_selector, identity]), ['id', 'group'], True),
-        (Pipeline_sk([col_selector, identity]), ['id'], True),
-        (Pipeline_sk([col_selector, identity]), ['id', 'group'], True),
+        (Pipeline([col_selector]), ['id']),
+        (Pipeline([col_selector]), ['id', 'group']),
+        (Pipeline_sk([col_selector]), ['id']),
+        (Pipeline_sk([col_selector]), ['id', 'group']),
     ]
 )
-def test_grouped_returns_pandas(pipeline, groupby, is_estimator, input_df):
+def test_grouped_returns_pandas(pipeline, groupby, input_df):
     gp = GroupedPipeline(groupby=groupby, pipeline=pipeline)
-    if is_estimator:
-        out = gp.fit_predict(input_df)
-    else:
-        out = gp.fit_transform(input_df)
+    out = gp.fit_transform(input_df)
     assert type(out) is pd.DataFrame
+
+
+@pytest.mark.parametrize(
+    'pipeline, groupby, y, y_mode',
+    [
+        (Pipeline([val_selector, identity]), ['id'], 'id', 'string'),
+        (Pipeline([val_selector, identity]), ['id'], 'id', 'series'),
+        (Pipeline([val_selector, identity]), ['id'], 'id', 'array'),
+        (Pipeline_sk([val_selector, identity]), ['id'], 'id', 'string'),
+        (Pipeline_sk([val_selector, identity]), ['id'], 'id', 'series'),
+        (Pipeline_sk([val_selector, identity]), ['id'], 'id', 'array'),
+    ]
+)
+def test_grouped_with_y(pipeline, groupby, y, input_df, y_mode):
+    if y_mode == 'series':
+        y = input_df[y]
+    elif y_mode == 'array':
+        y = input_df[y].values
+    gp = GroupedPipeline(groupby=groupby, pipeline=pipeline)
+
+    out = gp.fit_predict(input_df, y)
+
+    assert type(out) is np.ndarray
+    assert len(out) == len(input_df)
 
 
 @pytest.mark.parametrize(
@@ -86,9 +104,11 @@ def test_grouped_order(pipeline, groupby, is_estimator, input_df):
     gp = GroupedPipeline(groupby=groupby, pipeline=pipeline)
     if is_estimator:
         out = gp.fit_predict(input_df).values
+        expected = input_df[ini.Columns.target].values
     else:
         out = gp.fit_transform(input_df).values
-    np.testing.assert_array_equal(out, input_df[[ini.Columns.target]].values)
+        expected = input_df[[ini.Columns.target]].values
+    np.testing.assert_array_equal(out, expected)
 
 
 @pytest.mark.parametrize(
