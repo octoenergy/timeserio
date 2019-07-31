@@ -1,0 +1,7 @@
+timeserio.data.datasets module
+==============================
+
+.. automodule:: timeserio.data.datasets
+   :members:
+   :undoc-members:
+   :show-inheritance:

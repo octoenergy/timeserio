@@ -11,4 +11,5 @@ Submodules
 
 .. toctree::
 
+   timeserio.data.datasets
    timeserio.data.mock
