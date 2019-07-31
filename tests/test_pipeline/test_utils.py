@@ -2,7 +2,7 @@ import pytest
 
 import pandas as pd
 
-from timeserio.pipeline.pipeline import _y_as_string
+from timeserio.pipeline.pipeline import _parse_df_y
 
 
 @pytest.fixture
@@ -16,8 +16,8 @@ def df():
 
 def test_fit_decorator(df):
     """Test we can pass the target column by name."""
-    @_y_as_string
     def fit(df, y):
+        df, y = _parse_df_y(df, y)
         return df["x"] + y
 
     fit1 = fit(df, df["y"])

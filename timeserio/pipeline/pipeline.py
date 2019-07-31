@@ -1,5 +1,3 @@
-import functools
-
 import numpy as np
 import pandas as pd
 
@@ -10,14 +8,11 @@ from sklearn.utils.validation import check_is_fitted
 from .. import ini
 
 
-def _y_as_string(func):
+def _parse_df_y(df, y):
     """Allow func(X, y) to be called as func(df, col_name)."""
-    @functools.wraps(func)
-    def decorated(X, y, **kwargs):
-        if isinstance(X, pd.DataFrame) and isinstance(y, str):
-            X, y = X, X[y]
-        return func(X, y, **kwargs)
-    return decorated
+    if isinstance(df, pd.DataFrame) and isinstance(y, str):
+        df, y = df, df[y]
+    return df, y
 
 
 class FeatureUnion(sklearn.pipeline.FeatureUnion):
@@ -127,29 +122,42 @@ class GroupedPipeline(BaseEstimator, TransformerMixin):
         self.pipeline = pipeline
         self.errors = errors
 
+    def _iter_groups(self, df, y=None):
+        """Iterate over groups of `df`, and, if provided, matching labels."""
+        groups = df.groupby(self.groupby).groups
+        for key, sub_idx in groups.items():
+            sub_df = df.iloc[sub_idx]
+            sub_y = y[sub_idx] if y is not None else None
+            yield key, sub_df, sub_y
+
     def fit(self, df, y=None):
+        df, y = _parse_df_y(df, y)
         self.pipelines_ = {}
-        self.pipelines_ = {key: self._fit_subdf(sub_df)
-                           for key, sub_df in df.groupby(self.groupby)}
+        self.pipelines_ = {
+            key: self._fit_subdf(sub_df, y=sub_y)
+            for key, sub_df, sub_y in self._iter_groups(df, y=y)
+        }
         return self
 
-    def _fit_subdf(self, sub_df):
-        return clone(self.pipeline).fit(sub_df)
+    def _fit_subdf(self, sub_df, y=None):
+        return clone(self.pipeline).fit(sub_df, y=y)
 
     def transform(self, df):
-        return self._call_pipeline(df, 'transform')
+        return self._call_pipeline(df, attr='transform')
 
     def predict(self, df):
-        return self._call_pipeline(df, 'predict')
+        return self._call_pipeline(df, attr='predict').squeeze()
 
     def fit_predict(self, df, y=None):
         return self.fit(df, y).predict(df)
 
-    def _call_pipeline(self, df, fnc):
+    def _call_pipeline(self, df, y=None, attr=None):
         check_is_fitted(self, 'pipelines_')
         self.one_transformed = False
-        transformed = [self._call_pipeline_subdf(key, sub_df, fnc)
-                       for key, sub_df in df.groupby(self.groupby)]
+        transformed = [
+            self._call_pipeline_subdf(key, sub_df, attr=attr)
+            for key, sub_df, sub_y in self._iter_groups(df, y=y)
+        ]
         if not self.one_transformed and self.errors == 'return_empty':
             raise KeyError('All keys missing in fitted pipelines')
         out = pd.concat(transformed).reindex(df.index)
@@ -158,9 +166,9 @@ class GroupedPipeline(BaseEstimator, TransformerMixin):
             return out.values
         return out
 
-    def _call_pipeline_subdf(self, key, sub_df, fnc):
+    def _call_pipeline_subdf(self, key, sub_df, attr=None):
         try:
-            out = getattr(self.pipelines_[key], fnc)(sub_df)
+            out = getattr(self.pipelines_[key], attr)(sub_df)
             # type(out) is the same for each subdf
             self.cast_to_numpy = type(out) is np.ndarray
             # If out is pd.DataFrame, its unchanged
