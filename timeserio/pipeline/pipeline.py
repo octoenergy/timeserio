@@ -124,7 +124,7 @@ class GroupedPipeline(BaseEstimator, TransformerMixin):
 
     def _iter_groups(self, df, y=None):
         """Iterate over groups of `df`, and, if provided, matching labels."""
-        groups = df.groupby(self.groupby).groups
+        groups = df.groupby(self.groupby).indices
         for key, sub_idx in groups.items():
             sub_df = df.iloc[sub_idx]
             sub_y = y[sub_idx] if y is not None else None

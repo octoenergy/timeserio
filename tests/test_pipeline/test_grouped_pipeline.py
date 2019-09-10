@@ -188,3 +188,17 @@ def test_all_groups_missing_raises(input_df, errors):
     with pytest.raises(KeyError,
                        message='All keys missing in fitted pipelines'):
         gp.transform(transform_df)
+
+
+@pytest.mark.parametrize(
+    "index", [[1, 2, 3, 4], pd.date_range("2019-01-01", periods=4)]
+)
+def test_iter_groups_non_consecutive_index(index):
+    group = [1] * 2 + [2] * (len(index) - 2)
+    value = np.random.random(len(index))
+    input_df = pd.DataFrame(
+        [group, value], index=["group", "value"], columns=index
+    ).T
+    gp = GroupedPipeline(groupby=["group"], pipeline=None)
+    for key, sub_df, _ in gp._iter_groups(input_df):
+        assert (sub_df["group"] == key).all()
