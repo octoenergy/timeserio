@@ -1,0 +1,14 @@
+timeserio.model\_selection package
+==================================
+
+.. automodule:: timeserio.model_selection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   timeserio.model_selection.time_series_split

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>timeserio.preprocessing.datetime module &mdash; Timeserio 0.10.1 documentation</title>
+  <title>timeserio.model_selection.time_series_split module &mdash; Timeserio 0.10.1 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
   <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="timeserio.preprocessing.encoding module" href="timeserio.preprocessing.encoding.html" />
-    <link rel="prev" title="timeserio.preprocessing.batches module" href="timeserio.preprocessing.batches.html" /> 
+    <link rel="next" title="timeserio.multimodel package" href="timeserio.multimodel.html" />
+    <link rel="prev" title="timeserio.model_selection package" href="timeserio.model_selection.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -115,10 +115,10 @@
 <li class="toctree-l4"><a class="reference internal" href="timeserio.batches.html">timeserio.batches package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="timeserio.data.html">timeserio.data package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="timeserio.keras.html">timeserio.keras package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="timeserio.model_selection.html">timeserio.model_selection package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="timeserio.model_selection.html">timeserio.model_selection package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="timeserio.multimodel.html">timeserio.multimodel package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="timeserio.pipeline.html">timeserio.pipeline package</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="timeserio.preprocessing.html">timeserio.preprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="timeserio.preprocessing.html">timeserio.preprocessing package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="timeserio.utils.html">timeserio.utils package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="timeserio.validation.html">timeserio.validation package</a></li>
 </ul>
@@ -177,15 +177,15 @@
         
           <li><a href="timeserio.html">timeserio package</a> &raquo;</li>
         
-          <li><a href="timeserio.preprocessing.html">timeserio.preprocessing package</a> &raquo;</li>
+          <li><a href="timeserio.model_selection.html">timeserio.model_selection package</a> &raquo;</li>
         
-      <li>timeserio.preprocessing.datetime module</li>
+      <li>timeserio.model_selection.time_series_split module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/api/timeserio.preprocessing.datetime.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/timeserio.model_selection.time_series_split.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -222,8 +222,38 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="timeserio-preprocessing-datetime-module">
-<h1>timeserio.preprocessing.datetime module<a class="headerlink" href="#timeserio-preprocessing-datetime-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-timeserio.model_selection.time_series_split">
+<span id="timeserio-model-selection-time-series-split-module"></span><h1>timeserio.model_selection.time_series_split module<a class="headerlink" href="#module-timeserio.model_selection.time_series_split" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="timeserio.model_selection.time_series_split.PandasTimeSeriesSplit">
+<em class="property">class </em><code class="sig-prename descclassname">timeserio.model_selection.time_series_split.</code><code class="sig-name descname">PandasTimeSeriesSplit</code><span class="sig-paren">(</span><em class="sig-param">groupby</em>, <em class="sig-param">datetime_col</em>, <em class="sig-param">n_splits=3</em>, <em class="sig-param">max_train_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/model_selection/time_series_split.html#PandasTimeSeriesSplit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.model_selection.time_series_split.PandasTimeSeriesSplit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.model_selection._split._BaseKFold</span></code></p>
+<p>Apply a sklearn TimeSeriesSplit to multiple timeseries in a single DF.</p>
+<p>The dataframe should be ordered by date ascending for each time series, and
+the index should be unique.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>groupby</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.7)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]) – string or array of strings
+The column name(s) to group the input dataframe by - each group
+should hold a monotonically increasing time series.</p></li>
+<li><p><strong>datetime_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – string
+The column name of the datetime column - used to validate that the
+dataframe is groups of time series.</p></li>
+<li><p><strong>n_splits</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – int, default = 3
+Number of splits. Must be at least 2.</p></li>
+<li><p><strong>max_train_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.7)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – int, optional
+Maximum size for a single training set.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="timeserio.model_selection.time_series_split.PandasTimeSeriesSplit.split">
+<code class="sig-name descname">split</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">y=None</em>, <em class="sig-param">groups=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/timeserio/model_selection/time_series_split.html#PandasTimeSeriesSplit.split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#timeserio.model_selection.time_series_split.PandasTimeSeriesSplit.split" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -234,10 +264,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="timeserio.preprocessing.encoding.html" class="btn btn-neutral float-right" title="timeserio.preprocessing.encoding module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="timeserio.multimodel.html" class="btn btn-neutral float-right" title="timeserio.multimodel package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="timeserio.preprocessing.batches.html" class="btn btn-neutral float-left" title="timeserio.preprocessing.batches module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="timeserio.model_selection.html" class="btn btn-neutral float-left" title="timeserio.model_selection package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

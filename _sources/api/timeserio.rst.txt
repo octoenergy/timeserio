@@ -14,6 +14,7 @@ Subpackages
    timeserio.batches
    timeserio.data
    timeserio.keras
+   timeserio.model_selection
    timeserio.multimodel
    timeserio.pipeline
    timeserio.preprocessing

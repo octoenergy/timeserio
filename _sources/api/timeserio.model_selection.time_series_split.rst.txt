@@ -1,0 +1,7 @@
+timeserio.model\_selection.time\_series\_split module
+=====================================================
+
+.. automodule:: timeserio.model_selection.time_series_split
+   :members:
+   :undoc-members:
+   :show-inheritance:
