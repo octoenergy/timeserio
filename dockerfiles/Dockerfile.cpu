@@ -1,28 +1,21 @@
 # tensorflow no cpu and running python 3.6 
 # Loosely based in what tensorflow tools generate. 
 # More info
-ARG UBUNTU_VERSION=16.04
+ARG UBUNTU_VERSION=18.04
 
 FROM ubuntu:${UBUNTU_VERSION} as base
+
+# See http://bugs.python.org/issue19846
+ENV LANG C.UTF-8
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         curl \
         software-properties-common \
+        python3.6 python3.6-dev python3-distutils\
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-
-# See http://bugs.python.org/issue19846
-ENV LANG C.UTF-8
-
-RUN apt-get update \
-       && add-apt-repository -y ppa:jonathonf/python-3.6 \
-       && apt-get update \
-       && apt-get install -y python3.6 python3.6-dev \
-       && apt-get clean \
-       && rm -rf /var/lib/apt/lists/*
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.6 get-pip.py && rm get-pip.py
 RUN python3.6 -m pip install --no-cache-dir -U pip
@@ -32,4 +25,3 @@ RUN ln -s /usr/bin/python3.6 /usr/local/bin/python
 
 ARG TF_PACKAGE=tensorflow
 RUN pip install ${TF_PACKAGE}
-
