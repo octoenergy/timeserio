@@ -1,4 +1,5 @@
-[![CircleCI](https://circleci.com/gh/octoenergy/timeserio/tree/master.svg?style=svg)](https://circleci.com/gh/octoenergy/timeserio/tree/master)
+[![CircleCI](https://circleci.com/gh/octoenergy/timeserio/tree/master.svg?style=svg)](https://circleci.com/gh/octoenergy/timeserio/tree/master) 
+[![codecov](https://codecov.io/gh/octoenergy/timeserio/branch/master/graph/badge.svg)](https://codecov.io/gh/octoenergy/timeserio)
 
 # timeserio
 
