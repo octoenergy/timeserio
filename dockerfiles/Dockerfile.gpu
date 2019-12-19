@@ -41,7 +41,7 @@ ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV LANG C.UTF-8
 
 RUN apt-get update \
-       && add-apt-repository -y ppa:jonathonf/python-3.6 \
+       && add-apt-repository -y ppa:deadsnakes/ppa \
        && apt-get update \
        && apt-get install -y python3.6 python3.6-dev \
        && apt-get clean \
