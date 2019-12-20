@@ -31,6 +31,8 @@ sphinxcontrib-apidoc     = ">=0.3.0"
 nbsphinx                 = ">=0.4.2"
 nbsphinx-link            = ">=1.2.0"
 ipython                  = ">=7.5.0"
+# release tools
+twine = "*"
 
 [packages]
 timeserio        = {editable = true,path = "."}

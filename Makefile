@@ -50,6 +50,9 @@ build-cpu:
 build-gpu:
 	docker build -t ${GPU_IMAGE} . --build-arg gpu_tag="-gpu"
 
+version:
+	@pipenv run python -c "import timeserio; print(timeserio.__version__)"
+
 package:
 	pipenv run python setup.py sdist
 	pipenv run python setup.py bdist_wheel
