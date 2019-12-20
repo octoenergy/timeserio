@@ -11,18 +11,18 @@ pydocstyle       = "*"
 mypy             = "*"
 typeshed         = "*"
 yapf             = "*"
-pytest           = "==4.0.*"
+pytest           = ">=5.3, <6"
 pytest-cov       = "*"
 pytest-benchmark = "*"
-pytest-parallel  = "*"
+pytest-xdist     = "*"
 pytest-mock      = "*"
 moto             = "*"
 glob2            = "*"
 codecov          = "*"
 #
 dask             = {extras = ["dataframe", "distributed"], version = "*"}
-tensorflow       = "==1.13.1"
-pyarrow          = "==0.12.1"  # Dask does not support 0.13.0 yet
+tensorflow       = "==1.15.0"
+pyarrow          = ">=0.15.1"
 # sphinx docs
 sphinx-autodoc-typehints = ">=1.6.0"
 sphinx-rtd-theme         = ">=0.4.3"

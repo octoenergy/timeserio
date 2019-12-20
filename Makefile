@@ -25,7 +25,7 @@ test:
 	pipenv run pytest tests/
 
 test-parallel:
-	pipenv run pytest --workers auto tests/
+	pipenv run pytest -n auto tests/
 
 doctest:
 	pipenv run pytest --doctest-modules timeserio/
