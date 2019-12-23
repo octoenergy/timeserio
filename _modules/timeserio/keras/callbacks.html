@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>timeserio.keras.callbacks &mdash; Timeserio 0.10.1 documentation</title>
+  <title>timeserio.keras.callbacks &mdash; Timeserio 0.10.2 documentation</title>
   
 
   
@@ -27,6 +27,7 @@
         <script type="text/javascript" src="../../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
@@ -66,7 +67,7 @@
             
             
               <div class="version">
-                0.10.1
+                0.10.2
               </div>
             
           
@@ -175,7 +176,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">keras.callbacks</span> <span class="k">import</span> <span class="n">Callback</span>
+<span class="kn">from</span> <span class="nn">keras.callbacks</span> <span class="kn">import</span> <span class="n">Callback</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -194,23 +195,23 @@
     <span class="n">history</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;loss&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.2e&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">idx</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">with_name</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
     <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
-        <span class="k">return</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Metric &#39;</span><span class="si">{metric}</span><span class="s2">&#39; not found in history.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metric &#39;</span><span class="si">{metric}</span><span class="s2">&#39; not found in history.&quot;</span><span class="p">)</span>
     <span class="n">mean_value</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
-    <span class="n">formatted_value</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;{mean_value:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span>
+    <span class="n">formatted_value</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;{mean_value:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span>
     <span class="k">if</span> <span class="n">errors</span> <span class="ow">and</span> <span class="s1">&#39;batches&#39;</span> <span class="ow">in</span> <span class="n">history</span> <span class="ow">and</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="s1">&#39;batches&#39;</span><span class="p">][</span><span class="n">idx</span><span class="p">]:</span>
         <span class="n">batch_values</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="s1">&#39;batches&#39;</span><span class="p">][</span><span class="n">idx</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span>
         <span class="n">batch_min</span><span class="p">,</span> <span class="n">batch_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">batch_values</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">batch_values</span><span class="p">)</span>
         <span class="n">batch_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">batch_values</span><span class="p">)</span>
         <span class="n">formatted_errors</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">f</span><span class="s2">&quot; +- {batch_std:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span>
-            <span class="n">f</span><span class="s2">&quot; [{batch_min:</span><span class="si">{fmt}</span><span class="s2">} .. {batch_max:</span><span class="si">{fmt}</span><span class="s2">}]&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; +- {batch_std:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; [{batch_min:</span><span class="si">{fmt}</span><span class="s2">} .. {batch_max:</span><span class="si">{fmt}</span><span class="s2">}]&quot;</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">formatted_errors</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="k">if</span> <span class="n">with_name</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{metric}</span><span class="s2">: </span><span class="si">{formatted_value}{formatted_errors}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{metric}</span><span class="s2">: </span><span class="si">{formatted_value}{formatted_errors}</span><span class="s2">&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{formatted_value}{formatted_errors}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{formatted_value}{formatted_errors}</span><span class="s2">&quot;</span>
 
 
 <span class="k">def</span> <span class="nf">_format_epoch_summary</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.2e&#39;</span><span class="p">,</span> <span class="n">idx</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
@@ -233,7 +234,7 @@
 <span class="sd">    Based on keras.callbacks.History</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batches</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batches</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batches</span> <span class="o">=</span> <span class="n">batches</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
@@ -278,21 +279,21 @@
                 <span class="n">with_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">errors</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{metric}</span><span class="s2">: </span><span class="si">{before}</span><span class="s2"> --&gt; </span><span class="si">{after}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{metric}</span><span class="s2">: </span><span class="si">{before}</span><span class="s2"> --&gt; </span><span class="si">{after}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_log_training_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.2e&#39;</span><span class="p">):</span>
         <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;epoch_duration&#39;</span><span class="p">]</span>
         <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
         <span class="n">min_duration</span><span class="p">,</span> <span class="n">max_duration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Total duration: {total:</span><span class="si">{fmt}</span><span class="s2">} seconds&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total duration: {total:</span><span class="si">{fmt}</span><span class="s2">} seconds&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="n">f</span><span class="s2">&quot;Epoch duration: {mean:</span><span class="si">{fmt}</span><span class="s2">} +- {std:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span>
-            <span class="n">f</span><span class="s2">&quot; [{min_duration:</span><span class="si">{fmt}</span><span class="s2">} .. {max_duration:</span><span class="si">{fmt}</span><span class="s2">}] seconds&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Epoch duration: {mean:</span><span class="si">{fmt}</span><span class="s2">} +- {std:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; [{min_duration:</span><span class="si">{fmt}</span><span class="s2">} .. {max_duration:</span><span class="si">{fmt}</span><span class="s2">}] seconds&quot;</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="HistoryLogger.on_train_end"><a class="viewcode-back" href="../../../api/timeserio.keras.callbacks.html#timeserio.keras.callbacks.HistoryLogger.on_train_end">[docs]</a>    <span class="k">def</span> <span class="nf">on_train_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">num_epochs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">])</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Training finished in </span><span class="si">{num_epochs}</span><span class="s2"> epochs.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training finished in </span><span class="si">{num_epochs}</span><span class="s2"> epochs.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_training_time</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_training_metric_improvement</span><span class="p">()</span></div></div>
 
@@ -305,7 +306,7 @@
 <span class="sd">    the training process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Callback</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_training_time</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epoch_times</span> <span class="o">=</span> <span class="p">[]</span>
