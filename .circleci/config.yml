@@ -204,16 +204,22 @@ workflows:
           filters:
             tags:
               only: /^\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
       - docs-build:
           requires:
             - test
             - doctest
           filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
             branches:
-              only: master
+              ignore: /.*/
       - docs-deploy:
           requires:
             - docs-build
           filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
             branches:
-              only: master
+              ignore: /.*/
