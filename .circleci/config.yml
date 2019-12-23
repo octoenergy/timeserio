@@ -3,7 +3,7 @@ orbs:
   codecov: codecov/codecov@1.0.4
 
 jobs:
-  lint:
+  sync-lint:
     docker:
       - image: circleci/python:3.6.4
 
@@ -95,6 +95,35 @@ jobs:
       # - codecov/upload:
       #     file: ./coverage.xml
 
+  release:
+    docker:
+      - image: circleci/python:3.6.4
+
+    working_directory: ~/timeserio
+
+    environment:
+        PIPENV_VENV_IN_PROJECT: true
+        TWINE_NON_INTERACTIVE: true=
+
+    steps:
+
+      - checkout
+
+      - attach_workspace:
+          at: .  # Must be absolute path or relative path from working_directory
+
+      - run:
+          name: Create source and wheel distribution
+          command: make package
+
+      - run:
+          name: Release to PyPI
+          command: |
+            TWINE_REPOSITORY_URL=${TWINE_REPOSITORY_URL}
+            TWINE_USERNAME=${TWINE_USERNAME}
+            TWINE_PASSWORD=${TWINE_PASSWORD}
+            make release
+
   docs-build:
     docker:
       - image: circleci/python:3.6.4
@@ -152,13 +181,29 @@ workflows:
   version: 2
   lint-test-docs:
     jobs:
-      - lint
+      - sync-lint:
+          filters:
+              tags:
+                only: /^\d+\.\d+\.\d+$/
       - test:
           requires:
-            - lint
+            - sync-lint
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
       - doctest:
           requires:
-            - lint
+            - sync-lint
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+      - release:
+          requires:
+            - test
+            - doctest
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
       - docs-build:
           requires:
             - test
