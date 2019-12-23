@@ -141,7 +141,7 @@ def test_raises_when_missing_key(input_df):
     transform_df = mock.mock_raw_data(ids=[0, 1, 2])
     gp = GroupedPipeline(groupby=['id'], pipeline=Pipeline([col_selector]))
     gp.fit(input_df)
-    with pytest.raises(KeyError, message="Missing key 2 in fitted pipelines"):
+    with pytest.raises(KeyError, match="Missing key 2 in fitted pipelines"):
         gp.transform(transform_df)
 
 
@@ -176,17 +176,13 @@ def test_one_groups_missing_return_df(input_df):
     pd.testing.assert_frame_equal(out[orig_cols], transform_df)
 
 
-@pytest.mark.parametrize(
-    'errors',
-    ('return_empty')
-)
-def test_all_groups_missing_raises(input_df, errors):
+def test_all_groups_missing_raises(input_df):
     transform_df = mock.mock_raw_data(ids=[2, 3])
     gp = GroupedPipeline(groupby=['id'], pipeline=Pipeline([col_selector]),
-                         errors=errors)
+                         errors="return_empty")
     gp.fit(input_df)
     with pytest.raises(KeyError,
-                       message='All keys missing in fitted pipelines'):
+                       match='All keys missing in fitted pipelines'):
         gp.transform(transform_df)
 
 

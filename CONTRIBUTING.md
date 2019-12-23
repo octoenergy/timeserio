@@ -11,6 +11,7 @@ Useful commands to aid development are specifed in the `Makefile`. We try to re-
 ## Environment and dependencies
 
 The development environment is created using [`pipenv`](https://docs.pipenv.org/en/latest/).
+
 Run `make sync` to install specified dependency versions.
 
 To update *development* or *test* dependencies, edit `Pipfile` and lock versions using `make lock`.
@@ -23,6 +24,9 @@ The key steps are:
 - specify development and test requirements in `Pipfile` 
 - run `make lock` to pin specific versions and update `Pipfile.lock` - commit this file to Git
 - run `make sync` to install versions specified in the `Pipfile.lock`
+
+### NB: pipenv, Tensorflow, and manylinux2010
+At the time of writing (`2019-12-20`), newer Tensorflow builds (including `1.15.0` and `2.0`) for Linux are released as [`manylinux2010` wheels](https://discuss.python.org/t/the-next-manylinux-specification/1043). This causes [many issues](https://github.com/pypa/manylinux/issues/179), and requires `pipenv` to be installed from [source](https://github.com/pypa/pipenv) via `pip install git+https://github.com/pypa/pipenv.git` if you need to resolve dependencies or update the `Pipfile.lock`.
 
 ## Code Style
 

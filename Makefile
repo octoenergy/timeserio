@@ -25,7 +25,7 @@ test:
 	pipenv run pytest tests/
 
 test-parallel:
-	pipenv run pytest --workers auto tests/
+	pipenv run pytest -n auto tests/
 
 doctest:
 	pipenv run pytest --doctest-modules timeserio/
@@ -49,6 +49,9 @@ build-cpu:
 
 build-gpu:
 	docker build -t ${GPU_IMAGE} . --build-arg gpu_tag="-gpu"
+
+version:
+	@pipenv run python -c "import timeserio; print(timeserio.__version__)"
 
 package:
 	pipenv run python setup.py sdist

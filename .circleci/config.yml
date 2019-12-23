@@ -3,7 +3,7 @@ orbs:
   codecov: codecov/codecov@1.0.4
 
 jobs:
-  lint:
+  sync-lint:
     docker:
       - image: circleci/python:3.6.4
 
@@ -38,6 +38,11 @@ jobs:
           command: |
             make lint
 
+      - persist_to_workspace:
+          root: .  # absolute, or relative from working directory
+          paths:  # Must be relative path from root
+            - ./.venv
+
   test:
     docker:
       - image: circleci/python:3.6.4
@@ -52,23 +57,9 @@ jobs:
 
       - checkout
 
-      - restore_cache:
-          keys:
-            # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-            - pip-packages-v1-{{ .Branch }}-
-            - pip-packages-v1-
-
-      - run:
-          name: Install dependencies
-          command: |
-            make sync
+      - attach_workspace:
+          at: .  # Must be absolute path or relative path from working_directory
       
-      - save_cache:
-          paths:
-              - ./.venv/
-          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-
       - run:
           name: Run tests
           command:  |
@@ -94,22 +85,8 @@ jobs:
 
       - checkout
 
-      - restore_cache:
-          keys:
-            # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-            - pip-packages-v1-{{ .Branch }}-
-            - pip-packages-v1-
-
-      - run:
-          name: Install dependencies
-          command: |
-            make sync
-      
-      - save_cache:
-          paths:
-              - ./.venv/
-          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - attach_workspace:
+          at: .  # Must be absolute path or relative path from working_directory
 
       - run:
           name: Run doctests
@@ -117,6 +94,35 @@ jobs:
 
       # - codecov/upload:
       #     file: ./coverage.xml
+
+  release:
+    docker:
+      - image: circleci/python:3.6.4
+
+    working_directory: ~/timeserio
+
+    environment:
+        PIPENV_VENV_IN_PROJECT: true
+        TWINE_NON_INTERACTIVE: true=
+
+    steps:
+
+      - checkout
+
+      - attach_workspace:
+          at: .  # Must be absolute path or relative path from working_directory
+
+      - run:
+          name: Create source and wheel distribution
+          command: make package
+
+      - run:
+          name: Release to PyPI
+          command: |
+            TWINE_REPOSITORY_URL=${TWINE_REPOSITORY_URL}
+            TWINE_USERNAME=${TWINE_USERNAME}
+            TWINE_PASSWORD=${TWINE_PASSWORD}
+            make release
 
   docs-build:
     docker:
@@ -137,22 +143,8 @@ jobs:
             sudo wget https://github.com/jgm/pandoc/releases/download/2.7.3/pandoc-2.7.3-1-amd64.deb
             sudo dpkg -i pandoc-2.7.3-1-amd64.deb
 
-      - restore_cache:
-          keys:
-            # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-            - pip-packages-v1-{{ .Branch }}-
-            - pip-packages-v1-
-
-      - run:
-          name: Install dependencies
-          command: |
-            make sync
-      
-      - save_cache:
-          paths:
-              - ./.venv/
-          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - attach_workspace:
+          at: .  # Must be absolute path or relative path from working_directory
 
       - run:
           name: Build sphinx docs
@@ -189,13 +181,29 @@ workflows:
   version: 2
   lint-test-docs:
     jobs:
-      - lint
+      - sync-lint:
+          filters:
+              tags:
+                only: /^\d+\.\d+\.\d+$/
       - test:
           requires:
-            - lint
+            - sync-lint
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
       - doctest:
           requires:
-            - lint
+            - sync-lint
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+      - release:
+          requires:
+            - test
+            - doctest
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
       - docs-build:
           requires:
             - test
