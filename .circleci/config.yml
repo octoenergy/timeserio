@@ -38,6 +38,11 @@ jobs:
           command: |
             make lint
 
+      - persist_to_workspace:
+          root: .  # absolute, or relative from working directory
+          paths:  # Must be relative path from root
+            - ./.venv
+
   test:
     docker:
       - image: circleci/python:3.6.4
@@ -52,23 +57,9 @@ jobs:
 
       - checkout
 
-      - restore_cache:
-          keys:
-            # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-            - pip-packages-v1-{{ .Branch }}-
-            - pip-packages-v1-
-
-      - run:
-          name: Install dependencies
-          command: |
-            make sync
+      - attach_workspace:
+          at: .  # Must be absolute path or relative path from working_directory
       
-      - save_cache:
-          paths:
-              - ./.venv/
-          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-
       - run:
           name: Run tests
           command:  |
@@ -94,22 +85,8 @@ jobs:
 
       - checkout
 
-      - restore_cache:
-          keys:
-            # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-            - pip-packages-v1-{{ .Branch }}-
-            - pip-packages-v1-
-
-      - run:
-          name: Install dependencies
-          command: |
-            make sync
-      
-      - save_cache:
-          paths:
-              - ./.venv/
-          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - attach_workspace:
+          at: .  # Must be absolute path or relative path from working_directory
 
       - run:
           name: Run doctests
@@ -137,22 +114,8 @@ jobs:
             sudo wget https://github.com/jgm/pandoc/releases/download/2.7.3/pandoc-2.7.3-1-amd64.deb
             sudo dpkg -i pandoc-2.7.3-1-amd64.deb
 
-      - restore_cache:
-          keys:
-            # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-            - pip-packages-v1-{{ .Branch }}-
-            - pip-packages-v1-
-
-      - run:
-          name: Install dependencies
-          command: |
-            make sync
-      
-      - save_cache:
-          paths:
-              - ./.venv/
-          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - attach_workspace:
+          at: .  # Must be absolute path or relative path from working_directory
 
       - run:
           name: Build sphinx docs
