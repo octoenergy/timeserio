@@ -95,7 +95,7 @@ jobs:
       # - codecov/upload:
       #     file: ./coverage.xml
 
-  release:
+  build-release-test:
     docker:
       - image: circleci/python:3.6.4
 
@@ -103,7 +103,7 @@ jobs:
 
     environment:
         PIPENV_VENV_IN_PROJECT: true
-        TWINE_NON_INTERACTIVE: true=
+        TWINE_NON_INTERACTIVE: true
 
     steps:
 
@@ -119,9 +119,38 @@ jobs:
       - run:
           name: Release to PyPI
           command: |
-            TWINE_REPOSITORY_URL=${TWINE_REPOSITORY_URL}
-            TWINE_USERNAME=${TWINE_USERNAME}
-            TWINE_PASSWORD=${TWINE_PASSWORD}
+            TWINE_REPOSITORY_URL=${TEST_TWINE_REPOSITORY_URL} \
+            TWINE_USERNAME=${TEST_TWINE_USERNAME} \
+            TWINE_PASSWORD=${TEST_TWINE_PASSWORD} \
+            make release
+
+      - persist_to_workspace:
+          root: .
+          paths: ./build
+
+  release-prod:
+    docker:
+      - image: circleci/python:3.6.4
+
+    working_directory: ~/timeserio
+
+    environment:
+        PIPENV_VENV_IN_PROJECT: true
+        TWINE_NON_INTERACTIVE: true
+
+    steps:
+
+      - checkout
+
+      - attach_workspace:
+          at: .  # Must be absolute path or relative path from working_directory
+
+      - run:
+          name: Release to PyPI
+          command: |
+            TWINE_REPOSITORY_URL=${PROD_TWINE_REPOSITORY_URL} \
+            TWINE_USERNAME=${PROD_TWINE_USERNAME} \
+            TWINE_PASSWORD=${PROD_TWINE_PASSWORD} \
             make release
 
   docs-build:
@@ -197,10 +226,18 @@ workflows:
           filters:
             tags:
               only: /^\d+\.\d+\.\d+$/
-      - release:
+      - build-release-test:
           requires:
             - test
             - doctest
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - release-prod:
+          requires:
+            - build-release-test
           filters:
             tags:
               only: /^\d+\.\d+\.\d+$/
