@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/octoenergy/timeserio/tree/master.svg?style=svg)](https://circleci.com/gh/octoenergy/timeserio/tree/master) 
 [![codecov](https://codecov.io/gh/octoenergy/timeserio/branch/master/graph/badge.svg)](https://codecov.io/gh/octoenergy/timeserio)
-[![PyPI version](https://badge.fury.io/py/tentaclio.svg)](https://badge.fury.io/py/tentaclio)
+[![PyPI version](https://badge.fury.io/py/timeserio.svg)](https://badge.fury.io/py/timeserio)
 
 # timeserio
 
