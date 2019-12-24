@@ -7,10 +7,12 @@ from setuptools import find_packages, setup
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+CWD = os.getcwd()
 # read __version__ attribute from version.py
+ver_globals = {"HOME_DIR": CWD}
 with open("timeserio/version.py") as f:
-    exec(f.read())
-VERSION = __version__  # type: ignore  # noqa
+    exec(f.read(), ver_globals)
+VERSION = ver_globals["__version__"]
 # User README.md as long description
 with open("README.md", encoding="utf-8") as f:
     README = f.read()
