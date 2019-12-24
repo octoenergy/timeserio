@@ -3,12 +3,12 @@ import random
 from typing import Iterable
 
 import numpy as np
-import tensorflow as tf
-from keras import backend as K  # noqa
-from keras.engine import Layer
+
+from timeserio.externals import keras
+from timeserio.externals import tensorflow as tf
 
 
-def iterlayers(model: Layer) -> Iterable[Layer]:
+def iterlayers(model: "keras.engine.Layer") -> Iterable["keras.engine.Layer"]:
     """
     Return iterable over all layers (and sub-layers) of a model.
 
@@ -39,4 +39,4 @@ def seed_random():
     )
     tf.set_random_seed(1234)
     sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-    K.set_session(sess)
+    keras.backend.set_session(sess)

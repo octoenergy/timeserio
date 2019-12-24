@@ -548,3 +548,27 @@ class TestMultiNetworkSerialization:
         new_multinetwork = loads(s)
         lr_new = K.get_value(new_multinetwork.model['forecaster'].optimizer.lr)
         assert np.allclose(lr_new, lr_changed), 'Optimizer loaded incorrectly'
+
+    def test_serialize_no_keras(self, multinetwork, mocker):
+        import timeserio.keras.multinetwork
+
+        # replace `keras` with a broken non-module
+        mocker.patch.object(
+            timeserio.keras.multinetwork, "keras", None
+        )
+
+        params = multinetwork.get_params()
+        s = dumps(multinetwork)
+
+        # loading fails because HABEMUS_KERAS is still True
+        with pytest.raises(AttributeError):
+            new_multinetwork = loads(s)
+
+        # if both are mocked correctly, "unsafe" unpickling works again
+        mocker.patch.object(
+            timeserio.keras.multinetwork, "HABEMUS_KERAS", False
+        )
+        new_multinetwork = loads(s)
+        new_params = new_multinetwork.get_params()
+
+        assert new_params == params
