@@ -38,7 +38,6 @@ setup(
         "numpy",
         "pandas",
         "scikit-learn==0.20.3",
-        "keras==2.2.4",
         "s3fs",
         "holidays",
     ],

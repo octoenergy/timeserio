@@ -1,11 +1,16 @@
 from typing import Dict
 
-from keras.utils import Sequence
 from sklearn.base import BaseEstimator
 
+from timeserio.externals import keras
 from ..keras.multinetwork import MultiNetworkBase
 from ..pipeline import MultiPipeline
-from .pipegen import _PipelineGenerator
+
+
+def make_pipeline_generator(*args, **kwargs):
+    """Delay the `keras` import."""
+    from .pipegen import _PipelineGenerator
+    return _PipelineGenerator(*args, **kwargs)
 
 
 class MultiModel(BaseEstimator):
@@ -85,7 +90,7 @@ class MultiModel(BaseEstimator):
     def predict_generator(self, df_generator, model=None, **kwargs):
         """Predict from one of the sub-networks on a DataFrame generator."""
         x_pipes, y_pipes = self.get_model_pipes(model)
-        generator = _PipelineGenerator(
+        generator = make_pipeline_generator(
             x_pipes=x_pipes, y_pipes=y_pipes, df_generator=df_generator
         )
         return self.multinetwork.predict_generator(generator,
@@ -97,12 +102,15 @@ class MultiModel(BaseEstimator):
         x_pipes, y_pipes = self.get_model_pipes(model)
         if 'validation_data' in kwargs:
             is_none = (kwargs['validation_data'] is None)
-            is_sequence = isinstance(kwargs['validation_data'], Sequence)
+            is_sequence = isinstance(
+                kwargs['validation_data'],
+                keras.utils.Sequence
+            )
             if is_none:
                 pass
             elif is_sequence:  # validate from df generator
                 val_df_gen = kwargs['validation_data']
-                kwargs['validation_data'] = _PipelineGenerator(
+                kwargs['validation_data'] = make_pipeline_generator(
                     x_pipes=x_pipes, y_pipes=y_pipes, df_generator=val_df_gen
                 )
             else:  # validate from DataFrame
@@ -110,7 +118,7 @@ class MultiModel(BaseEstimator):
                 val_x = self.get_fit_transformed(x_pipes, val_df)
                 val_y = self.get_fit_transformed(y_pipes, val_df)
                 kwargs['validation_data'] = (val_x, val_y)
-        generator = _PipelineGenerator(
+        generator = make_pipeline_generator(
             x_pipes=x_pipes, y_pipes=y_pipes, df_generator=df_generator
         )
         return self.multinetwork.fit_generator(
@@ -128,7 +136,7 @@ class MultiModel(BaseEstimator):
     def evaluate_generator(self, df_generator, model=None, **kwargs):
         """Evaluate a subnetwork from a DataFrame generator."""
         x_pipes, y_pipes = self.get_model_pipes(model)
-        generator = _PipelineGenerator(
+        generator = make_pipeline_generator(
             x_pipes=x_pipes, y_pipes=y_pipes, df_generator=df_generator
         )
         metrics = self.multinetwork.evaluate_generator(
