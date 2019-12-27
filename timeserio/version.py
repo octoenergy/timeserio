@@ -37,7 +37,7 @@ def call_git_describe(abbrev, home_dir=None):
             ]
         )
         return stdout.decode("utf-8").strip()
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         return None
 
 
