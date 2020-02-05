@@ -38,7 +38,7 @@ def _join_multilevel_dataframes(df_list):
     """
     minx_df = []
     for df in df_list:
-        if isinstance(df.columns, pd.core.index.MultiIndex):
+        if isinstance(df.columns, pd.MultiIndex):
             minx_df.append(df)
         else:
             df.columns = pd.MultiIndex.from_product([df.columns, ['']])
