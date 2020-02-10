@@ -1,3 +1,5 @@
+import datetime as dt
+
 import numpy as np
 import pandas as pd
 import dask.dataframe as dd
@@ -13,7 +15,7 @@ DEF_FREQ = '0.5H'
 def mock_datetime_range(periods=DEF_N, start=None):
     """Sample datetime range with a half-hour period."""
     if not start:
-        start = pd.datetime.now()
+        start = dt.datetime.now()
     return pd.date_range(start=start, freq=DEF_FREQ, periods=periods)
 
 
