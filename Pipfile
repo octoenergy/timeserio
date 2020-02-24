@@ -21,7 +21,7 @@ glob2            = "*"
 codecov          = "*"
 #
 dask             = {extras = ["dataframe", "distributed"], version = "*"}
-tensorflow       = "==1.15.0"
+tensorflow       = "==1.15.2"
 keras            = "==2.2.4"
 pyarrow          = ">=0.15.1"
 # sphinx docs
