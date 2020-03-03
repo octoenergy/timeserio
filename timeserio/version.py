@@ -20,7 +20,7 @@ def get_git_dir(home_dir=None):
 
 def get_release_version_file(home_dir=None):
     home_dir = get_home_dir(home_dir)
-    return os.path.join(home_dir, "RELEASE-VERSION")
+    return os.path.join(home_dir, "timeserio", "RELEASE-VERSION")
 
 
 def call_git_describe(abbrev, home_dir=None):
@@ -34,7 +34,8 @@ def call_git_describe(abbrev, home_dir=None):
                 "--tags",
                 f"--abbrev={abbrev:d}",
                 "--dirty",
-            ]
+            ],
+            stderr=subprocess.PIPE
         )
         return stdout.decode("utf-8").strip()
     except (subprocess.CalledProcessError, FileNotFoundError):
