@@ -2,7 +2,7 @@ TF_VERSION?=1.13.1
 PY_VERSION?=py36
 CPU_IMAGE?=tensorflow:${TF_VERSION}-${PY_VERSION}
 GPU_IMAGE?=tensorflow:${TF_VERSION}-gpu-${PY_VERSION}
-DOCKER_ID_USER?=octoenergy
+DOCKER_NAMESPACE?=krakentechnologies
 
 .PHONY: all build-cpu build-gpu push-cpu push-gpu
 
@@ -16,10 +16,10 @@ build-gpu:
 
 push-cpu:
 	docker login
-	docker tag ${CPU_IMAGE} ${DOCKER_ID_USER}/${CPU_IMAGE}
-	docker push ${DOCKER_ID_USER}/${CPU_IMAGE}
+	docker tag ${CPU_IMAGE} ${DOCKER_NAMESPACE}/${CPU_IMAGE}
+	docker push ${DOCKER_NAMESPACE}/${CPU_IMAGE}
 
 push-gpu:
 	docker login
-	docker tag ${GPU_IMAGE} ${DOCKER_ID_USER}/${GPU_IMAGE}
-	docker push ${DOCKER_ID_USER}/${GPU_IMAGE}
+	docker tag ${GPU_IMAGE} ${DOCKER_NAMESPACE}/${GPU_IMAGE}
+	docker push ${DOCKER_NAMESPACE}/${GPU_IMAGE}
