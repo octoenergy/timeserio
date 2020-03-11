@@ -1,5 +1,5 @@
 ARG gpu_tag
-FROM "octoenergy/tensorflow:1.13.1${gpu_tag}-py36"
+FROM "krakentechnologies/tensorflow:1.12.0${gpu_tag}-py36"
 
 ARG gpu_tag
 
