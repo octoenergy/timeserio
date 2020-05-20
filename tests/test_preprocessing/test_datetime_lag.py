@@ -32,6 +32,31 @@ def test_fit_single_lag(df):
     npt.assert_equal(values_lagged[:1], np.nan)
 
 
+def test_dont_refit(df):
+    feat = LagFeaturizer(
+        datetime_column=ini.Columns.datetime,
+        columns=ini.Columns.target,
+        lags=DEF_FREQ,
+        refit=False,
+    )
+    feat.fit(df)
+    second = df.copy()
+    second[ini.Columns.target] *= 2
+    out = feat.fit_transform(second)
+
+    first_values = df[ini.Columns.target].values
+    second_values = second[ini.Columns.target].values
+    values_transformed = out[ini.Columns.target].values
+    values_lagged = out[f"{ini.Columns.target}_{DEF_FREQ}"].values
+
+    # The target column is the same as the dataframe passed to fit_transform
+    npt.assert_equal(second_values, values_transformed)
+    # But the lagged values correspond to first dataframe
+    # since the second fit is ignored
+    npt.assert_equal(first_values[:-1], values_lagged[1:])
+    npt.assert_equal(values_lagged[:1], np.nan)
+
+
 def test_fit_multiple_lags(df):
     feat = LagFeaturizer(
         datetime_column=ini.Columns.datetime,
