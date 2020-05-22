@@ -342,15 +342,15 @@ class TestSubClass:
         multinetwork._freeze_models_except(model)
         all_models = multinetwork.model_names
         for m in all_models:
-            for l in iterlayers(multinetwork.model[m]):
-                assert l.trainable is False
+            for layer in iterlayers(multinetwork.model[m]):
+                assert layer.trainable is False
 
     def test__freeze_sets_trainable_all(self, multinetwork):
         all_models = multinetwork.model_names
         multinetwork._freeze_models_except(all_models)
         for m in all_models:
-            for l in iterlayers(multinetwork.model[m]):
-                assert l.trainable is True
+            for layer in iterlayers(multinetwork.model[m]):
+                assert layer.trainable is True
 
     def test__freeze_sets_trainable_except(self, multinetwork):
         model = 'forecaster'
@@ -358,11 +358,11 @@ class TestSubClass:
         multinetwork._freeze_models_except(model)
         for m in all_models:
             if m == model:
-                for l in iterlayers(multinetwork.model[m]):
-                    assert l.trainable is True
+                for layer in iterlayers(multinetwork.model[m]):
+                    assert layer.trainable is True
             else:
-                for l in iterlayers(multinetwork.model[m]):
-                    assert l.trainable is False
+                for layer in iterlayers(multinetwork.model[m]):
+                    assert layer.trainable is False
 
     def test_freeze(self, multinetwork, mocker):
         multinetwork._freeze_models_except = mocker.MagicMock()

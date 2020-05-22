@@ -32,6 +32,7 @@ def seed_random():
     https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
     """
     os.environ['PYTHONHASHSEED'] = '0'
+    os.environ['CUDA_VISIBLE_DEVICES'] = ''
     np.random.seed(42)
     random.seed(12345)
     session_conf = tf.ConfigProto(

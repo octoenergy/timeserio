@@ -274,8 +274,8 @@ class MultiNetworkBase(abc.ABC):
         """Set trainable state for each layer in submodel."""
         self.check_model_name(model)
         submodel = self.model[model]
-        for l in iterlayers(submodel):
-            l.trainable = trainable
+        for layer in iterlayers(submodel):
+            layer.trainable = trainable
 
     def _compile_all_models(self):
         """Compile all submodels."""
