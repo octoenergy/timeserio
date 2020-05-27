@@ -17,7 +17,7 @@ import keras.backend as K  # noqa
 
 from timeserio.keras.batches import ArrayBatchGenerator
 from timeserio.keras.multinetwork import MultiNetworkBase
-from timeserio.keras.utils import iterlayers
+from timeserio.keras.utils import iterlayers, seed_random
 
 from timeserio.utils.pickle import dumps, loads
 
@@ -203,6 +203,20 @@ class TestBaseClass:
         assert base.get_params().items() >= params2.items()
 
 
+def test_reproducibility():
+    results = []
+    for _ in range(5):
+        with seed_random():
+            multinetwork = SimpleMultiNetwork()
+            x = np.random.rand(13, 1)
+            y = np.random.rand(13, 1)
+            multinetwork.fit(x, y, model='forecaster', batch_size=1, epochs=1)
+            loss = multinetwork.history[-1]['history']['loss'][-1]
+        results.append(loss)
+    print(results)
+    assert min(results) == max(results)
+
+
 class TestSubClass:
     """Test subclass."""
 
@@ -218,7 +232,7 @@ class TestSubClass:
         params = multinetwork.get_params()
         assert 'forecaster_features' in params
 
-    def test_history_is_appended(self, multinetwork):
+    def test_history_is_appended(self, multinetwork, random):
         """Multinetwork history gets overwritten at the end of training."""
         x = np.random.rand(13, 1)
         y = np.random.rand(13, 1)

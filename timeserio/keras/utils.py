@@ -1,5 +1,6 @@
+from contextlib import contextmanager
 import os
-import random
+import random as py_random
 from typing import Iterable
 
 import numpy as np
@@ -22,7 +23,8 @@ def iterlayers(model: "keras.engine.Layer") -> Iterable["keras.engine.Layer"]:
         yield model
 
 
-def seed_random():
+@contextmanager
+def seed_random(seed=42):
     """Seed all random number generators to ensure repeatable tests.
 
     Sets python, `numpy`, and `tensorflow` random seeds
@@ -31,13 +33,20 @@ def seed_random():
 
     https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
     """
-    os.environ['PYTHONHASHSEED'] = '0'
+    os.environ['PYTHONHASHSEED'] = f'{seed}'
     os.environ['CUDA_VISIBLE_DEVICES'] = ''
-    np.random.seed(42)
-    random.seed(12345)
-    session_conf = tf.ConfigProto(
-        intra_op_parallelism_threads=1, inter_op_parallelism_threads=1
+    py_random.seed(seed)
+    np.random.seed(seed)
+    tf.reset_default_graph()
+
+    graph = tf.Graph()
+    config = tf.ConfigProto(
+        intra_op_parallelism_threads=1,
+        inter_op_parallelism_threads=1,
     )
-    tf.set_random_seed(1234)
-    sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-    keras.backend.set_session(sess)
+    session = tf.Session(graph=graph, config=config)
+    keras.backend.set_session(session)
+    with tf.device("/cpu:0"), graph.as_default(), session.as_default():
+        tf.set_random_seed(seed)
+        graph.seed = seed
+        yield
