@@ -2,7 +2,8 @@ import logging
 import time
 
 import numpy as np
-from keras.callbacks import Callback
+
+from timeserio.externals import keras
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +55,7 @@ def _format_epoch_summary(history, fmt='.2e', idx=-1):
     return message
 
 
-class HistoryLogger(Callback):
+class HistoryLogger(keras.callbacks.Callback):
     """Log all history, including per-batch losses and metrics.
 
     Based on keras.callbacks.History
@@ -73,7 +74,7 @@ class HistoryLogger(Callback):
         batch_history.append({})
         self.epoch_time_start = _now()
 
-    def on_batch_end(self, batch, logs=None):
+    def on_train_batch_end(self, batch, logs=None):
         if not self.batches:
             return
         batch_history = self.history['batches'][-1]
@@ -124,7 +125,7 @@ class HistoryLogger(Callback):
         self._log_training_metric_improvement()
 
 
-class TimeLogger(Callback):
+class TimeLogger(keras.callbacks.Callback):
     """
     Logs the times of training the network and per epoch.
 
@@ -133,7 +134,7 @@ class TimeLogger(Callback):
     """
 
     def __init__(self):
-        super(Callback, self).__init__()
+        super(keras.callbacks.Callback, self).__init__()
         self.start_training_time = 0
         self.epoch_times = []
         self.training_time = 0

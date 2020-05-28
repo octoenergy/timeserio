@@ -46,5 +46,8 @@ def optional_import(module_name):
     return module, success
 
 
-keras, HABEMUS_KERAS = optional_import("keras")
 tensorflow, HABEMUS_TENSORS = optional_import("tensorflow")
+if HABEMUS_TENSORS:
+    keras, HABEMUS_KERAS = tensorflow.keras, True
+else:
+    keras, HABEMUS_KERAS = NotFoundModule("keras"), False

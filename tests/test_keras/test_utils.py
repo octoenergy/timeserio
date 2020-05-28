@@ -1,7 +1,7 @@
 import pytest
-import keras.backend as K  # noqa
-from keras.layers import Concatenate, Dense, Input
-from keras.models import Model, Sequential
+import tensorflow.keras.backend as K  # noqa
+from tensorflow.keras.layers import Concatenate, Dense, Input
+from tensorflow.keras.models import Model, Sequential
 
 from timeserio.keras.utils import iterlayers
 

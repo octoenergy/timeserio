@@ -6,7 +6,7 @@ import warnings
 
 from timeserio.externals import keras, HABEMUS_KERAS
 from ..utils.functools import get_default_args
-from .utils import iterlayers
+from .utils import iterlayers, has_arg
 
 
 def make_history_logger(*args, **kwargs):
@@ -21,8 +21,8 @@ class MultiNetworkBase(abc.ABC):
         Define a simple pair of regression models using `MultiNetworkBase`:
 
         >>> from timeserio.keras.multinetwork import MultiNetworkBase
-        >>> from keras.models import Model
-        >>> from keras.layers import Input, Dense
+        >>> from tensorflow.keras.models import Model
+        >>> from tensorflow.keras.layers import Input, Dense
 
         >>> class MyNetwork(MultiNetworkBase):
         ...     def _model(self, hidden_units=8):
@@ -44,7 +44,7 @@ class MultiNetworkBase(abc.ABC):
         Models are instantiated on demand:
 
         >>> mnet.model
-        {'model_1': <keras.engine.training.Model ...>, 'model_2': <...>}
+        {'model_1': <...keras.engine.training.Model ...>, 'model_2': <...>}
 
 
     """
@@ -104,7 +104,7 @@ class MultiNetworkBase(abc.ABC):
         override = override or {}
         res = {}
         for name, value in self.hyperparams.items():
-            if keras.utils.generic_utils.has_arg(fn, name):
+            if has_arg(fn, name):
                 res.update({name: value})
         res.update(override)
         return res
@@ -124,7 +124,7 @@ class MultiNetworkBase(abc.ABC):
 
         for params_name in params:
             for fn in self._funcs_with_legal_params:
-                if keras.utils.generic_utils.has_arg(fn, params_name):
+                if has_arg(fn, params_name):
                     break
             else:
                 raise ValueError(f'{params_name} is not a legal parameter')
@@ -527,12 +527,12 @@ class MultiNetworkBase(abc.ABC):
             )
         return predictions
 
-    def evaluate(self, x, y, model=None, **kwargs):
+    def evaluate(self, x, y=None, model=None, **kwargs):
         """
         Evaluate estimator on given data.
 
         Args:
-            x:  array-like, shape `(n_samples, n_features)`
+            x:  array-like, shape `(n_samples, n_features)`, or Sequence
                 Test samples where `n_samples` is the number of samples
                 and `n_features` is the number of features.
             y: array-like

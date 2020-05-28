@@ -1,8 +1,8 @@
 from typing import Dict
 
 import pytest
-from keras.layers import LSTM, Concatenate, Dense, Input
-from keras.models import Model
+from tensorflow.keras.layers import LSTM, Concatenate, Dense, Input
+from tensorflow.keras.models import Model
 
 
 @pytest.fixture

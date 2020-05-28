@@ -1,7 +1,7 @@
-from keras.utils import Sequence
+from timeserio.externals import keras
 
 
-class _PipelineGenerator(Sequence):
+class _PipelineGenerator(keras.utils.Sequence):
     def __init__(self, *, x_pipes, y_pipes, df_generator):
         self.x_pipes = x_pipes
         self.y_pipes = y_pipes
