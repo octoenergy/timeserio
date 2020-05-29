@@ -9,4 +9,5 @@ def random():
 
     Ensures repeatable tests.
     """
-    seed_random()
+    with seed_random():
+        yield

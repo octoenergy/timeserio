@@ -1,8 +1,8 @@
 import pytest
 
-from keras.models import Model
-from keras.layers import Dense, Input
-from keras.optimizers import SGD
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.optimizers import SGD
 
 from timeserio.preprocessing import (PandasValueSelector, PandasColumnSelector)
 from timeserio.pipeline import Pipeline, MultiPipeline

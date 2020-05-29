@@ -9,7 +9,6 @@ pep8-naming      = "*"
 flake8           = "*"
 pydocstyle       = "*"
 mypy             = "*"
-typeshed         = "*"
 yapf             = "*"
 pytest           = ">=5.3, <6"
 pytest-cov       = "*"
@@ -21,8 +20,7 @@ glob2            = "*"
 codecov          = "*"
 #
 dask             = {extras = ["dataframe", "distributed"], version = "*"}
-tensorflow       = "==1.15.0"
-keras            = "==2.2.4"
+tensorflow       = "==1.15.2"
 pyarrow          = ">=0.15.1"
 # sphinx docs
 sphinx-autodoc-typehints = ">=1.6.0"

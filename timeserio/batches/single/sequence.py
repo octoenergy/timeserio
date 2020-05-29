@@ -217,8 +217,8 @@ class SequenceForecastBatchGenerator(ForecastBatchGeneratorBase):
         self.dt_column = dt_column
         self.start_time = start_time
         if self.sequence_length % self.batch_offset_period != 0:
-            raise ValueError(f'sequence_length not divisible'
-                             f' by batch_offset_period')
+            raise ValueError('sequence_length not divisible'
+                             ' by batch_offset_period')
 
     @property  # type: ignore
     @functools.lru_cache(None)

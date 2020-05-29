@@ -5,7 +5,7 @@ orbs:
 jobs:
   sync-lint:
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.6.9
 
     working_directory: ~/timeserio
 
@@ -13,15 +13,19 @@ jobs:
         PIPENV_VENV_IN_PROJECT: true 
 
     steps:
-
       - checkout
 
       - restore_cache:
           keys:
             # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
-            - pip-packages-v1-{{ .Branch }}-
-            - pip-packages-v1-
+            - pip-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            - pip-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-
+            - pip-packages-{{ .Environment.CACHE_VERSION }}-
+
+      - run:
+          name: Update pip
+          command: |
+            pipenv run pip install --upgrade pip
 
       - run:
           name: Install dependencies
@@ -31,7 +35,7 @@ jobs:
       - save_cache:
           paths:
               - ./.venv/
-          key: pip-packages-v1-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: pip-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
 
       - run:
           name: Run lint
@@ -45,7 +49,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.6.9
     parallelism: 4
 
     working_directory: ~/timeserio
@@ -74,7 +78,7 @@ jobs:
   
   doctest:
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.6.9
 
     working_directory: ~/timeserio
 
@@ -97,7 +101,7 @@ jobs:
 
   build-release-test:
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.6.9
 
     working_directory: ~/timeserio
 
@@ -130,7 +134,7 @@ jobs:
 
   release-prod:
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.6.9
 
     working_directory: ~/timeserio
 
@@ -155,7 +159,7 @@ jobs:
 
   docs-build:
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.6.9
 
     working_directory: ~/timeserio
 

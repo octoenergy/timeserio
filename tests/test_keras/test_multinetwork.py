@@ -1,8 +1,10 @@
+import itertools
+
 import numpy as np
 import numpy.testing as npt
 import pytest
-from keras.initializers import RandomUniform
-from keras.layers import (
+from tensorflow.keras.initializers import RandomUniform
+from tensorflow.keras.layers import (
     Input,
     Dense,
     Concatenate,
@@ -10,14 +12,14 @@ from keras.layers import (
     Flatten,
     BatchNormalization
 )
-from keras.models import Model
-from keras.optimizers import SGD, Adam
-from keras.callbacks import ReduceLROnPlateau, EarlyStopping
-import keras.backend as K  # noqa
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import SGD, Adam
+from tensorflow.keras.callbacks import ReduceLROnPlateau, EarlyStopping
+import tensorflow.keras.backend as K  # noqa
 
 from timeserio.keras.batches import ArrayBatchGenerator
 from timeserio.keras.multinetwork import MultiNetworkBase
-from timeserio.keras.utils import iterlayers
+from timeserio.keras.utils import iterlayers, seed_random
 
 from timeserio.utils.pickle import dumps, loads
 
@@ -203,6 +205,19 @@ class TestBaseClass:
         assert base.get_params().items() >= params2.items()
 
 
+def test_reproducibility():
+    results = []
+    for _ in range(5):
+        with seed_random():
+            multinetwork = SimpleMultiNetwork()
+            x = np.random.rand(13, 1)
+            y = np.random.rand(13, 1)
+            multinetwork.fit(x, y, model='forecaster', batch_size=1, epochs=1)
+            loss = multinetwork.history[-1]['history']['loss'][-1]
+        results.append(loss)
+    assert min(results) == max(results)
+
+
 class TestSubClass:
     """Test subclass."""
 
@@ -211,7 +226,7 @@ class TestSubClass:
         return SimpleMultiNetwork
 
     @pytest.fixture
-    def multinetwork(self):
+    def multinetwork(self, random):
         return SimpleMultiNetwork()
 
     def test_default_params(self, multinetwork):
@@ -251,36 +266,38 @@ class TestSubClass:
             assert name in multinetwork.model
             assert isinstance(multinetwork.model[name], Model)
 
-    def test_predict_defaut(self, multinetwork, random):
+    def test_predict_defaut(self, multinetwork):
         x = np.random.rand(13, 1)
         y = multinetwork.predict(x, model='forecaster')
         assert y.shape == (13, 1)
 
-    def test_predict_set_params(self, multinetwork, random):
+    def test_predict_set_params(self, multinetwork):
         multinetwork.set_params(forecaster_features=2)
         x = np.random.rand(13, 2)
         y = multinetwork.predict(x, model='forecaster')
         assert y.shape == (13, 1)
 
-    def test_fit_default(self, multinetwork, random):
+    def test_fit_default(self, multinetwork):
         x = np.random.rand(13, 1)
         y = np.random.rand(13, 1)
-        error0 = multinetwork.evaluate(x, y, model='forecaster')
+        metrics0 = multinetwork.evaluate(x, y, model='forecaster')
         multinetwork.fit(x, y, model='forecaster', batch_size=100, epochs=1)
-        error = multinetwork.evaluate(x, y, model='forecaster')
-        assert error < error0
+        metrics = multinetwork.evaluate(x, y, model='forecaster')
+        for metric0, metric in zip(metrics0, metrics):
+            assert metric < metric0
 
     @pytest.mark.parametrize('batch_size', [1, 2])
-    def test_fit_generator(self, multinetwork, random, batch_size):
+    def test_fit_generator(self, multinetwork, batch_size):
         x = np.random.rand(13, 1)
         y = np.random.rand(13, 1)
-        error0 = multinetwork.evaluate(x, y, model='forecaster')
+        metrics0 = multinetwork.evaluate(x, y, model='forecaster')
         generator = ArrayBatchGenerator(x, y, batch_size=batch_size)
         multinetwork.fit_generator(generator, model='forecaster', epochs=1)
-        error = multinetwork.evaluate(x, y, model='forecaster')
-        assert error < error0
+        metrics = multinetwork.evaluate(x, y, model='forecaster')
+        for metric0, metric in zip(metrics0, metrics):
+            assert metric < metric0
 
-    def test_validation_data(self, multinetwork, random):
+    def test_validation_data(self, multinetwork):
         x = np.random.rand(13, 1)
         y = np.random.rand(13, 1)
         x_val = np.random.rand(13, 1)
@@ -299,7 +316,7 @@ class TestSubClass:
         assert history['val_loss'][0] > 0
         assert history['val_loss'][0] >= history['val_loss'][-1]
 
-    def test_score(self, multinetwork, random):
+    def test_score(self, multinetwork):
         x = np.random.rand(13, 1)
         y = np.random.rand(13, 1)
         num_epochs = 1
@@ -310,7 +327,7 @@ class TestSubClass:
         assert score_value >= 0
         assert history['loss'][0] >= (score_value)
 
-    def test_evaluate(self, multinetwork, random):
+    def test_evaluate(self, multinetwork):
         x = np.random.rand(13, 1)
         y = np.random.rand(13, 1)
         num_epochs = 1
@@ -324,13 +341,16 @@ class TestSubClass:
         assert history['mean_absolute_error'][0] >= mae
 
     @pytest.mark.parametrize('batch_size', [1, 2, 2 ** 10])
-    def test_evaluate_generator(self, multinetwork, batch_size, random):
-        x = np.random.rand(13, 1)
-        y = np.random.rand(13, 1)
+    def test_evaluate_generator(self, multinetwork, batch_size):
+        x = np.random.rand(12, 1)
+        y = np.random.rand(12, 1)
+        # evaluate_generator appears to average batch losses while
+        # ignoring the number of samples per batch when different
+        # This is apparent when the last batch is smaller.
         generator = ArrayBatchGenerator(x, y, batch_size=batch_size)
         error0 = multinetwork.evaluate(x, y, model='forecaster')
         error = multinetwork.evaluate_generator(generator, model='forecaster')
-        npt.assert_allclose(error, error0)
+        npt.assert_allclose(error, error0, rtol=1e-6)
 
     @pytest.mark.parametrize('models', [None, 'forecaster', ['forecaster']])
     def test_trainable_models_sets_internal_state(self, multinetwork, models):
@@ -342,15 +362,15 @@ class TestSubClass:
         multinetwork._freeze_models_except(model)
         all_models = multinetwork.model_names
         for m in all_models:
-            for l in iterlayers(multinetwork.model[m]):
-                assert l.trainable is False
+            for layer in iterlayers(multinetwork.model[m]):
+                assert layer.trainable is False
 
     def test__freeze_sets_trainable_all(self, multinetwork):
         all_models = multinetwork.model_names
         multinetwork._freeze_models_except(all_models)
         for m in all_models:
-            for l in iterlayers(multinetwork.model[m]):
-                assert l.trainable is True
+            for layer in iterlayers(multinetwork.model[m]):
+                assert layer.trainable is True
 
     def test__freeze_sets_trainable_except(self, multinetwork):
         model = 'forecaster'
@@ -358,11 +378,11 @@ class TestSubClass:
         multinetwork._freeze_models_except(model)
         for m in all_models:
             if m == model:
-                for l in iterlayers(multinetwork.model[m]):
-                    assert l.trainable is True
+                for layer in iterlayers(multinetwork.model[m]):
+                    assert layer.trainable is True
             else:
-                for l in iterlayers(multinetwork.model[m]):
-                    assert l.trainable is False
+                for layer in iterlayers(multinetwork.model[m]):
+                    assert layer.trainable is False
 
     def test_freeze(self, multinetwork, mocker):
         multinetwork._freeze_models_except = mocker.MagicMock()
@@ -412,15 +432,20 @@ class TestSubClass:
         assert multinetwork._freeze.called_once_with()
         assert multinetwork._unfreeze.called_once_with()
 
-    def test_training_context_preserves_losses_and_metrics(self, multinetwork):
-        losses = multinetwork.model['forecaster'].losses
+    def test_training_context_preserves_loss_and_metrics(self, multinetwork):
+        loss = multinetwork.model['forecaster'].loss
         metrics = multinetwork.model['forecaster'].metrics
 
         with multinetwork._training_context():
-            assert multinetwork.model['forecaster'].losses == losses
-            assert multinetwork.model['forecaster'].metrics == metrics
+            context_loss = multinetwork.model['forecaster'].loss
+            context_metrics = multinetwork.model['forecaster'].metrics
+            assert context_loss == loss
+            for metric, context_metric in itertools.zip_longest(
+                metrics, context_metrics
+            ):
+                assert metric.get_config() == context_metric.get_config()
 
-    def test_fit_frozen(self, multinetwork, random):
+    def test_fit_frozen(self, multinetwork):
         """Assert fitting a frozen model does nothing.
 
         - all weights remain same.
@@ -438,7 +463,7 @@ class TestSubClass:
             npt.assert_equal(w0, w)
         assert error == error0
 
-    def test_fit_frozen_via_kwarg(self, multinetwork, random):
+    def test_fit_frozen_via_kwarg(self, multinetwork):
         """Assert fitting a frozen model does nothing.
 
         Pass trainable_models as kwarg to fit.
@@ -466,15 +491,15 @@ class TestSubClass:
 
 class TestMultiNetworkSerialization:
     @pytest.fixture
-    def multinetwork(self):
+    def multinetwork(self, random):
         return SimpleMultiNetwork()
 
     @pytest.fixture
-    def bn_multinetwork(self):
+    def bn_multinetwork(self, random):
         return BatchNormNetwork()
 
     @pytest.fixture
-    def ef_multinetwork(self):
+    def ef_multinetwork(self, random):
         return EmbedderForecasterNetwork()
 
     def assert_models_same(self, model, model2):

@@ -3,8 +3,10 @@ A set of tools for determining output latency (delay and stride).
 
 For temporal NN models.
 """
-import keras.layers as kl
+from timeserio.externals import keras
 import numpy as np
+
+kl = keras.layers
 
 
 def _n(num_or_tuple):
