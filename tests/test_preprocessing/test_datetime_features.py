@@ -64,6 +64,17 @@ def test_get_is_holiday_from_series():
     pdt.assert_series_equal(is_holiday, expected)
 
 
+@pytest.mark.parametrize(
+    "country, expected",
+    [("England", [1, 0, 0, 1]), ("Scotland", [1, 1, 1, 0])]
+)
+def test_get_is_holiday_from_series_with_country(country, expected):
+    dates = ["2020-01-01", "2020-01-02", "2020-08-03", "2020-08-31"]
+    series = pd.to_datetime(pd.Series(dates))
+    is_holiday = get_is_holiday_from_series(series, country=country)
+    pdt.assert_series_equal(is_holiday, pd.Series(expected))
+
+
 def test_get_zero_indexed_month_from_series():
     series = pd.Series(
         pd.date_range(start='2000-01-01', freq='1M', periods=12)
