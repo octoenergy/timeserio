@@ -129,6 +129,7 @@ SUPPORTED_DATETIME_ATTRS = [
     'time',
     'hour',
     'month',
+    'day',
     'dayofweek',
     'dayofyear',
     'weekday_name',
