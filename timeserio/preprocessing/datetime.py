@@ -5,7 +5,7 @@ from sklearn.utils.validation import check_is_fitted
 from .. import ini
 from .utils import _as_list_of_str, CallableMixin
 
-from holidays import UnitedKingdom as HolidayCalender
+import holidays
 
 DAYS_IN_YEAR = 365
 HOURS_IN_DAY = 24
@@ -48,14 +48,18 @@ def get_fractional_year_from_series(series: pd.Series) -> pd.Series:
     return (series.dt.dayofyear - 1) / 365
 
 
-def get_is_holiday_from_series(series: pd.Series) -> pd.Series:
-    """Return 1 if day is a UK public holiday.
+def get_is_holiday_from_series(
+    series: pd.Series, country: str = "UnitedKingdom"
+) -> pd.Series:
+    """Return 1 if day is a public holiday.
 
-    FixMe: may require region information (England/Wales/Scotland)
-    FixMe: maybe move to geo-related features
+    By default, uses UK holidays, but can specify a country by string name in
+    `country` arg. See `holidays.list_supported_countries()` for list of
+    supported countries.
     """
     years = series.dt.year.unique()
-    return series.dt.date.isin(HolidayCalender(years=years)).astype(int)
+    holiday_dates = holidays.CountryHoliday(country, years=years)
+    return series.dt.date.isin(holiday_dates).astype(int)
 
 
 def get_zero_indexed_month_from_series(series: pd.Series) -> pd.Series:
