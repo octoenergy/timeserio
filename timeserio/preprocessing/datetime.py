@@ -229,6 +229,9 @@ class LagFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
         lags: List[DateOffset, tseries.offsets, timedelta, or str]
             List of lags to apply.
             See pandas.DataFrame.shift
+        refit: bool, default True
+            If set to False, a fitted LagFeaturizer will not be refitted
+            on subsequent calls to `fit()`
         duplicate_agg: str, default 'raise'
             Aggregation functions to apply to values for duplicate datetimes.
             By default, an error is raised if duplicates
@@ -244,14 +247,18 @@ class LagFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
         datetime_column,
         columns,
         lags,
+        refit=True,
         duplicate_agg='raise'
     ):
         self.datetime_column = datetime_column
         self.columns = columns
         self.lags = lags
+        self.refit = refit
         self.duplicate_agg = duplicate_agg
 
     def fit(self, df, y=None, **fit_params):
+        if hasattr(self, 'df_') and not self.refit:
+            return self
         columns = _as_list_of_str(self.columns)
         self.df_ = df.set_index(self.datetime_column)[columns]
         if self.duplicate_agg == 'raise':
