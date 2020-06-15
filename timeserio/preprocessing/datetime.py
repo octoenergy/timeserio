@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
+from typing import List, Union
 
 from .. import ini
 from .utils import _as_list_of_str, CallableMixin
@@ -216,7 +217,58 @@ class PandasDateTimeFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
         return input_columns | set(self.attributes_)
 
 
-class LagFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
+class _BaseLagFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
+    datetime_column: str
+    columns: Union[str, List[str]]
+    lags: List
+    refit: bool
+    duplicate_agg: str
+
+    def __init__(
+        self,
+        datetime_column,
+        columns,
+        lags,
+        refit = True,
+        duplicate_agg = "raise"
+    ):
+        self.datetime_column = datetime_column
+        self.columns = columns
+        self.lags = lags
+        self.refit = refit
+        self.duplicate_agg = duplicate_agg
+
+    def fit(self, df, y=None, **fit_params):
+        if hasattr(self, 'df_') and not self.refit:
+            return self
+        columns = _as_list_of_str(self.columns)
+        self.df_ = df.set_index(self.datetime_column)[columns]
+        if self.duplicate_agg == 'raise':
+            if any(self.df_.index.duplicated()):
+                raise ValueError(
+                    "Input dataframe contains duplicate entries "
+                    "with the same %s", self.datetime_column
+                )
+        else:
+            self.df_ = self.df_.groupby(level=0).agg(self.duplicate_agg)
+        return self
+
+    @property
+    def required_columns(self):
+        columns = [self.datetime_column] + _as_list_of_str(self.columns)
+        return set(columns)
+
+    def transformed_columns(self, input_columns):
+        input_columns = set(_as_list_of_str(input_columns))
+        if not self.required_columns <= input_columns:
+            raise ValueError(f'Required columns are {self.required_columns}')
+        lags = _as_list_of_str(self.lags)
+        columns = _as_list_of_str(self.columns)
+        new_columns = [f"{col}_{lag}" for lag in lags for col in columns]
+        return input_columns | set(new_columns)
+
+
+class LagFeaturizer(_BaseLagFeaturizer):
     """Add lag features to a DataFrame.
 
     Note that None will be inserted where no historic data is available.
@@ -241,36 +293,6 @@ class LagFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
 
     """
 
-    def __init__(
-        self,
-        *,
-        datetime_column,
-        columns,
-        lags,
-        refit=True,
-        duplicate_agg='raise'
-    ):
-        self.datetime_column = datetime_column
-        self.columns = columns
-        self.lags = lags
-        self.refit = refit
-        self.duplicate_agg = duplicate_agg
-
-    def fit(self, df, y=None, **fit_params):
-        if hasattr(self, 'df_') and not self.refit:
-            return self
-        columns = _as_list_of_str(self.columns)
-        self.df_ = df.set_index(self.datetime_column)[columns]
-        if self.duplicate_agg == 'raise':
-            if any(self.df_.index.duplicated()):
-                raise ValueError(
-                    "Input dataframe contains duplicate entries "
-                    "with the same %s", self.datetime_column
-                )
-        else:
-            self.df_ = self.df_.groupby(level=0).agg(self.duplicate_agg)
-        return self
-
     def transform(self, df):
         check_is_fitted(self, 'df_')
         lags = _as_list_of_str(self.lags)
@@ -284,16 +306,81 @@ class LagFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
             )
         return df.reset_index()
 
-    @property
-    def required_columns(self):
-        columns = [self.datetime_column] + _as_list_of_str(self.columns)
-        return set(columns)
 
-    def transformed_columns(self, input_columns):
-        input_columns = set(_as_list_of_str(input_columns))
-        if not self.required_columns <= input_columns:
-            raise ValueError(f'Required columns are {self.required_columns}')
-        lags = _as_list_of_str(self.lags)
-        columns = _as_list_of_str(self.columns)
-        new_columns = [f"{col}_{lag}" for lag in lags for col in columns]
-        return input_columns | set(new_columns)
+class RollingMeanFeaturizer(_BaseLagFeaturizer):
+    """Add rolling mean features to a DataFrame.
+
+        Note that None will be inserted where no historic data is available.
+
+    Parameters:
+        datetime_column: str
+        columns: str or List[str]
+            Feature column to lag according to datetime_column.
+            See pandas.DataFrame.groupby
+        windows: List[int or offset]
+            List of moving window sizes.
+            See pandas.DataFrame.rolling
+        min_periods: int, default ``None``
+            Minimum number of observations in window required to have a value
+        center: bool, default False
+            Set the labels at the center of the window
+        win_type: str, default ``None``
+            Provide a window type. If ``None``, all points are
+            evenly weighted
+        closed: str, default ``None``
+            Make the interval closed on the 'right', 'left', 'both'
+            or 'neither' endpoints.
+        refit: bool, default True
+            If set to False, a fitted LagFeaturizer will not be refitted
+            on subsequent calls to `fit()`
+        duplicate_agg: str, default 'raise'
+            Aggregation functions to apply to values for duplicate datetimes.
+            By default, an error is raised if duplicates
+            See pandas.DataFrame.groupby().aggregate()
+
+    This Transformer is stateful.
+
+    """
+
+    def __init__(
+        self,
+        datetime_column: str,
+        columns: Union[str, List[str]],
+        windows: List,
+        min_periods: int = None,
+        center: bool = False,
+        win_type: str = None,
+        closed: str = None,
+        refit: bool = True,
+        duplicate_agg: str = 'raise'
+    ):
+        super().__init__(
+            datetime_column,
+            columns,
+            windows,
+            refit,
+            duplicate_agg
+        )
+        self.min_periods = min_periods
+        self.center = center
+        self.win_type = win_type
+        self.closed = closed
+
+    def transform(self, df):
+        check_is_fitted(self, 'df_')
+        windows = _as_list_of_str(self.lags)
+        df = df.copy().set_index(self.datetime_column)
+        for window in windows:
+            window_df = self.df_.rolling(
+                window=window,
+                min_periods=self.min_periods,
+                center=self.center,
+                win_type=self.win_type,
+                closed=self.closed
+            ).mean().add_suffix(f"_{window}")
+            df = pd.merge(
+                df, window_df,
+                how="left", left_index=True, right_index=True,
+                suffixes=("", "")
+            )
+        return df.reset_index()

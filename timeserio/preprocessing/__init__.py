@@ -5,5 +5,5 @@ from .encoding import (FeatureIndexEncoder,  # noqa
 from .pandas import (PandasColumnSelector,  # noqa
                      PandasValueSelector,
                      PandasSequenceSplitter)
-from .datetime import PandasDateTimeFeaturizer, LagFeaturizer  # noqa
+from .datetime import PandasDateTimeFeaturizer, LagFeaturizer, RollingMeanFeaturizer  # noqa
 from .aggregate import AggregateFeaturizer  # noqa
