@@ -229,8 +229,8 @@ class _BaseLagFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
         datetime_column,
         columns,
         lags,
-        refit = True,
-        duplicate_agg = "raise"
+        refit=True,
+        duplicate_agg="raise"
     ):
         self.datetime_column = datetime_column
         self.columns = columns

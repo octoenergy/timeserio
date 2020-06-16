@@ -7,7 +7,7 @@ import pandas as pd
 
 import timeserio.ini as ini
 from timeserio.data.mock import mock_raw_data, DEF_FREQ
-from timeserio.preprocessing import LagFeaturizer
+from timeserio.preprocessing import LagFeaturizer, RollingMeanFeaturizer
 
 
 @pytest.fixture
@@ -138,3 +138,20 @@ def test_fit_with_duplicates_with_agg(df):
 
     assert len(feat.df_) == len(df)
     assert len(df_test_transformed) == len(df_test)
+
+
+def test_fit_rolling_mean_single_window(df):
+    window = "6H"
+    feat = RollingMeanFeaturizer(
+        datetime_column=ini.Columns.datetime,
+        columns=ini.Columns.target,
+        windows=[window]
+    )
+    df2 = feat.fit_transform(df)
+    values = df[ini.Columns.target].values
+    values_transformed = df2[ini.Columns.target].values
+    values_rolled = df2[f"{ini.Columns.target}_{window}"].values
+
+    npt.assert_equal(values, values_transformed)
+    npt.assert_equal(values[0], values_rolled[0])
+    npt.assert_almost_equal(values[:12].mean(), values_rolled[11])
