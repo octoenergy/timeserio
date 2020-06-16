@@ -221,8 +221,8 @@ class _BaseLagFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
     datetime_column: str
     columns: Union[str, List[str]]
     lags: List
-    refit: bool
-    duplicate_agg: str
+    refit: bool = True
+    duplicate_agg: str = "raise"
 
     def __init__(
         self,
