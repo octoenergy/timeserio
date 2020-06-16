@@ -37,7 +37,7 @@ setup(
         "joblib",
         "numpy",
         "pandas",
-        "scikit-learn==0.20.3",
+        "scikit-learn",
         "s3fs",
         "holidays",
     ],

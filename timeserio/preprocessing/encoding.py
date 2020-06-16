@@ -3,8 +3,9 @@ import numbers
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing.base import _transform_selected
 from sklearn.utils.validation import check_is_fitted
+
+from .utils import transform_selected
 
 
 class FeatureIndexEncoder(BaseEstimator, TransformerMixin):
@@ -197,7 +198,7 @@ class PeriodicEncoder(BaseEstimator, TransformerMixin):
             raise ValueError(f'X has different shape than during fitting.'
                              f' Expected {self.n_features_} features,'
                              f' got {n_features}.')
-        return _transform_selected(
+        return transform_selected(
             X,
             self._transform,
             dtype=X.dtype,
