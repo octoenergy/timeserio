@@ -376,6 +376,14 @@ class RollingMeanFeaturizer(_BaseLagFeaturizer):
         self.win_type = win_type
         self.closed = closed
 
+    @property
+    def windows(self):
+        return self.lags
+
+    @windows.setter
+    def windows(self, windows):
+        self.lags = windows
+
     def _lag_df(self, lag):
         return self.df_.rolling(
             window=lag,
