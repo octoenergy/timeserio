@@ -1,3 +1,5 @@
+import abc
+
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
@@ -253,6 +255,24 @@ class _BaseLagFeaturizer(BaseEstimator, TransformerMixin, CallableMixin):
             self.df_ = self.df_.groupby(level=0).agg(self.duplicate_agg)
         return self
 
+    @abc.abstractmethod
+    def _lag_df(self, lag):
+        """Implement concrete lagging mechanism for a single lag."""
+        raise NotImplementedError
+
+    def transform(self, df):
+        check_is_fitted(self, 'df_')
+        lags = _as_list_of_str(self.lags)
+        df = df.copy().set_index(self.datetime_column)
+        for lag in lags:
+            lag_df = self._lag_df(lag).add_suffix(f"_{lag}")
+            df = pd.merge(
+                df, lag_df,
+                how="left", left_index=True, right_index=True,
+                suffixes=("", "")
+            )
+        return df.reset_index()
+
     @property
     def required_columns(self):
         columns = [self.datetime_column] + _as_list_of_str(self.columns)
@@ -293,18 +313,8 @@ class LagFeaturizer(_BaseLagFeaturizer):
 
     """
 
-    def transform(self, df):
-        check_is_fitted(self, 'df_')
-        lags = _as_list_of_str(self.lags)
-        df = df.copy().set_index(self.datetime_column)
-        for lag in lags:
-            lag_df = self.df_.shift(freq=lag).add_suffix(f"_{lag}")
-            df = pd.merge(
-                df, lag_df,
-                how="left", left_index=True, right_index=True,
-                suffixes=("", "")
-            )
-        return df.reset_index()
+    def _lag_df(self, lag):
+        return self.df_.shift(freq=lag)
 
 
 class RollingMeanFeaturizer(_BaseLagFeaturizer):
@@ -366,21 +376,11 @@ class RollingMeanFeaturizer(_BaseLagFeaturizer):
         self.win_type = win_type
         self.closed = closed
 
-    def transform(self, df):
-        check_is_fitted(self, 'df_')
-        windows = _as_list_of_str(self.lags)
-        df = df.copy().set_index(self.datetime_column)
-        for window in windows:
-            window_df = self.df_.rolling(
-                window=window,
-                min_periods=self.min_periods,
-                center=self.center,
-                win_type=self.win_type,
-                closed=self.closed
-            ).mean().add_suffix(f"_{window}")
-            df = pd.merge(
-                df, window_df,
-                how="left", left_index=True, right_index=True,
-                suffixes=("", "")
-            )
-        return df.reset_index()
+    def _lag_df(self, lag):
+        return self.df_.rolling(
+            window=lag,
+            min_periods=self.min_periods,
+            center=self.center,
+            win_type=self.win_type,
+            closed=self.closed
+        ).mean()
