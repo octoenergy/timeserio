@@ -3,7 +3,6 @@ import pandas as pd
 import pytest
 
 import timeserio.ini as ini
-from timeserio.externals import HABEMUS_TENSOR_EXT
 from timeserio.data.mock import mock_fit_data
 from timeserio.preprocessing import (
     PandasColumnSelector, PandasValueSelector, PandasSequenceSplitter
@@ -12,11 +11,6 @@ from timeserio.preprocessing import (
 
 datetime_column = ini.Columns.datetime
 usage_column = ini.Columns.target
-
-
-@pytest.fixture(params=[False, True] if HABEMUS_TENSOR_EXT else [])
-def use_tensor_extension(request):
-    return request.param
 
 
 @pytest.fixture
