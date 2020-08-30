@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 
 import timeserio.ini as ini
+from timeserio.externals import HABEMUS_TENSOR_EXT
 from timeserio.data.mock import mock_fit_data
 from timeserio.preprocessing import (
     PandasColumnSelector, PandasValueSelector, PandasSequenceSplitter
@@ -13,28 +14,37 @@ datetime_column = ini.Columns.datetime
 usage_column = ini.Columns.target
 
 
+@pytest.fixture(params=[False, True] if HABEMUS_TENSOR_EXT else [])
+def use_tensor_extension(request):
+    return request.param
+
+
 @pytest.fixture
-def df():
-    return mock_fit_data()
+def df(use_tensor_extension):
+    return mock_fit_data(use_tensor_extension=use_tensor_extension)
 
 
 @pytest.mark.parametrize(
-    'columns, shape1', [
+    'columns, num_columns', [
         (None, 0),
         ([], 0),
         ('cluster', 1),
         ([datetime_column], 1),
         (['weather_temperature', usage_column], 2),
         ([datetime_column, usage_column], 2),
-        ('embedding', 2),
-        (['embedding', usage_column], 3),
+        ('embedding', 1),
+        (['embedding', usage_column], 2),
     ]
 )
-def test_column_selector(df, columns, shape1):
-    expected_shape = (len(df), shape1)
+def test_column_selector(df, columns, num_columns):
     subframe = PandasColumnSelector(columns=columns).transform(df)
     assert isinstance(subframe, pd.DataFrame)
-    assert subframe.shape == expected_shape
+    assert len(subframe) == len(df)
+    try:
+        new_columns = subframe.columns.get_level_values(0).unique()
+    except AttributeError:  # not a MultiIindex
+        new_columns = subframe.columns
+    assert len(new_columns) == num_columns
 
 
 @pytest.mark.parametrize(

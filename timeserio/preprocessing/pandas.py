@@ -73,6 +73,14 @@ class PandasColumnSelector(BaseEstimator, TransformerMixin):
         return self.required_columns
 
 
+def _get_column_as_tensor(s: pd.Series):
+    """Get every normal or TensorArray column as a 2D array."""
+    try:
+        return s.tensor.values
+    except AttributeError:  # normal column
+        return s.values.reshape(-1, 1)
+
+
 class PandasValueSelector(BaseEstimator, TransformerMixin):
     """Select scalar - or vector-valued feature cols, and return np.array."""
 
@@ -84,7 +92,12 @@ class PandasValueSelector(BaseEstimator, TransformerMixin):
 
     def transform(self, df):
         columns = _as_list_of_str(self.columns)
-        subarray = df[columns].values
+        any_tensors = any(hasattr(df[col], "tensor") for col in columns)
+        if not any_tensors:
+            subarray = df[columns].values
+        else:  # support a mix of compatible tensors and regular columns
+            blocks = [_get_column_as_tensor(df[col]) for col in columns]
+            subarray = np.hstack(blocks)
         return subarray
 
     @property
