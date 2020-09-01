@@ -32,6 +32,7 @@ nbsphinx-link            = ">=1.2.0"
 ipython                  = ">=7.5.0"
 # release tools
 twine = "*"
+tensorpandas = {git = "https://github.com/ig248/tensorpandas.git"}
 
 [packages]
 timeserio        = {editable = true,path = "."}
