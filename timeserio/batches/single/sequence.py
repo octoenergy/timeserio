@@ -10,6 +10,7 @@ from ...preprocessing.pandas import array_to_dataframe
 from ..utils import ceiling_division
 from .base import BatchGenerator
 
+
 class ForecastBatchGeneratorBase(BatchGenerator):
     """Generate batches of sequence forecast examples.
 
