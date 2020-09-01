@@ -63,7 +63,11 @@ def test_get_attr(multipipeline):
 
 
 def test_get_item(multipipeline):
-    assert multipipeline['poly'] is multipipeline.poly
+    assert multipipeline["poly"] is multipipeline.poly
+    # Set params overwrites the attribute in this way, so it needs to pass the
+    # change on to the underlying dict
+    multipipeline.poly = "overwritten"
+    assert multipipeline["poly"] is multipipeline.poly
 
 
 def test_pipeline_validation(multipipeline_validation):

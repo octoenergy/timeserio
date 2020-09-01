@@ -18,6 +18,12 @@ class MultiPipeline(BaseEstimator):
         """Get parameter names for the estimator."""
         return sorted(self.pipelines.keys())
 
+    def __setattr__(self, item, value):
+        if item != "pipelines" and item in self.pipelines:
+            self.pipelines[item] = value
+        else:
+            super().__setattr__(item, value)
+
     def __getattr__(self, item):
         if item in self.pipelines:
             return self.pipelines[item]
