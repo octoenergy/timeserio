@@ -14,6 +14,6 @@ def random():
         yield
 
 
-@pytest.fixture(params=[False, True] if HABEMUS_TENSOR_EXT else [])
+@pytest.fixture(params=[False, True] if HABEMUS_TENSOR_EXT else [False])
 def use_tensor_extension(request):
     return request.param
