@@ -3,7 +3,10 @@ import logging
 from types import ModuleType
 
 
-__all__ = ["keras", "HABEMUS_KERAS", "tensorflow", "HABEMUS_TENSORS"]
+__all__ = [
+    "keras", "HABEMUS_KERAS", "tensorflow", "HABEMUS_TENSORS",
+    "tensorpandas", "HABEMUS_TENSOR_EXT"
+]
 
 
 logger = logging.getLogger(__name__)
@@ -51,3 +54,5 @@ if HABEMUS_TENSORS:
     keras, HABEMUS_KERAS = tensorflow.keras, True
 else:
     keras, HABEMUS_KERAS = NotFoundModule("keras"), False
+
+tensorpandas, HABEMUS_TENSOR_EXT = optional_import("tensorpandas")

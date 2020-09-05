@@ -9,10 +9,7 @@ def load_iris_df():
         s.replace("(cm)", "cm").strip().replace(" ", "_")
         for s in iris['feature_names']
     ]
-    df = pd.DataFrame(
-        data=iris['data'],
-        columns=feature_names
-    )
+    df = pd.DataFrame(data=iris['data'], columns=feature_names)
     target_names = iris['target_names']
     targets = target_names[iris['target']]
     df["species"] = targets

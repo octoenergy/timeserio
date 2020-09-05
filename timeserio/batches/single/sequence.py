@@ -5,6 +5,7 @@ from typing import Union
 import numpy as np
 
 from ... import ini
+from ...externals import tensorpandas
 from ...preprocessing.pandas import array_to_dataframe
 from ..utils import ceiling_division
 from .base import BatchGenerator
@@ -29,6 +30,7 @@ class ForecastBatchGeneratorBase(BatchGenerator):
         last_step_prefix='end_of_',
         forecast_steps_min=1,
         forecast_steps_max=1,
+        use_tensor_extension=False,
     ):
         self.df = df
         self.batch_size = batch_size
@@ -55,6 +57,7 @@ class ForecastBatchGeneratorBase(BatchGenerator):
 
         self.forecast_steps_min = forecast_steps_min
         self.forecast_steps_max = forecast_steps_max
+        self.use_tensor_extension = use_tensor_extension
 
     @property
     def num_points(self):
@@ -99,11 +102,14 @@ class ForecastBatchGeneratorBase(BatchGenerator):
                 column, start_indices
             )
             seq_col_name = self.sequence_prefix + column
-            batch_df = array_to_dataframe(
-                seq_values,
-                column=seq_col_name,
-                df=batch_df
-            )
+            if self.use_tensor_extension:
+                batch_df[seq_col_name] = tensorpandas.TensorArray(seq_values)
+            else:
+                batch_df = array_to_dataframe(
+                    seq_values,
+                    column=seq_col_name,
+                    df=batch_df
+                )
         for column in last_step_columns:
             seq_col_name = self.sequence_prefix + column
             last_step_col_name = self.last_step_prefix + column
@@ -132,6 +138,7 @@ class SamplingForecastBatchGenerator(ForecastBatchGeneratorBase):
         forecast_steps_min=1,
         forecast_steps_max=1,
         oversampling=1,
+        use_tensor_extension=False,
     ):
         super().__init__(
             df=df,
@@ -144,6 +151,7 @@ class SamplingForecastBatchGenerator(ForecastBatchGeneratorBase):
             last_step_prefix=last_step_prefix,
             forecast_steps_min=forecast_steps_min,
             forecast_steps_max=forecast_steps_max,
+            use_tensor_extension=use_tensor_extension,
         )
         self.oversampling = oversampling or 1
 
@@ -199,6 +207,7 @@ class SequenceForecastBatchGenerator(ForecastBatchGeneratorBase):
         batch_offset_period=1,
         dt_column=ini.Columns.datetime,
         start_time=None,
+        use_tensor_extension=False,
     ):
         super().__init__(
             df=df,
@@ -211,6 +220,7 @@ class SequenceForecastBatchGenerator(ForecastBatchGeneratorBase):
             last_step_prefix=last_step_prefix,
             forecast_steps_min=forecast_steps_min,
             forecast_steps_max=forecast_steps_max,
+            use_tensor_extension=use_tensor_extension,
         )
         self.batch_offset = batch_offset
         self.batch_offset_period = batch_offset_period

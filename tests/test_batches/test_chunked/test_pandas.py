@@ -40,9 +40,11 @@ class TestSequenceForecastBatchGeneratorMultiID:
         4,
         5,
     ])
-    def test_n_subgens(self, n_customers):
+    def test_n_subgens(self, n_customers, use_tensor_extension):
         ids = np.arange(n_customers)
-        df = mock_fit_data(periods=4, ids=ids)
+        df = mock_fit_data(
+            periods=4, ids=ids, use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             sequence_length=2,
@@ -64,10 +66,14 @@ class TestSequenceForecastBatchGeneratorMultiID:
             (None, 1),
         ]
     )
-    def test_subgen_lengths(self, n_customers, batch_size, exp_sg_len):
+    def test_subgen_lengths(
+        self, n_customers, batch_size, exp_sg_len, use_tensor_extension
+    ):
         n_customers = 3
         ids = np.arange(n_customers)
-        df = mock_fit_data(periods=3, ids=ids)
+        df = mock_fit_data(
+            periods=3, ids=ids, use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             sequence_length=1,
@@ -89,11 +95,14 @@ class TestSequenceForecastBatchGeneratorMultiID:
         ]
     )
     def test_find_batch_in_subgens(
-        self, batch_size, batch_idx, exp_subgen_idx, exp_idx_in_subgen
+        self, batch_size, batch_idx, exp_subgen_idx, exp_idx_in_subgen,
+        use_tensor_extension
     ):
         n_customers = 3
         ids = np.arange(n_customers)
-        df = mock_fit_data(periods=3, ids=ids)
+        df = mock_fit_data(
+            periods=3, ids=ids, use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             sequence_length=1,
@@ -106,10 +115,12 @@ class TestSequenceForecastBatchGeneratorMultiID:
         assert subgen_idx == exp_subgen_idx
         assert idx_in_subgen == exp_idx_in_subgen
 
-    def test_find_batch_raises_outside_subgens(self):
+    def test_find_batch_raises_outside_subgens(self, use_tensor_extension):
         n_customers = 3
         ids = np.arange(n_customers)
-        df = mock_fit_data(periods=3, ids=ids)
+        df = mock_fit_data(
+            periods=3, ids=ids, use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             sequence_length=1,
@@ -120,10 +131,12 @@ class TestSequenceForecastBatchGeneratorMultiID:
         with pytest.raises(IndexError):
             generator.find_subbatch_in_subgens(batch_idx)
 
-    def test_aggregate_ids(self):
+    def test_aggregate_ids(self, use_tensor_extension):
         n_customers = 2
         ids = np.arange(n_customers)
-        df = mock_fit_data(periods=3, ids=ids)
+        df = mock_fit_data(
+            periods=3, ids=ids, use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             sequence_length=2,

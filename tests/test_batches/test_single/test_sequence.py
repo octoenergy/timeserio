@@ -15,9 +15,13 @@ class TestForecastBatchGeneratorBase:
 
 
 class TestSamplingForecastBatchGenerator:
-    def test_get_sequence_values(self):
+    def test_get_sequence_values(self, use_tensor_extension):
         n_points, sequence_length = 10, 2
-        df = mock_fit_data(periods=n_points, ids=[0])
+        df = mock_fit_data(
+            periods=n_points,
+            ids=[0],
+            use_tensor_extension=use_tensor_extension
+        )
         gen = SamplingForecastBatchGenerator(
             df=df,
             sequence_length=sequence_length,
@@ -37,9 +41,14 @@ class TestSequenceForecastBatchGenerator:
         ]
     )
     def test_num_examples(
-        self, n_points, seq_length, fc_max, n_sequences_expected
+        self, n_points, seq_length, fc_max, n_sequences_expected,
+        use_tensor_extension
     ):
-        df = mock_fit_data(periods=n_points, ids=[0])
+        df = mock_fit_data(
+            periods=n_points,
+            ids=[0],
+            use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             sequence_length=seq_length,
@@ -96,8 +105,12 @@ class TestSequenceForecastBatchGenerator:
             (4, 4),
         ]
     )
-    def test_start_time(self, start_time_idx, expected_start_time_idx):
-        df = mock_fit_data(periods=1344, ids=[0])
+    def test_start_time(
+        self, start_time_idx, expected_start_time_idx, use_tensor_extension
+    ):
+        df = mock_fit_data(
+            periods=1344, ids=[0], use_tensor_extension=use_tensor_extension
+        )
         df = df.sort_values(by=[ini.Columns.datetime])
         if start_time_idx is None:
             start_time = None
@@ -116,8 +129,10 @@ class TestSequenceForecastBatchGenerator:
         actual_start_time = batch[f'seq_{ini.Columns.datetime}'][0][0].time()
         assert actual_start_time == expected_start_time
 
-    def test_invalid_start_time(self):
-        df = mock_fit_data(periods=1344, ids=[0])
+    def test_invalid_start_time(self, use_tensor_extension):
+        df = mock_fit_data(
+            periods=1344, ids=[0], use_tensor_extension=use_tensor_extension
+        )
         df = df.sort_values(by=[ini.Columns.datetime])
         start_time = (df[ini.Columns.datetime][0] +
                       pd.Timedelta(1, unit='m')).time()
@@ -130,8 +145,10 @@ class TestSequenceForecastBatchGenerator:
         with pytest.raises(ValueError):
             generator[0]
 
-    def test_random_offset(self, random):
-        df = mock_fit_data(periods=101, ids=[0])
+    def test_random_offset(self, random, use_tensor_extension):
+        df = mock_fit_data(
+            periods=101, ids=[0], use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             batch_offset=True,
@@ -150,9 +167,12 @@ class TestSequenceForecastBatchGenerator:
         ]
     )
     def test_random_offset_value_with_period(
-        self, random, seq_len, period, expected_max_offset
+        self, random, seq_len, period, expected_max_offset,
+        use_tensor_extension
     ):
-        df = mock_fit_data(periods=101, ids=[0])
+        df = mock_fit_data(
+            periods=101, ids=[0], use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             sequence_length=seq_len,
@@ -188,9 +208,14 @@ class TestSequenceForecastBatchGenerator:
         ]
     )
     def test_n_batches(
-        self, n_points, seq_length, fc_max, batch_size, n_batches_expected
+        self, n_points, seq_length, fc_max, batch_size, n_batches_expected,
+        use_tensor_extension
     ):
-        df = mock_fit_data(periods=n_points, ids=[0])
+        df = mock_fit_data(
+            periods=n_points,
+            ids=[0],
+            use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             batch_size=batch_size,
@@ -207,9 +232,14 @@ class TestSequenceForecastBatchGenerator:
         ]
     )
     def test_n_batches_with_offset(
-        self, n_points, seq_length, fc_max, batch_size, n_batches_expected
+        self, n_points, seq_length, fc_max, batch_size, n_batches_expected,
+        use_tensor_extension
     ):
-        df = mock_fit_data(periods=n_points, ids=[0])
+        df = mock_fit_data(
+            periods=n_points,
+            ids=[0],
+            use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             batch_size=batch_size,
@@ -228,9 +258,13 @@ class TestSequenceForecastBatchGenerator:
     )
     def test_batch_size(
         self, n_points, seq_length, fc_max, batch_size,
-        expected_last_batch_size
+        expected_last_batch_size, use_tensor_extension
     ):
-        df = mock_fit_data(periods=n_points, ids=[0])
+        df = mock_fit_data(
+            periods=n_points,
+            ids=[0],
+            use_tensor_extension=use_tensor_extension
+        )
         generator = SequenceForecastBatchGenerator(
             df=df,
             batch_size=batch_size,
@@ -244,8 +278,10 @@ class TestSequenceForecastBatchGenerator:
             assert len(generator[batch_idx]) == batch_size
         assert len(generator[-1]) == expected_last_batch_size
 
-    def test_single_batch(self):
-        df = mock_fit_data(periods=9, ids=[0])
+    def test_single_batch(self, use_tensor_extension):
+        df = mock_fit_data(
+            periods=9, ids=[0], use_tensor_extension=use_tensor_extension
+        )
         seq_length = 2
         generator = SequenceForecastBatchGenerator(
             df=df,
@@ -274,8 +310,10 @@ class TestSequenceForecastBatchGenerator:
             sequenced = batch[sequence_column]
             assert sequenced.values.shape[1] == seq_length
 
-    def test_single_batch_with_last_step(self):
-        df = mock_fit_data(periods=9, ids=[0])
+    def test_single_batch_with_last_step(self, use_tensor_extension):
+        df = mock_fit_data(
+            periods=9, ids=[0], use_tensor_extension=use_tensor_extension
+        )
         seq_length = 2
         generator = SequenceForecastBatchGenerator(
             df=df,
