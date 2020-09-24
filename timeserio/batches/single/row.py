@@ -28,14 +28,13 @@ class RowBatchGenerator(BatchGenerator):
     def __getitem__(self, batch_idx):
         if not len(self):
             raise IndexError('Batch index out of range: Empty batch generator')
-        columns = self.columns
-        if not columns:
-            columns = self.df.columns
         batch_idx = batch_idx % len(self)
-        batch_df = self.df[columns].iloc[
+        batch_df = self.df.iloc[
             batch_idx * self._eff_batch_size:
             batch_idx * self._eff_batch_size +
             self._eff_batch_size
         ]
+        if self.columns:
+            batch_df = batch_df[self.columns]
 
         return batch_df
