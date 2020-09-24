@@ -72,7 +72,8 @@ def mock_fit_data(
     ids=[0],
     embedding_dim=DEF_EMB_DIM,
     seq_length=DEF_SEQ_LENGTH,
-    use_tensor_extension=False
+    use_tensor_extension=False,
+    index=False
 ):
     """Create example fit data in the tall DataFrame format."""
     user_dfs = [
@@ -86,7 +87,9 @@ def mock_fit_data(
         ) for id in ids
     ]
     df = pd.concat(user_dfs, axis=0)
-    df.reset_index(inplace=True, drop=True)
+    df = df.reset_index(drop=True)
+    if index:
+        df = df.set_index([ini.Columns.datetime, ini.Columns.id])
     return df
 
 

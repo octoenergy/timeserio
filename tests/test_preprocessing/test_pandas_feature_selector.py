@@ -5,7 +5,8 @@ import pytest
 import timeserio.ini as ini
 from timeserio.data.mock import mock_fit_data
 from timeserio.preprocessing import (
-    PandasColumnSelector, PandasValueSelector, PandasSequenceSplitter
+    PandasColumnSelector, PandasValueSelector,
+    PandasIndexValueSelector, PandasSequenceSplitter
 )
 
 
@@ -16,6 +17,11 @@ usage_column = ini.Columns.target
 @pytest.fixture
 def df(use_tensor_extension):
     return mock_fit_data(use_tensor_extension=use_tensor_extension)
+
+
+@pytest.fixture
+def indexed_df():
+    return mock_fit_data(index=True)
 
 
 @pytest.mark.parametrize(
@@ -56,6 +62,23 @@ def test_column_selector(df, columns, num_columns):
 def test_value_selector(df, columns, shape1):
     expected_shape = (len(df), shape1)
     subarray = PandasValueSelector(columns=columns).transform(df)
+    assert isinstance(subarray, np.ndarray)
+    assert subarray.shape == expected_shape
+
+
+@pytest.mark.parametrize(
+    'levels, shape1', [
+        (None, 0),
+        ([], 0),
+        (datetime_column, 1),
+        ([datetime_column], 1),
+        ([1, -1], 2),
+        ([datetime_column, 0], 2),
+    ]
+)
+def test_index_value_selector(indexed_df, levels, shape1):
+    expected_shape = (len(indexed_df), shape1)
+    subarray = PandasIndexValueSelector(levels=levels).transform(indexed_df)
     assert isinstance(subarray, np.ndarray)
     assert subarray.shape == expected_shape
 

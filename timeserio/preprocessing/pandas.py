@@ -111,6 +111,31 @@ class PandasValueSelector(BaseEstimator, TransformerMixin):
         return {None}
 
 
+class PandasIndexValueSelector(BaseEstimator, TransformerMixin):
+    """Select index levels as feature cols, and return np.array."""
+
+    def __init__(self, levels=None):
+        self.levels = levels
+
+    def fit(self, df, y=None, **fit_params):
+        return self
+
+    def transform(self, df):
+        levels = self.levels or []
+        if isinstance(levels, str):
+            levels = [levels]
+        try:
+            iter(levels)
+        except TypeError:
+            levels = [levels]
+        blocks = [
+            df.index.get_level_values(level).values.reshape(-1, 1)
+            for level in levels
+        ]
+        subarray = np.hstack(blocks) if blocks else np.empty((len(df), 0))
+        return subarray
+
+
 class PandasSequenceSplitter(BaseEstimator, TransformerMixin):
     """Split sequence columns in two."""
 
