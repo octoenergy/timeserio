@@ -56,17 +56,17 @@ def seed_random(seed=42):
     os.environ['CUDA_VISIBLE_DEVICES'] = ''
     py_random.seed(seed)
     np.random.seed(seed)
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
 
     graph = tf.Graph()
-    config = tf.ConfigProto(
+    config = tf.compat.v1.ConfigProto(
         intra_op_parallelism_threads=1,
         inter_op_parallelism_threads=1,
     )
-    session = tf.Session(graph=graph, config=config)
-    keras.backend.set_session(session)
+    session = tf.compat.v1.Session(graph=graph, config=config)
+    tf.compat.v1.keras.backend.set_session(session)
     with tf.device("/cpu:0"), graph.as_default(), session.as_default():
-        tf.set_random_seed(seed)
+        tf.compat.v1.set_random_seed(seed)
         graph.seed = seed
         yield
-    keras.backend.clear_session()
+    tf.compat.v1.keras.backend.clear_session()
