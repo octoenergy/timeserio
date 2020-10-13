@@ -279,7 +279,7 @@ class TestSubClass:
 
     def test_fit_default(self, multinetwork):
         x = np.random.rand(13, 1)
-        y = np.random.rand(13, 1)
+        y = x * 2
         metrics0 = multinetwork.evaluate(x, y, model='forecaster')
         multinetwork.fit(x, y, model='forecaster', batch_size=100, epochs=1)
         metrics = multinetwork.evaluate(x, y, model='forecaster')
@@ -330,7 +330,7 @@ class TestSubClass:
     def test_evaluate(self, multinetwork):
         x = np.random.rand(13, 1)
         y = np.random.rand(13, 1)
-        num_epochs = 1
+        num_epochs = 2
         model = 'forecaster'
         multinetwork.fit(x, y, model=model, batch_size=100, epochs=num_epochs)
         mse, mae = multinetwork.evaluate(x, y, model=model)
@@ -338,7 +338,10 @@ class TestSubClass:
         assert mse >= 0
         assert mae >= 0
         assert history['loss'][0] >= mse
-        assert history['mean_absolute_error'][0] >= mae
+        if "mean_absolute_error" in history:
+            assert history['mean_absolute_error'][0] >= mae
+        else:
+            assert history['mae'][0] >= mae
 
     @pytest.mark.parametrize('batch_size', [1, 2, 2 ** 10])
     def test_evaluate_generator(self, multinetwork, batch_size):

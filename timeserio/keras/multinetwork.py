@@ -71,11 +71,17 @@ class MultiNetworkBase(abc.ABC):
     @property
     def _funcs_with_legal_params(self):
         Sequential = keras.models.Sequential
-        return [
+        methods = [
             Sequential.fit, Sequential.fit_generator, Sequential.predict,
-            Sequential.predict_classes, Sequential.evaluate, self._model,
-            self._callbacks
+            Sequential.predict_classes, Sequential.evaluate
         ]
+        # fix for tensorflow 2.2.0 using method wrappers
+        # these were removed again in 2.3.0
+        unwrapped_methods = [
+            getattr(method, "__wrapped__", default=method)
+            for method in methods
+        ]
+        return [*unwrapped_methods, self._model, self._callbacks]
 
     @property
     def _funcs_with_default_params(self):
@@ -103,6 +109,7 @@ class MultiNetworkBase(abc.ABC):
         """
         override = override or {}
         res = {}
+        fn = getattr(fn, "__wrapped__", default=fn)
         for name, value in self.hyperparams.items():
             if has_arg(fn, name):
                 res.update({name: value})
