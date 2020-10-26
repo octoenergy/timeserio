@@ -78,7 +78,7 @@ class MultiNetworkBase(abc.ABC):
         # fix for tensorflow 2.2.0 using method wrappers
         # these were removed again in 2.3.0
         unwrapped_methods = [
-            getattr(method, "__wrapped__", default=method)
+            getattr(method, "__wrapped__", method)
             for method in methods
         ]
         return [*unwrapped_methods, self._model, self._callbacks]
@@ -109,7 +109,7 @@ class MultiNetworkBase(abc.ABC):
         """
         override = override or {}
         res = {}
-        fn = getattr(fn, "__wrapped__", default=fn)
+        fn = getattr(fn, "__wrapped__", fn)
         for name, value in self.hyperparams.items():
             if has_arg(fn, name):
                 res.update({name: value})
