@@ -50,7 +50,6 @@ def _join_multilevel_dataframes(df_list):
 
 class PandasColumnSelector(BaseEstimator, TransformerMixin):
     """Select a sub-set of columns from a pandas DataFrame."""
-
     def __init__(self, columns=None):
         self.columns = columns
 
@@ -82,10 +81,13 @@ def _get_column_as_tensor(s: pd.Series):
 
 
 class PandasValueSelector(BaseEstimator, TransformerMixin):
-    """Select scalar - or vector-valued feature cols, and return np.array."""
+    """Select scalar - or vector-valued feature cols, and return np.array.
 
-    def __init__(self, columns=None):
+    Optionally, cast the resulting arry to dtype.
+    """
+    def __init__(self, columns=None, dtype=None):
         self.columns = columns
+        self.dtype = dtype
 
     def fit(self, df, y=None, **fit_params):
         return self
@@ -98,6 +100,8 @@ class PandasValueSelector(BaseEstimator, TransformerMixin):
         else:  # support a mix of compatible tensors and regular columns
             blocks = [_get_column_as_tensor(df[col]) for col in columns]
             subarray = np.hstack(blocks)
+        if self.dtype:
+            subarray = subarray.astype(self.dtype)
         return subarray
 
     @property
@@ -112,10 +116,13 @@ class PandasValueSelector(BaseEstimator, TransformerMixin):
 
 
 class PandasIndexValueSelector(BaseEstimator, TransformerMixin):
-    """Select index levels as feature cols, and return np.array."""
+    """Select index levels as feature cols, and return np.array.
 
-    def __init__(self, levels=None):
+    Optionally, cast the resulting arry to dtype.
+    """
+    def __init__(self, levels=None, dtype=None):
         self.levels = levels
+        self.dtype = dtype
 
     def fit(self, df, y=None, **fit_params):
         return self
@@ -133,12 +140,13 @@ class PandasIndexValueSelector(BaseEstimator, TransformerMixin):
             for level in levels
         ]
         subarray = np.hstack(blocks) if blocks else np.empty((len(df), 0))
+        if self.dtype:
+            subarray = subarray.astype(self.dtype)
         return subarray
 
 
 class PandasSequenceSplitter(BaseEstimator, TransformerMixin):
     """Split sequence columns in two."""
-
     def __init__(self, columns=None, index=0):
         self.columns = columns
         self.index = index

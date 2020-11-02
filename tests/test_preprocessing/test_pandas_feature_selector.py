@@ -5,13 +5,13 @@ import pytest
 import timeserio.ini as ini
 from timeserio.data.mock import mock_fit_data
 from timeserio.preprocessing import (
-    PandasColumnSelector, PandasValueSelector,
-    PandasIndexValueSelector, PandasSequenceSplitter
+    PandasColumnSelector, PandasValueSelector, PandasIndexValueSelector,
+    PandasSequenceSplitter
 )
-
 
 datetime_column = ini.Columns.datetime
 usage_column = ini.Columns.target
+id_column = ini.Columns.id
 
 
 @pytest.fixture
@@ -66,6 +66,12 @@ def test_value_selector(df, columns, shape1):
     assert subarray.shape == expected_shape
 
 
+@pytest.mark.parametrize("dtype", ["uint8", "int8"])
+def test_value_selector_dtype(df, dtype):
+    subarray = PandasValueSelector(columns="id", dtype=dtype).transform(df)
+    assert subarray.dtype == dtype
+
+
 @pytest.mark.parametrize(
     'levels, shape1', [
         (None, 0),
@@ -81,6 +87,13 @@ def test_index_value_selector(indexed_df, levels, shape1):
     subarray = PandasIndexValueSelector(levels=levels).transform(indexed_df)
     assert isinstance(subarray, np.ndarray)
     assert subarray.shape == expected_shape
+
+
+@pytest.mark.parametrize("dtype", ["uint8", "int8"])
+def test_index_value_selector_dtype(indexed_df, dtype):
+    subarray = PandasIndexValueSelector(levels="id",
+                                        dtype=dtype).transform(indexed_df)
+    assert subarray.dtype == dtype
 
 
 @pytest.mark.parametrize(
