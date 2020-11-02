@@ -50,6 +50,7 @@ def _join_multilevel_dataframes(df_list):
 
 class PandasColumnSelector(BaseEstimator, TransformerMixin):
     """Select a sub-set of columns from a pandas DataFrame."""
+
     def __init__(self, columns=None):
         self.columns = columns
 
@@ -85,6 +86,7 @@ class PandasValueSelector(BaseEstimator, TransformerMixin):
 
     Optionally, cast the resulting arry to dtype.
     """
+
     def __init__(self, columns=None, dtype=None):
         self.columns = columns
         self.dtype = dtype
@@ -120,6 +122,7 @@ class PandasIndexValueSelector(BaseEstimator, TransformerMixin):
 
     Optionally, cast the resulting arry to dtype.
     """
+
     def __init__(self, levels=None, dtype=None):
         self.levels = levels
         self.dtype = dtype
@@ -147,6 +150,7 @@ class PandasIndexValueSelector(BaseEstimator, TransformerMixin):
 
 class PandasSequenceSplitter(BaseEstimator, TransformerMixin):
     """Split sequence columns in two."""
+
     def __init__(self, columns=None, index=0):
         self.columns = columns
         self.index = index
