@@ -109,7 +109,7 @@ class HistoryLogger(keras.callbacks.Callback):
             logger.info(f"{metric}: {before} --> {after}")
 
     def _log_training_time(self, fmt='.2e'):
-        times = self.history['epoch_duration']
+        times = self.history.get('epoch_duration', [0])
         mean, std, total = np.mean(times), np.std(times), np.sum(times)
         min_duration, max_duration = np.min(times), np.max(times)
         logger.info(f"Total duration: {total:{fmt}} seconds")
@@ -119,7 +119,7 @@ class HistoryLogger(keras.callbacks.Callback):
         )
 
     def on_train_end(self, logs=None):
-        num_epochs = len(self.history['epoch'])
+        num_epochs = len(self.history.get('epoch', []))
         logger.info(f"Training finished in {num_epochs} epochs.")
         self._log_training_time()
         self._log_training_metric_improvement()
