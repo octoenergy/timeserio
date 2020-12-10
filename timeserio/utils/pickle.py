@@ -1,4 +1,4 @@
-import s3fs
+import tentaclio
 import joblib.externals.cloudpickle as cp
 
 __all__ = ['dumpf', 'loadf']
@@ -9,11 +9,7 @@ def open_url(filename, mode):
 
     S3 filename must start with `s3://`.
     """
-    if filename.startswith('s3://'):
-        s3 = s3fs.S3FileSystem()
-        file = s3.open(filename, mode)
-    else:
-        file = open(filename, mode)
+    file = tentaclio.open(filename, mode)
     return file
 
 
