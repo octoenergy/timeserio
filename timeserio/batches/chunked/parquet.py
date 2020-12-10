@@ -1,7 +1,5 @@
 """Generate batches from a data stored in Parquet files."""
-import os
-
-import s3fs
+import tentaclio
 import pandas as pd
 
 from .base import ChunkedBatchGenerator
@@ -25,15 +23,8 @@ class RowBatchGenerator(ChunkedBatchGenerator):
         self.columns = columns
         self.batch_aggregator = batch_aggregator
 
-        if self.path.startswith('s3://'):
-            s3 = s3fs.S3FileSystem()
-            self.files = [f's3://{file}' for file in s3.ls(self.path)]
-        else:
-            self.files = [
-                os.path.join(path, file)
-                for file in os.listdir(self.path)
-            ]
-        self.files = [f for f in self.files if f.endswith('.parquet')]
+        dir_contents = tentaclio.listdir(path)
+        self.files = [f for f in dir_contents if f.endswith('.parquet')]
 
     @property
     def chunks(self):
@@ -86,15 +77,8 @@ class SequenceForecastBatchGenerator(ChunkedBatchGenerator):
         self.start_time = start_time
         self.batch_aggregator = batch_aggregator
 
-        if self.path.startswith('s3://'):
-            s3 = s3fs.S3FileSystem()
-            self.files = [f's3://{file}' for file in s3.ls(self.path)]
-        else:
-            self.files = [
-                os.path.join(path, file)
-                for file in os.listdir(self.path)
-            ]
-        self.files = [f for f in self.files if f.endswith('.parquet')]
+        dir_contents = tentaclio.listdir(path)
+        self.files = [f for f in dir_contents if f.endswith('.parquet')]
 
     @property
     def chunks(self):
