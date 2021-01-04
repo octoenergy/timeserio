@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+timeserio        = {editable = true, path = "."}
 mccabe           = "*"
 pep8-naming      = "*"
 flake8           = "*"
@@ -18,11 +19,6 @@ pytest-mock      = "*"
 moto             = "*"
 glob2            = "*"
 codecov          = "*"
-#
-dask             = {extras = ["dataframe", "distributed"], version = "*"}
-tensorflow       = "==1.15.2"
-keras            = "2.2.4"
-pyarrow          = ">=0.15.1"
 # sphinx docs
 sphinx-autodoc-typehints = ">=1.6.0"
 sphinx-rtd-theme         = ">=0.4.3"
@@ -34,9 +30,8 @@ ipython                  = ">=7.5.0"
 # release tools
 twine = "*"
 tensorpandas = {git = "https://github.com/ig248/tensorpandas.git"}
-
-[packages]
-timeserio        = {editable = true,path = "."}
+dask             = {extras = ["dataframe", "distributed"], version = "*"}
+pyarrow          = ">=0.15.1"
 
 [requires]
 python_version    = "3.6"

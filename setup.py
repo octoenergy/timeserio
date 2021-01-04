@@ -39,7 +39,9 @@ setup(
         "pandas",
         "scikit-learn>=0.23.1",
         "holidays",
-        "tentaclio"
+        "tentaclio",
+        "tensorflow==1.15.2",
+        "keras==2.2.4"
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
