@@ -29,6 +29,7 @@ holidays = "^0.10.5"
 cloudpickle = "^1.6.0"
 fsspec = "^0.8.7"
 s3fs = "^0.4"
+tensorflow = "^2.3.1"
 
 
 [tool.poetry.dev-dependencies]
@@ -55,7 +56,7 @@ pytest-xdist = "<2.0"
 sphinx-autodoc-typehints = ">=1.6.0"
 sphinx-rtd-theme = ">=0.4.3"
 sphinxcontrib-apidoc = ">=0.3.0"
-tensorflow = "==1.15.2"
+tensorflow = "==2.3.1"
 tensorpandas = {git = "https://github.com/ig248/tensorpandas.git"}
 twine = "*"
 yapf = "*"
