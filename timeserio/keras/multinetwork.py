@@ -44,7 +44,7 @@ class MultiNetworkBase(abc.ABC):
         Models are instantiated on demand:
 
         >>> mnet.model
-        {'model_1': <...keras.engine.training.Model ...>, 'model_2': <...>}
+        {'model_1': <...keras.engine...>, 'model_2': <...>}
 
 
     """
