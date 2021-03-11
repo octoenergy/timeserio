@@ -1,6 +1,5 @@
 from contextlib import contextmanager
 import inspect
-import os
 import random as py_random
 from typing import Iterable
 
@@ -52,21 +51,7 @@ def seed_random(seed=42):
 
     https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
     """
-    os.environ['PYTHONHASHSEED'] = f'{seed}'
-    os.environ['CUDA_VISIBLE_DEVICES'] = ''
     py_random.seed(seed)
     np.random.seed(seed)
-    tf.compat.v1.reset_default_graph()
-
-    graph = tf.Graph()
-    config = tf.compat.v1.ConfigProto(
-        intra_op_parallelism_threads=1,
-        inter_op_parallelism_threads=1,
-    )
-    session = tf.compat.v1.Session(graph=graph, config=config)
-    tf.compat.v1.keras.backend.set_session(session)
-    with tf.device("/cpu:0"), graph.as_default(), session.as_default():
-        tf.compat.v1.set_random_seed(seed)
-        graph.seed = seed
-        yield
-    tf.compat.v1.keras.backend.clear_session()
+    tf.random.set_seed(seed)
+    yield

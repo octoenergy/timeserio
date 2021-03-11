@@ -9,8 +9,10 @@ jobs:
 
     working_directory: ~/timeserio
 
-    environment:
-        PIPENV_VENV_IN_PROJECT: true 
+    environment:  # these don't get interpolated
+        POETRY_VERSION: 1.1.2 
+        POETRY_HOME: /home/circleci/.poetry
+        POETRY_VIRTUALENVS_IN_PROJECT: "true"
 
     steps:
       - checkout
@@ -18,24 +20,27 @@ jobs:
       - restore_cache:
           keys:
             # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+            - pip-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ checksum "poetry.lock" }}
             - pip-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-
             - pip-packages-{{ .Environment.CACHE_VERSION }}-
 
       - run:
-          name: Update pip
+          name: Set up build tools
           command: |
-            pipenv run pip install --upgrade pip
+            mkdir -p $POETRY_HOME
+            curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+            cat $POETRY_HOME/env >> $BASH_ENV
 
       - run:
+          # we remove untracked to avoid issues with stail/removed dependencies
           name: Install dependencies
           command: |
-            make sync
-      
+            poetry install -vvv --remove-untracked
+
       - save_cache:
           paths:
               - ./.venv/
-          key: pip-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: pip-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ checksum "poetry.lock" }}
 
       - run:
           name: Run lint
@@ -43,9 +48,10 @@ jobs:
             make lint
 
       - persist_to_workspace:
-          root: .  # absolute, or relative from working directory
+          root: /home/circleci  # absolute, or relative from working directory
           paths:  # Must be relative path from root
-            - ./.venv
+            - timeserio/.venv
+            - .poetry
 
   test:
     docker:
@@ -55,20 +61,24 @@ jobs:
     working_directory: ~/timeserio
 
     environment:
-        PIPENV_VENV_IN_PROJECT: true 
+        POETRY_VIRTUALENVS_IN_PROJECT: "true"
 
     steps:
 
       - checkout
 
       - attach_workspace:
-          at: .  # Must be absolute path or relative path from working_directory
-      
+          at: /home/circleci  # Must be absolute path or relative path from working_directory
+
+      - run:
+          name: Configure poetry
+          command: cat ~/.poetry/env >> $BASH_ENV
+
       - run:
           name: Run tests
           command:  |
             TESTFILES=$(circleci tests glob "tests/**/*.py" | circleci tests split --split-by=timings)
-            pipenv run pytest --cov=./timeserio/ --cov-report xml --junitxml=junit/pytest/results.xml --keep-duplicates $TESTFILES
+            poetry run pytest --cov=./timeserio/ --cov-report xml --junitxml=junit/pytest/results.xml --keep-duplicates $TESTFILES
       
       - store_test_results:
           path: ./junit
@@ -83,14 +93,19 @@ jobs:
     working_directory: ~/timeserio
 
     environment:
-        PIPENV_VENV_IN_PROJECT: true 
+        POETRY_VIRTUALENVS_IN_PROJECT: "true"
 
     steps:
 
       - checkout
 
       - attach_workspace:
-          at: .  # Must be absolute path or relative path from working_directory
+          at: /home/circleci  # Must be absolute path or relative path from working_directory
+
+      - run:
+          name: Configure poetry
+          command: cat ~/.poetry/env >> $BASH_ENV
+
 
       - run:
           name: Run doctests
@@ -106,19 +121,23 @@ jobs:
     working_directory: ~/timeserio
 
     environment:
-        PIPENV_VENV_IN_PROJECT: true
-        TWINE_NON_INTERACTIVE: true
+        TWINE_NON_INTERACTIVE: "true"
 
     steps:
 
       - checkout
 
       - attach_workspace:
-          at: .  # Must be absolute path or relative path from working_directory
+          at: /home/circleci  # Must be absolute path or relative path from working_directory
+
+      - run:
+          name: Configure poetry
+          command: cat ~/.poetry/env >> $BASH_ENV
 
       - run:
           name: Create source and wheel distribution
-          command: make package
+          command: |
+            make package
 
       - run:
           name: Release to PyPI
@@ -130,7 +149,8 @@ jobs:
 
       - persist_to_workspace:
           root: .
-          paths: ./build
+          paths: 
+            - ./build
 
   release-prod:
     docker:
@@ -139,16 +159,20 @@ jobs:
     working_directory: ~/timeserio
 
     environment:
-        PIPENV_VENV_IN_PROJECT: true
-        TWINE_NON_INTERACTIVE: true
+        TWINE_NON_INTERACTIVE: "true"
+        POETRY_VIRTUALENVS_IN_PROJECT: "true"
 
     steps:
 
       - checkout
 
       - attach_workspace:
-          at: .  # Must be absolute path or relative path from working_directory
+          at: /home/circleci  # Must be absolute path or relative path from working_directory
 
+      - run:
+          name: Configure poetry
+          command: cat ~/.poetry/env >> $BASH_ENV
+          
       - run:
           name: Release to PyPI
           command: |
@@ -164,7 +188,7 @@ jobs:
     working_directory: ~/timeserio
 
     environment:
-        PIPENV_VENV_IN_PROJECT: true 
+        POETRY_VIRTUALENVS_IN_PROJECT: "true"
 
     steps:
 
@@ -177,7 +201,11 @@ jobs:
             sudo dpkg -i pandoc-2.7.3-1-amd64.deb
 
       - attach_workspace:
-          at: .  # Must be absolute path or relative path from working_directory
+          at: /home/circleci  # Must be absolute path or relative path from working_directory
+
+      - run:
+          name: Configure poetry
+          command: cat ~/.poetry/env >> $BASH_ENV
 
       - run:
           name: Build sphinx docs
@@ -186,7 +214,8 @@ jobs:
       
       - persist_to_workspace:
           root: docs/_build
-          paths: html
+          paths: 
+            - html
 
   docs-deploy:
     docker:

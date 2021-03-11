@@ -44,7 +44,7 @@ class MultiNetworkBase(abc.ABC):
         Models are instantiated on demand:
 
         >>> mnet.model
-        {'model_1': <...keras.engine.training.Model ...>, 'model_2': <...>}
+        {'model_1': <...keras.engine...>, 'model_2': <...>}
 
 
     """
@@ -286,16 +286,17 @@ class MultiNetworkBase(abc.ABC):
 
     def _compile_all_models(self):
         """Compile all submodels."""
-        for model in self.model_names:
-            submodel = self.model[model]
-            try:
-                submodel.compile(
-                    loss=submodel.loss,
-                    optimizer=submodel.optimizer,
-                    metrics=submodel.metrics,
-                )
-            except AttributeError:
-                pass
+        for model in self.model.values():
+            if hasattr(model, "_originally_built_as_v1"):
+                raise ValueError("Support for v1 models has been dropped.")
+            if not model._is_compiled:
+                continue
+            # this is valid after .compile() but before .fit()/.predict()
+            model.compile(
+                loss=model.loss,
+                optimizer=model.optimizer,
+                metrics=model.compiled_metrics._metrics,
+            )
 
     def _freeze_models_except(self, model=None):
         """
@@ -397,7 +398,7 @@ class MultiNetworkBase(abc.ABC):
     def fit(
         self,
         x,
-        y,
+        y=None,
         model=None,
         reset_weights=False,
         reset_optimizers=True,
@@ -442,50 +443,21 @@ class MultiNetworkBase(abc.ABC):
         reset_history=False,
         **kwargs
     ):
-        """Train model from `generator`.
-
-        Args:
-            generator : generator or keras.utils.Sequence
-                Training batches as in Sequential.fit_generator
-            init: bool
-                initialize new model; use False to continue training
-            **kwargs: dictionary arguments
-                Legal arguments are the arguments of `Sequential.fit_generator`
-
-        Returns:
-            history : List[Dict]
-                details about the training history at each epoch.
-
-        """
-        self.check_model_name(model)
-
-        if 'trainable_models' in kwargs:
-            trainable_models = kwargs.pop('trainable_models') or []
-        else:
-            trainable_models = None
-
-        fit_args = self._filter_hyperparams(
-            keras.models.Sequential.fit_generator
+        """Upstream now depricates fit_generator."""
+        MESSAGE = (
+            "fit_generator() is now deprected. Use fit() instead."
         )
-        fit_args.update(callbacks=self.callbacks.get(model))
-        fit_args.update(kwargs)
+        warnings.warn(MESSAGE, DeprecationWarning, stacklevel=2)
 
-        history_cbk = make_history_logger(batches=True)
-        fit_args['callbacks'] += [history_cbk]
-
-        training_context = self._training_context(
+        return self.fit(
+            x=generator,
+            y=None,
+            model=model,
             reset_weights=reset_weights,
             reset_optimizers=reset_optimizers,
             reset_history=reset_history,
-            trainable_models=trainable_models,
+            **kwargs
         )
-        with training_context:
-            self.model[model].fit_generator(generator, **fit_args)
-        self._add_history_record(
-            model=model, history=history_cbk.history,
-            trainable_models=trainable_models
-        )
-        return history_cbk
 
     def predict(self, x, model: str = None, **kwargs):
         """Return predictions for the given test data.

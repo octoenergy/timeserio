@@ -42,12 +42,8 @@ class TestPickling:
             obj2 = loadf(f.name)
         assert_object_same(obj, obj2)
 
-    def test_pickle_to_s3(
-        self,
-        s3, test_bucket_name,
-        obj, assert_object_same
-    ):
-        filename = f's3://{test_bucket_name}/path/file.pickle'
+    def test_pickle_to_uri(self, obj, assert_object_same):
+        filename = 'memory://test/path/file.pickle'
         dumpf(obj, filename)
         obj2 = loadf(filename)
         assert_object_same(obj, obj2)

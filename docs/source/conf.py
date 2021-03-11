@@ -26,9 +26,9 @@ author = 'Octopus Energy Ltd'
 # Read version
 exec(open('../../timeserio/version.py').read())
 # short X.Y version
-version = __version__
+version = __version__  # noqa
 # The full version, including alpha/beta/rc tags
-release = __version__
+release = __version__  # noqa
 
 # -- General configuration ---------------------------------------------------
 
@@ -48,7 +48,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    #'recommonmark',
+    # 'recommonmark',
     'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
     'sphinxcontrib.apidoc',  # automatically generate API docs, see https://github.com/rtfd/readthedocs.org/issues/1139
@@ -249,14 +249,14 @@ nbsphinx_link_target_root = repo
 # from https://github.com/vidartf/nbsphinx-link/blob/master/docs/source/conf.py for custom tags
 import subprocess
 try:
-   git_rev = subprocess.check_output(['git', 'describe', '--exact-match', 'HEAD'], universal_newlines=True)
+    git_rev = subprocess.check_output(['git', 'describe', '--exact-match', 'HEAD'], universal_newlines=True)
 except subprocess.CalledProcessError:
-   try:
-       git_rev = subprocess.check_output(['git', 'rev-parse', 'HEAD'], universal_newlines=True)
-   except subprocess.CalledProcessError:
-       git_rev = ''
+    try:
+        git_rev = subprocess.check_output(['git', 'rev-parse', 'HEAD'], universal_newlines=True)
+    except subprocess.CalledProcessError:
+        git_rev = ''
 if git_rev:
-   git_rev = git_rev.splitlines()[0] + '/'
+    git_rev = git_rev.splitlines()[0] + '/'
 
 nbsphinx_prolog = (
 r"""
