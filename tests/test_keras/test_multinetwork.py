@@ -458,8 +458,12 @@ class TestSubClass:
         y = np.random.rand(13, 1)
         error0 = multinetwork.evaluate(x, y, model='forecaster')
         weights0 = multinetwork.model['forecaster'].get_weights()
-        multinetwork.trainable_models = None
-        multinetwork.fit(x, y, model='forecaster', batch_size=100, epochs=3)
+        multinetwork.fit(
+            x, y,
+            model='forecaster',
+            trainable_models=None,
+            batch_size=100, epochs=3
+        )
         error = multinetwork.evaluate(x, y, model='forecaster')
         weights = multinetwork.model['forecaster'].get_weights()
         for w0, w in zip(weights0, weights):

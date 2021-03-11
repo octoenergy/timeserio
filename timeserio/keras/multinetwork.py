@@ -286,18 +286,17 @@ class MultiNetworkBase(abc.ABC):
 
     def _compile_all_models(self):
         """Compile all submodels."""
-        for model in self.model_names:
-            submodel = self.model[model]
-            if hasattr(submodel, "_originally_built_as_v1"):
+        for model in self.model.values():
+            if hasattr(model, "_originally_built_as_v1"):
                 raise ValueError("Support for v1 models has been dropped.")
-            try:
-                submodel.compile(
-                    loss=submodel.loss,
-                    optimizer=submodel.optimizer,
-                    metrics=submodel.metrics,
-                )
-            except AttributeError:
-                pass
+            if not model._is_compiled:
+                continue
+            # this is valid after .compile() but before .fit()/.predict()
+            model.compile(
+                loss=model.loss,
+                optimizer=model.optimizer,
+                metrics=model.compiled_metrics._metrics,
+            )
 
     def _freeze_models_except(self, model=None):
         """
