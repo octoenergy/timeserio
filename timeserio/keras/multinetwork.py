@@ -288,6 +288,8 @@ class MultiNetworkBase(abc.ABC):
         """Compile all submodels."""
         for model in self.model_names:
             submodel = self.model[model]
+            if hasattr(submodel, "_originally_built_as_v1"):
+                raise ValueError("Support for v1 models has been dropped.")
             try:
                 submodel.compile(
                     loss=submodel.loss,
