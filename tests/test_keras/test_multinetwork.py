@@ -130,7 +130,7 @@ class EmbedderForecasterNetwork(MultiNetworkBase):
         for idx, units in enumerate(forecaster_dense_units):
             forecaster_output = Dense(
                 units=units,
-                activation='relu',
+                activation='tanh',
                 name='forecaster_dense_{}'.format(idx)
             )(forecaster_output)
         forecaster_model = Model(

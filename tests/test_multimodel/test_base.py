@@ -39,7 +39,7 @@ class SimpleMultiNetwork(MultiNetworkBase):
         for idx, units in enumerate(forecaster_dense_units):
             forecaster_output = Dense(
                 units=units,
-                activation='relu',
+                activation='tanh',
                 name='forecaster_dense_{}'.format(idx)
             )(forecaster_output)
         forecaster_model = Model(
@@ -131,7 +131,7 @@ def test_fit_generator(multimodel, df, batch_size):
     generator = RowBatchGenerator(df=df, batch_size=batch_size)
     error0 = multimodel.evaluate(df=df, model='forecaster')
     multimodel.fit_generator(
-        df_generator=generator, model='forecaster', epochs=3
+        df_generator=generator, model='forecaster', epochs=EPOCHS
     )
     error = multimodel.evaluate(df=df, model='forecaster')
     assert error < error0
