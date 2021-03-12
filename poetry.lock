@@ -2,7 +2,7 @@
 name = "absl-py"
 version = "0.12.0"
 description = "Abseil Python Common Libraries, see https://github.com/abseil/abseil-py."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -29,7 +29,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "astunparse"
 version = "1.6.3"
 description = "An AST unparser for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -158,7 +158,7 @@ urllib3 = ">=1.25.4,<1.27"
 name = "cachetools"
 version = "4.2.1"
 description = "Extensible memoizing collections and decorators"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "~=3.5"
 
@@ -166,7 +166,7 @@ python-versions = "~=3.5"
 name = "certifi"
 version = "2020.12.5"
 description = "Python package for providing Mozilla's CA Bundle."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -203,7 +203,7 @@ six = ">=1.11"
 name = "chardet"
 version = "4.0.0"
 description = "Universal encoding detector for Python 2 and 3"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -500,7 +500,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "gast"
 version = "0.3.3"
 description = "Python AST that abstracts the underlying Python version"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -516,7 +516,7 @@ python-versions = "*"
 name = "google-auth"
 version = "1.27.1"
 description = "Google Authentication Library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*"
 
@@ -534,7 +534,7 @@ pyopenssl = ["pyopenssl (>=20.0.0)"]
 name = "google-auth-oauthlib"
 version = "0.4.3"
 description = "Google Authentication Library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -549,7 +549,7 @@ tool = ["click (>=6.0.0)"]
 name = "google-pasta"
 version = "0.2.0"
 description = "pasta is an AST-based Python refactoring library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -560,7 +560,7 @@ six = "*"
 name = "grpcio"
 version = "1.36.1"
 description = "HTTP/2-based RPC framework"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -574,7 +574,7 @@ protobuf = ["grpcio-tools (>=1.36.1)"]
 name = "h5py"
 version = "2.10.0"
 description = "Read and write HDF5 files from Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -617,7 +617,7 @@ six = "*"
 name = "idna"
 version = "2.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -837,7 +837,7 @@ pygments = ">=2.4.1,<3"
 name = "keras-preprocessing"
 version = "1.1.2"
 description = "Easy data preprocessing and data augmentation for deep learning models"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -892,7 +892,7 @@ mistune = "*"
 name = "markdown"
 version = "3.3.4"
 description = "Python implementation of Markdown."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -1175,7 +1175,7 @@ python-versions = ">=3.5"
 name = "oauthlib"
 version = "3.1.0"
 description = "A generic, spec-compliant, thorough implementation of the OAuth request-signing logic"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -1188,7 +1188,7 @@ signedtoken = ["cryptography", "pyjwt (>=1.0.0)"]
 name = "opt-einsum"
 version = "3.3.0"
 description = "Optimizing numpys einsum function"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -1282,7 +1282,7 @@ dev = ["pre-commit", "tox"]
 name = "protobuf"
 version = "3.15.5"
 description = "Protocol Buffers"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1332,7 +1332,7 @@ six = ">=1.0.0"
 name = "pyasn1"
 version = "0.4.8"
 description = "ASN.1 types and codecs"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1340,7 +1340,7 @@ python-versions = "*"
 name = "pyasn1-modules"
 version = "0.2.8"
 description = "A collection of ASN.1-based protocols modules."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1619,7 +1619,7 @@ md = ["cmarkgfm (>=0.5.0,<0.6.0)"]
 name = "requests"
 version = "2.25.1"
 description = "Python HTTP for Humans."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -1637,7 +1637,7 @@ socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
 name = "requests-oauthlib"
 version = "1.3.0"
 description = "OAuthlib authentication support for Requests."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -1690,7 +1690,7 @@ idna2008 = ["idna"]
 name = "rsa"
 version = "4.7.2"
 description = "Pure-Python RSA implementation"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5, <4"
 
@@ -1950,7 +1950,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "tensorboard"
 version = "2.4.1"
 description = "TensorBoard lets you watch Tensors Flow"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">= 2.7, != 3.0.*, != 3.1.*"
 
@@ -1971,7 +1971,7 @@ werkzeug = ">=0.11.15"
 name = "tensorboard-plugin-wit"
 version = "1.8.0"
 description = "What-If Tool TensorBoard plugin."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1979,7 +1979,7 @@ python-versions = "*"
 name = "tensorflow"
 version = "2.3.1"
 description = "TensorFlow is an open source machine learning framework for everyone."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -2004,7 +2004,7 @@ wrapt = ">=1.11.1"
 name = "tensorflow-estimator"
 version = "2.3.0"
 description = "TensorFlow Estimator."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -2030,7 +2030,7 @@ resolved_reference = "2008fc57c085df167fb77cfe97dee4341324cb7f"
 name = "termcolor"
 version = "1.1.0"
 description = "ANSII Color formatting for output in terminal."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -2177,7 +2177,7 @@ six = "*"
 name = "werkzeug"
 version = "1.0.1"
 description = "The comprehensive WSGI web application library."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -2189,7 +2189,7 @@ watchdog = ["watchdog"]
 name = "wrapt"
 version = "1.12.1"
 description = "Module for decorators, wrappers and monkey patching."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -2235,7 +2235,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "6dbd5339d798de27e75fce9d742263554962af279fb4e3e2a70be1ad9e37266b"
+content-hash = "4e7bf0862fbd8b27efd779cef490810bf7d8de233a7dfdda1a64e24610076af3"
 
 [metadata.files]
 absl-py = [
