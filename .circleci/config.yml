@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  codecov: codecov/codecov@1.0.4
 
 jobs:
   sync-lint:
@@ -73,8 +71,6 @@ jobs:
       - store_test_results:
           path: ./junit
 
-      - codecov/upload:
-          file: ./coverage.xml
   
   doctest:
     docker:
@@ -96,8 +92,6 @@ jobs:
           name: Run doctests
           command: make doctest
 
-      # - codecov/upload:
-      #     file: ./coverage.xml
 
   build-release-test:
     docker:
