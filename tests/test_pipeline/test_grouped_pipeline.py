@@ -191,10 +191,28 @@ def test_all_groups_missing_raises(input_df):
 )
 def test_iter_groups_non_consecutive_index(index):
     group = [1] * 2 + [2] * (len(index) - 2)
+    target = np.array(group)
     value = np.random.random(len(index))
     input_df = pd.DataFrame(
         [group, value], index=["group", "value"], columns=index
     ).T
     gp = GroupedPipeline(groupby=["group"], pipeline=None)
-    for key, sub_df, _ in gp._iter_groups(input_df):
+    for key, sub_df, sub_target in gp._iter_groups(input_df, target):
         assert (sub_df["group"] == key).all()
+        assert (sub_target == key).all()
+
+
+@pytest.mark.parametrize(
+    "index", [[1, 2, 3, 4], pd.date_range("2019-01-01", periods=4)]
+)
+def test_iter_groups_non_consecutive_index_target_series(index):
+    group = [1] * 2 + [2] * (len(index) - 2)
+    target = pd.Series(group, index=index)
+    value = np.random.random(len(index))
+    input_df = pd.DataFrame(
+        [group, value], index=["group", "value"], columns=index
+    ).T
+    gp = GroupedPipeline(groupby=["group"], pipeline=None)
+    for key, sub_df, sub_target in gp._iter_groups(input_df, target):
+        assert (sub_df["group"] == key).all()
+        assert (sub_target == key).all()

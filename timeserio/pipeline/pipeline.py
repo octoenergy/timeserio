@@ -127,7 +127,11 @@ class GroupedPipeline(BaseEstimator, TransformerMixin):
         groups = df.groupby(self.groupby).indices
         for key, sub_idx in groups.items():
             sub_df = df.iloc[sub_idx]
-            sub_y = y[sub_idx] if y is not None else None
+            if y is not None:
+                # y is either a numpy array or a pd.Series so index accordingly
+                sub_y = y.iloc[sub_idx] if type(y) is pd.Series else y[sub_idx]
+            else:
+                sub_y = None
             yield key, sub_df, sub_y
 
     def fit(self, df, y=None):
