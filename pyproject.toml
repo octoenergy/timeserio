@@ -22,7 +22,7 @@ classifiers=[
 
 [tool.poetry.dependencies]
 python = "^3.8"
-scikit-learn = "^0.23.1"
+scikit-learn = "^0.24"
 numpy = "^1.18"
 pandas = "^1.0"
 holidays = "^0.10.5"
