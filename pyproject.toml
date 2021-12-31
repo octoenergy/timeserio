@@ -21,7 +21,7 @@ classifiers=[
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
+python = "^3.8"
 scikit-learn = "^0.23.1"
 numpy = "^1.18"
 pandas = "^1.0"
@@ -33,9 +33,7 @@ s3fs = "^0.4"
 
 [tool.poetry.dev-dependencies]
 codecov = "*"
-dask = "*"
-dataframe = "^0.2.1"
-distributed = "^2021.3.0"
+dask = {version = "*", extras = ["dataframe", "distributed"]}
 flake8 = "*"
 glob2 = "*"
 m2r = ">=0.2.1"
@@ -45,7 +43,7 @@ mypy = "*"
 nbsphinx = ">=0.4.2"
 nbsphinx-link = ">=1.2.0"
 pep8-naming = "*"
-pyarrow = ">=0.15.1"
+pyarrow = "^6.0"
 pydocstyle = "*"
 pytest = "<6,>=5.3"
 pytest-benchmark = "*"
@@ -55,7 +53,7 @@ pytest-xdist = "<2.0"
 sphinx-autodoc-typehints = ">=1.6.0"
 sphinx-rtd-theme = ">=0.4.3"
 sphinxcontrib-apidoc = ">=0.3.0"
-tensorflow = "==2.3.1"
+tensorflow = "~2.5.2"
 tensorpandas = {git = "https://github.com/ig248/tensorpandas.git"}
 twine = "*"
-yapf = "*"
+yapf = "^0.30"
