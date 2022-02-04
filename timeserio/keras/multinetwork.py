@@ -48,9 +48,8 @@ class MultiNetworkBase(abc.ABC):
 
         >>> mnet.model
         {'model_1': <...keras.engine...>, 'model_2': <...>}
-
-
     """
+
     def __init__(self, **hyperparams):
         self._model_instance = None
         self.hyperparams = hyperparams
