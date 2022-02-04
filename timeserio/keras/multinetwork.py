@@ -1,12 +1,15 @@
 import abc
 import contextlib
 import copy
-from typing import Optional, Dict, Collection
 import warnings
+from typing import Collection, Dict, Optional
 
-from timeserio.externals import keras, HABEMUS_KERAS
+import numpy as np
+
+from timeserio.externals import HABEMUS_KERAS, keras
+
 from ..utils.functools import get_default_args
-from .utils import iterlayers, has_arg
+from .utils import has_arg, iterlayers
 
 
 def make_history_logger(*args, **kwargs):
@@ -48,7 +51,6 @@ class MultiNetworkBase(abc.ABC):
 
 
     """
-
     def __init__(self, **hyperparams):
         self._model_instance = None
         self.hyperparams = hyperparams
@@ -73,13 +75,12 @@ class MultiNetworkBase(abc.ABC):
         Sequential = keras.models.Sequential
         methods = [
             Sequential.fit, Sequential.fit_generator, Sequential.predict,
-            Sequential.predict_classes, Sequential.evaluate
+            Sequential.evaluate
         ]
         # fix for tensorflow 2.2.0 using method wrappers
         # these were removed again in 2.3.0
         unwrapped_methods = [
-            getattr(method, "__wrapped__", method)
-            for method in methods
+            getattr(method, "__wrapped__", method) for method in methods
         ]
         return [*unwrapped_methods, self._model, self._callbacks]
 
@@ -321,8 +322,8 @@ class MultiNetworkBase(abc.ABC):
         Use argument if a list is provided, else use self.trainable_models.
         """
         self._freeze_models_except(
-            trainable_models if trainable_models is not None
-            else self.trainable_models
+            trainable_models if trainable_models is not None else self.
+            trainable_models
         )
 
     def _unfreeze(self):
@@ -331,8 +332,13 @@ class MultiNetworkBase(abc.ABC):
 
     @contextlib.contextmanager
     def _model_context(
-        self, *, reset_weights: bool, reset_optimizers: bool,
-        reset_history: bool, freeze: bool, training: bool = False,
+        self,
+        *,
+        reset_weights: bool,
+        reset_optimizers: bool,
+        reset_history: bool,
+        freeze: bool,
+        training: bool = False,
         persist_model: bool = False,
         trainable_models: Optional[Collection[str]] = None,
     ):
@@ -429,7 +435,8 @@ class MultiNetworkBase(abc.ABC):
         with training_context:
             self.model[model].fit(x, y, **fit_args)
         self._add_history_record(
-            model=model, history=history_cbk.history,
+            model=model,
+            history=history_cbk.history,
             trainable_models=trainable_models
         )
         return history_cbk
@@ -444,9 +451,7 @@ class MultiNetworkBase(abc.ABC):
         **kwargs
     ):
         """Upstream now depricates fit_generator."""
-        MESSAGE = (
-            "fit_generator() is now deprected. Use fit() instead."
-        )
+        MESSAGE = ("fit_generator() is now deprected. Use fit() instead.")
         warnings.warn(MESSAGE, DeprecationWarning, stacklevel=2)
 
         return self.fit(
@@ -480,6 +485,24 @@ class MultiNetworkBase(abc.ABC):
         with self._prediction_context():
             predictions = self.model[model].predict(x, **pred_kwargs)
         return predictions
+
+    def predict_classes(self, x, model: str = None, **kwargs):
+        """Return class predictions for the given test data.
+
+        Args:
+            x: array-like, shape `(n_samples, n_features)`
+                Test samples where `n_samples` is the number of samples
+                and `n_features` is the number of features.
+            **kwargs: dictionary arguments
+                Legal arguments are the arguments of `Sequential.predict`.
+
+        Returns:
+            preds: array-like if integer class labels, shape `(n_samples)`
+                Predictions.
+
+        """
+        predictions = self.predict(x, model=model, **kwargs)
+        return np.argmax(predictions, axis=-1)
 
     def predict_generator(self, generator, model: str = None, **kwargs):
         """Return predictions from a batch generator.
