@@ -74,8 +74,7 @@ class MultiNetworkBase(abc.ABC):
     def _funcs_with_legal_params(self):
         Sequential = keras.models.Sequential
         methods = [
-            Sequential.fit, Sequential.fit_generator, Sequential.predict,
-            Sequential.evaluate
+            Sequential.fit, Sequential, Sequential.predict, Sequential.evaluate
         ]
         # fix for tensorflow 2.2.0 using method wrappers
         # these were removed again in 2.3.0
@@ -519,15 +518,7 @@ class MultiNetworkBase(abc.ABC):
                 Predictions.
 
         """
-        self.check_model_name(model)
-        pred_kwargs = self._filter_hyperparams(
-            keras.models.Sequential.predict_generator, kwargs
-        )
-        with self._prediction_context():
-            predictions = (
-                self.model[model].predict_generator(generator, **pred_kwargs)
-            )
-        return predictions
+        return self.predict(generator, model=model, **kwargs)
 
     def evaluate(self, x, y=None, model=None, **kwargs):
         """
@@ -580,15 +571,7 @@ class MultiNetworkBase(abc.ABC):
             evaluation metric value(s)
 
         """
-        self.check_model_name(model)
-        ev_kwargs = self._filter_hyperparams(
-            keras.models.Sequential.evaluate, kwargs
-        )
-        with self._prediction_context():
-            evaluation = (
-                self.model[model].evaluate_generator(generator, **ev_kwargs)
-            )
-        return evaluation
+        return self.evaluate(x=generator, y=None, model=model, **kwargs)
 
     # Pickling #
     def __getstate__(self) -> Dict:
