@@ -5,7 +5,7 @@ orbs:
 jobs:
   sync-lint:
     docker:
-      - image: circleci/python:3.6.9
+      - image: cimg/python:3.8.12
 
     working_directory: ~/timeserio
 
@@ -55,7 +55,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/python:3.6.9
+      - image: cimg/python:3.8.12
     parallelism: 4
 
     working_directory: ~/timeserio
@@ -88,7 +88,7 @@ jobs:
   
   doctest:
     docker:
-      - image: circleci/python:3.6.9
+      - image: cimg/python:3.8.12
 
     working_directory: ~/timeserio
 
@@ -116,7 +116,7 @@ jobs:
 
   build-release-test:
     docker:
-      - image: circleci/python:3.6.9
+      - image: cimg/python:3.8.12
 
     working_directory: ~/timeserio
 
@@ -154,7 +154,7 @@ jobs:
 
   release-prod:
     docker:
-      - image: circleci/python:3.6.9
+      - image: cimg/python:3.8.12
 
     working_directory: ~/timeserio
 
@@ -183,7 +183,7 @@ jobs:
 
   docs-build:
     docker:
-      - image: circleci/python:3.6.9
+      - image: cimg/python:3.8.12
 
     working_directory: ~/timeserio
 

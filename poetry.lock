@@ -290,7 +290,7 @@ test = ["pytest (>=6.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pret
 
 [[package]]
 name = "dask"
-version = "2021.12.0"
+version = "2022.1.1"
 description = "Parallel PyData with Task Scheduling"
 category = "dev"
 optional = false
@@ -298,21 +298,21 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 cloudpickle = ">=1.1.1"
-distributed = {version = "2021.12.0", optional = true, markers = "extra == \"distributed\""}
+distributed = {version = "2022.01.1", optional = true, markers = "extra == \"distributed\""}
 fsspec = ">=0.6.0"
 numpy = {version = ">=1.18", optional = true, markers = "extra == \"dataframe\""}
 packaging = ">=20.0"
 pandas = {version = ">=1.0", optional = true, markers = "extra == \"dataframe\""}
 partd = ">=0.3.10"
-pyyaml = "*"
+pyyaml = ">=5.3.1"
 toolz = ">=0.8.2"
 
 [package.extras]
 array = ["numpy (>=1.18)"]
-complete = ["bokeh (>=2.1.1)", "distributed (==2021.12.0)", "jinja2", "numpy (>=1.18)", "pandas (>=1.0)"]
+complete = ["bokeh (>=2.1.1)", "distributed (==2022.01.1)", "jinja2", "numpy (>=1.18)", "pandas (>=1.0)"]
 dataframe = ["numpy (>=1.18)", "pandas (>=1.0)"]
 diagnostics = ["bokeh (>=2.1.1)", "jinja2"]
-distributed = ["distributed (==2021.12.0)"]
+distributed = ["distributed (==2022.01.1)"]
 test = ["pytest", "pytest-rerunfailures", "pytest-xdist", "pre-commit"]
 
 [[package]]
@@ -333,7 +333,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "distributed"
-version = "2021.12.0"
+version = "2022.1.1"
 description = "Distributed scheduler for Dask"
 category = "dev"
 optional = false
@@ -342,9 +342,10 @@ python-versions = ">=3.7"
 [package.dependencies]
 click = ">=6.6"
 cloudpickle = ">=1.5.0"
-dask = "2021.12.0"
+dask = "2022.01.1"
 jinja2 = "*"
 msgpack = ">=0.6.0"
+packaging = ">=20.0"
 psutil = ">=5.0"
 pyyaml = "*"
 sortedcontainers = "<2.0.0 || >2.0.0,<2.0.1 || >2.0.1"
@@ -633,6 +634,20 @@ description = "Vestigial utilities from IPython"
 category = "dev"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "isort"
+version = "5.10.1"
+description = "A Python utility / library to sort Python imports."
+category = "dev"
+optional = false
+python-versions = ">=3.6.1,<4.0"
+
+[package.extras]
+pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
+requirements_deprecated_finder = ["pipreqs", "pip-api"]
+colors = ["colorama (>=0.4.3,<0.5.0)"]
+plugins = ["setuptools"]
 
 [[package]]
 name = "jeepney"
@@ -2220,7 +2235,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "d2e5659e243aa1e6d12adaa956391a075b4d08d27343b63179f5e8df657977fa"
+content-hash = "f41f5856c62e3730c63948fb29d1c2454d70db14bd6c273ef93e07123629dae8"
 
 [metadata.files]
 absl-py = [
@@ -2437,8 +2452,8 @@ cryptography = [
     {file = "cryptography-3.4.6.tar.gz", hash = "sha256:2d32223e5b0ee02943f32b19245b61a62db83a882f0e76cc564e1cec60d48f87"},
 ]
 dask = [
-    {file = "dask-2021.12.0-py3-none-any.whl", hash = "sha256:47041fe1874e64c395e7be772173999e50b5c61a577084158083b9ef4b4175b2"},
-    {file = "dask-2021.12.0.tar.gz", hash = "sha256:90614c9d162713e4849532c86f2854e8d53468521285413403b6c496344c0109"},
+    {file = "dask-2022.1.1-py3-none-any.whl", hash = "sha256:6caaf633c85ecd1197025de0b8bd244ef88b4b1810f315b09005b3fe5c21ee8e"},
+    {file = "dask-2022.1.1.tar.gz", hash = "sha256:3d5e935792d8a5a61d19cb7e63771ee02cdfd6122e36beb15c2dad6257320c58"},
 ]
 decorator = [
     {file = "decorator-4.4.2-py2.py3-none-any.whl", hash = "sha256:41fa54c2a0cc4ba648be4fd43cff00aedf5b9465c9bf18d64325bc225f08f760"},
@@ -2449,8 +2464,8 @@ defusedxml = [
     {file = "defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"},
 ]
 distributed = [
-    {file = "distributed-2021.12.0-py3-none-any.whl", hash = "sha256:ea8cdb56ecbf1f999c4e28a5c848ce231cb90d6919e42c13e89ceb0d86366d41"},
-    {file = "distributed-2021.12.0.tar.gz", hash = "sha256:c6119a2cf1fb2d8ac60337915bb9a790af6530afcb5d7a809a3308323b874714"},
+    {file = "distributed-2022.1.1-py3-none-any.whl", hash = "sha256:b8cdec07e46a7ddeaaa6cc1f3d8a50b0d102130b725e2246056ff531ea68a4c1"},
+    {file = "distributed-2022.1.1.tar.gz", hash = "sha256:c227b5dd2c784830917679487f049fb943c154f1993f187d5c52076aa78a72d0"},
 ]
 docker = [
     {file = "docker-4.2.2-py2.py3-none-any.whl", hash = "sha256:03a46400c4080cb6f7aa997f881ddd84fef855499ece219d75fbdb53289c17ab"},
@@ -2603,6 +2618,10 @@ importlib-metadata = [
 ipython-genutils = [
     {file = "ipython_genutils-0.2.0-py2.py3-none-any.whl", hash = "sha256:72dd37233799e619666c9f639a9da83c34013a73e8bbc79a7a6348d93c61fab8"},
     {file = "ipython_genutils-0.2.0.tar.gz", hash = "sha256:eb2e116e75ecef9d4d228fdc66af54269afa26ab4463042e33785b887c628ba8"},
+]
+isort = [
+    {file = "isort-5.10.1-py3-none-any.whl", hash = "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7"},
+    {file = "isort-5.10.1.tar.gz", hash = "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"},
 ]
 jeepney = [
     {file = "jeepney-0.6.0-py3-none-any.whl", hash = "sha256:aec56c0eb1691a841795111e184e13cad504f7703b9a64f63020816afa79a8ae"},

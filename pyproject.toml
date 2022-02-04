@@ -57,3 +57,4 @@ tensorflow = "~2.5.2"
 tensorpandas = {git = "https://github.com/ig248/tensorpandas.git"}
 twine = "*"
 yapf = "^0.30"
+isort = "^5.10.1"
