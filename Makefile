@@ -5,7 +5,7 @@ CPU_IMAGE?="timeserio:latest"
 
 yapf:
 	poetry run yapf -vv -ir .
-	poetry run isort -y
+	poetry run isort .
 
 lint:
 	poetry run flake8 .
