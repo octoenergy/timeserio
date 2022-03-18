@@ -22,6 +22,13 @@ class NotFoundModule(ModuleType):
         super().__init__(name, *args, **kwargs)
 
     def __getattr__(self, attr):
+        # Doctest attempts to unwrap everything to see if it can doctest it
+        # so we need to raise an AttributeError in that case rather than the
+        # specific ModuleNotFoundError
+        if attr == "__wrapped__":
+            raise AttributeError(
+                "'NotFoundModule' has no attribute '__wrapped__'"
+            )
         raise ModuleNotFoundError(
             f"Can not access `{self.__name__}.{attr}`, "
             f"module `{self.__name__}` was not found during import."

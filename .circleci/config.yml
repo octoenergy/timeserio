@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   sync-lint:
     docker:
-      - image: circleci/python:3.6.9
+      - image: circleci/python:3.9.5
 
     working_directory: ~/timeserio
 
@@ -47,7 +47,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/python:3.6.9
+      - image: circleci/python:3.9.5
     parallelism: 4
 
     working_directory: ~/timeserio
@@ -74,7 +74,7 @@ jobs:
   
   doctest:
     docker:
-      - image: circleci/python:3.6.9
+      - image: circleci/python:3.9.5
 
     working_directory: ~/timeserio
 
@@ -95,7 +95,7 @@ jobs:
 
   build-release-test:
     docker:
-      - image: circleci/python:3.6.9
+      - image: circleci/python:3.9.5
 
     working_directory: ~/timeserio
 
@@ -128,7 +128,7 @@ jobs:
 
   release-prod:
     docker:
-      - image: circleci/python:3.6.9
+      - image: circleci/python:3.9.5
 
     working_directory: ~/timeserio
 
@@ -153,7 +153,7 @@ jobs:
 
   docs-build:
     docker:
-      - image: circleci/python:3.6.9
+      - image: circleci/python:3.9.5
 
     working_directory: ~/timeserio
 

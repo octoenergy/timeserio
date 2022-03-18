@@ -44,7 +44,8 @@ class MultiNetworkBase(abc.ABC):
         Models are instantiated on demand:
 
         >>> mnet.model
-        {'model_1': <...keras.engine.training.Model ...>, 'model_2': <...>}
+        {'model_1': <...keras.engine.functional.Functional...>,
+         'model_2': <...>}
 
 
     """
@@ -73,7 +74,7 @@ class MultiNetworkBase(abc.ABC):
         Sequential = keras.models.Sequential
         methods = [
             Sequential.fit, Sequential.fit_generator, Sequential.predict,
-            Sequential.predict_classes, Sequential.evaluate
+            Sequential.evaluate
         ]
         # fix for tensorflow 2.2.0 using method wrappers
         # these were removed again in 2.3.0
@@ -289,10 +290,14 @@ class MultiNetworkBase(abc.ABC):
         for model in self.model_names:
             submodel = self.model[model]
             try:
+                metrics = (
+                    submodel.metrics if not submodel._is_compiled
+                    else submodel.compiled_metrics._metrics
+                )
                 submodel.compile(
                     loss=submodel.loss,
                     optimizer=submodel.optimizer,
-                    metrics=submodel.metrics,
+                    metrics=metrics
                 )
             except AttributeError:
                 pass

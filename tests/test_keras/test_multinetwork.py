@@ -130,7 +130,7 @@ class EmbedderForecasterNetwork(MultiNetworkBase):
         for idx, units in enumerate(forecaster_dense_units):
             forecaster_output = Dense(
                 units=units,
-                activation='relu',
+                activation='tanh',
                 name='forecaster_dense_{}'.format(idx)
             )(forecaster_output)
         forecaster_model = Model(
@@ -530,14 +530,6 @@ class TestMultiNetworkSerialization:
         new_multinetwork = loads(s)
         new_params = new_multinetwork.get_params()
         assert new_params == params
-
-    def test_deserialized_gradients(self, ef_multinetwork):
-        ef_multinetwork._init_model()
-        s = dumps(ef_multinetwork)
-        ef_multinetwork = loads(s)
-        model = ef_multinetwork.model['combined']
-        grads = K.gradients(model.total_loss, model.trainable_weights)
-        assert all([g is not None for g in grads])
 
     def test_deserialized_batch_norm(self, bn_multinetwork):
         multinetwork = bn_multinetwork

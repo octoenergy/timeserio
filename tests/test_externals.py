@@ -3,14 +3,11 @@ import pytest
 from timeserio.externals import optional_import
 
 
-def test_absent_imports(mocker):
-    """Test that mock keras import is created."""
-    _import = mocker.patch("timeserio.externals.builtins.__import__")
-    _import.side_effect = ModuleNotFoundError()
+def test_absent_imports():
+    """Test that mock module import is created."""
+    module, HABEMUS_MODULE = optional_import("not_real_module")
 
-    keras, HABEMUS_KERAS = optional_import("keras")
-
-    assert not HABEMUS_KERAS
-    assert keras.__name__ == "keras"
+    assert not HABEMUS_MODULE
+    assert module.__name__ == "not_real_module"
     with pytest.raises(ModuleNotFoundError):
-        _ = keras.layers
+        _ = module.layers
