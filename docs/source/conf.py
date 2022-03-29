@@ -26,9 +26,9 @@ author = 'Octopus Energy Ltd'
 # Read version
 exec(open('../../timeserio/version.py').read())
 # short X.Y version
-version = __version__
+version = __version__  # type: ignore
 # The full version, including alpha/beta/rc tags
-release = __version__
+release = __version__  # type: ignore
 
 # -- General configuration ---------------------------------------------------
 
@@ -162,7 +162,7 @@ htmlhelp_basename = 'timeseriodocs'
 
 # -- Options for LaTeX output ------------------------------------------------
 
-latex_elements = {
+latex_elements = {  # type: ignore
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',

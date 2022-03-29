@@ -38,11 +38,9 @@ setup(
         "numpy",
         "pandas",
         "scikit-learn>=0.23.1",
-        "s3fs<0.5",  # see [1] below
+        "tentaclio[s3]",
         "holidays",
     ],
-    # [1] this is where s3fs switches to async
-    #     https://github.com/aio-libs/aiobotocore/pull/766
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
@@ -50,6 +48,6 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.9",
     ],
 )

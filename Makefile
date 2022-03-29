@@ -19,7 +19,7 @@ sync:
 	pipenv sync --dev
 
 lock:
-	pipenv lock --dev 
+	pipenv lock --dev
 
 test:
 	pipenv run pytest tests/

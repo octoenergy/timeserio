@@ -37,7 +37,13 @@ def call_git_describe(abbrev, home_dir=None):
             ],
             stderr=subprocess.PIPE
         )
-        return stdout.decode("utf-8").strip()
+        describe = stdout.decode("utf-8").strip().split('-')
+        if len(describe) == 3:
+            version, commits_after, sha = describe
+            return f"{version}.dev{commits_after}+git.{sha}"
+        else:
+            version, commits_after, sha, _ = describe
+            return f"{version}.dev{commits_after}+git.{sha}.dirty"
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None
 

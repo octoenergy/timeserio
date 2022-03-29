@@ -52,7 +52,7 @@ class PandasTimeSeriesSplit(_BaseKFold):
 
                 if key not in splits:
                     splitter = TimeSeriesSplit(
-                        self.n_splits, self.max_train_size
+                        self.n_splits, max_train_size=self.max_train_size
                     )
                     splits[key] = splitter.split(sub_df, sub_y)
 
