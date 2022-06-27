@@ -2,7 +2,6 @@ import numpy as np
 from scipy import sparse
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils import check_array
-from sklearn.utils.fixes import _astype_copy_false
 from sklearn.utils.validation import FLOAT_DTYPES
 
 
@@ -98,7 +97,7 @@ def transform_selected(
         # The columns of X which are not transformed need
         # to be casted to the desire dtype before concatenation.
         # Otherwise, the stacking will cast to the higher-precision dtype.
-        X_not_sel = X[:, ind[not_sel]].astype(dtype, **_astype_copy_false(X))
+        X_not_sel = X[:, ind[not_sel]].astype(dtype, copy=False)
 
     if retain_order:
         if X_sel.shape[1] + X_not_sel.shape[1] != n_features:

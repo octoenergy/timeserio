@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry>=1.0.10", "cython>=0.29", "wheel>=0.35"]
+requires = ["poetry>=1.1.13", "cython>=0.29", "wheel>=0.35"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
@@ -21,14 +21,14 @@ classifiers=[
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-scikit-learn = ">=0.24,<1.0"
-numpy = "^1.18"
+python = ">=3.8,<3.11"
+scikit-learn = "~1.1.1"
+numpy = "~1.22.4"
 pandas = "^1.0"
 holidays = "^0.10.5"
 cloudpickle = "^1.6.0"
-fsspec = "^0.8.7"
-s3fs = "^0.4"
+fsspec = "~2022.5.0"
+s3fs = "~2022.5.0"
 
 
 [tool.poetry.dev-dependencies]
@@ -36,7 +36,7 @@ codecov = "*"
 dask = {version = "*", extras = ["dataframe", "distributed"]}
 flake8 = "*"
 glob2 = "*"
-m2r = ">=0.2.1"
+m2r2 = "~0.3.2"
 mccabe = "*"
 moto = "<2"
 mypy = "*"
@@ -45,7 +45,7 @@ nbsphinx-link = ">=1.2.0"
 pep8-naming = "*"
 pyarrow = "^6.0"
 pydocstyle = "*"
-pytest = "<6,>=5.3"
+pytest = "^6.0.1"
 pytest-benchmark = "*"
 pytest-cov = "*"
 pytest-mock = "*"
@@ -53,7 +53,7 @@ pytest-xdist = "<2.0"
 sphinx-autodoc-typehints = ">=1.6.0"
 sphinx-rtd-theme = ">=0.4.3"
 sphinxcontrib-apidoc = ">=0.3.0"
-tensorflow = "~2.5.2"
+tensorflow = "~2.9.1"
 tensorpandas = {git = "https://github.com/ig248/tensorpandas.git"}
 twine = "*"
 yapf = "^0.30"
