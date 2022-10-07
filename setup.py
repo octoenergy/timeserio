@@ -37,7 +37,8 @@ setup(
         "joblib",
         "numpy",
         "pandas",
-        "scikit-learn>=0.23.1",
+        # _astype_copy_false is removed in sklearn 1.1.0
+        "scikit-learn>=0.23.1, <=1.0.2",
         "tentaclio[s3]",
         "holidays",
     ],
