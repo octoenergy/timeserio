@@ -6,7 +6,6 @@ import warnings
 
 from timeserio.externals import keras, HABEMUS_KERAS
 from ..utils.functools import get_default_args
-from .utils import iterlayers, has_arg
 
 
 def make_history_logger(*args, **kwargs):
@@ -107,6 +106,8 @@ class MultiNetworkBase(abc.ABC):
                 in both `hyperparams` and `fn`'s arguments.
 
         """
+        from .utils import has_arg
+
         override = override or {}
         res = {}
         fn = getattr(fn, "__wrapped__", fn)
@@ -128,6 +129,8 @@ class MultiNetworkBase(abc.ABC):
         """
         if not HABEMUS_KERAS:  # for unpickling without keras/tensorflow
             return
+
+        from .utils import has_arg
 
         for params_name in params:
             for fn in self._funcs_with_legal_params:
@@ -279,6 +282,8 @@ class MultiNetworkBase(abc.ABC):
 
     def _set_model_trainable(self, model=None, trainable=True):
         """Set trainable state for each layer in submodel."""
+        from .utils import iterlayers
+
         self.check_model_name(model)
         submodel = self.model[model]
         for layer in iterlayers(submodel):
