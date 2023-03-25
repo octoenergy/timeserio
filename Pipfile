@@ -20,7 +20,7 @@ glob2            = "*"
 codecov          = "*"
 #
 dask             = {extras = ["dataframe", "distributed"], version = "*"}
-tensorflow       = "==2.8.0"
+tensorflow       = "==2.11.1"
 pyarrow          = ">=0.15.1"
 # sphinx docs
 sphinx-autodoc-typehints = ">=1.6.0"
